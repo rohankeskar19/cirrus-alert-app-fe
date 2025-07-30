@@ -57,9 +57,11 @@ const Input: React.FC<InputProps> = ({
   const accentColor = useThemeColor("accentColor");
   const onBackground = useThemeColor("onBackground");
 
-  const isMounted = useRef(true);
+  const isMounted = useRef(false);
 
   useEffect(() => {
+    isMounted.current = true;
+
     return () => {
       isMounted.current = false;
     };

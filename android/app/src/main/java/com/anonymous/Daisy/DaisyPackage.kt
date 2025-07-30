@@ -4,10 +4,12 @@ import com.facebook.react.ReactPackage
 import com.facebook.react.bridge.NativeModule
 import com.facebook.react.bridge.ReactApplicationContext
 import com.facebook.react.uimanager.ViewManager
+import com.anonymous.Daisy.modules.PermissionModule
+import com.anonymous.Daisy.modules.ScreenTimeModule
 
 class DaisyPackage : ReactPackage {
     override fun createNativeModules(reactContext: ReactApplicationContext): List<NativeModule> {
-        return listOf(PermissionModule(reactContext))
+        return listOf(PermissionModule(reactContext), ScreenTimeModule(reactContext))
     }
 
     override fun createViewManagers(reactContext: ReactApplicationContext): List<ViewManager<*, *>> {

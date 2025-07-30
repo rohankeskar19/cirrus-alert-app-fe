@@ -230,9 +230,10 @@ const OnboardingScreen = () => {
         !usageStatsPermissionStatus ||
         usageStatsPermissionStatus.status !== "approved" ||
         !overlayPermissionStatus ||
-        overlayPermissionStatus.status !== "approved" ||
-        !accessibilityPermissionStatus ||
-        accessibilityPermissionStatus.status !== "approved"
+        overlayPermissionStatus.status !== "approved"
+        // ||
+        // !accessibilityPermissionStatus ||
+        // accessibilityPermissionStatus.status !== "approved"
       )
         return true;
     }

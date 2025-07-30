@@ -31,8 +31,6 @@ const Step3 = () => {
 
   const intl = useIntl();
 
-  console.log("Status ", usageStatsPermissionStatus);
-
   return (
     <View style={styles.stepContainer}>
       <View

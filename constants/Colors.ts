@@ -46,7 +46,7 @@ export const Colors = {
     secondaryText: "#B9B9B9",
     secondaryGray: "#616161",
     accentColor: "#42BFE8",
-    greenColor: "#A5FF75",
+    greenColor: "#8DD400",
     redColor: "#FF6B6B",
     placeholderGray: "#828282",
     cooldownColor: "#47C5FF",

@@ -1,6 +1,7 @@
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 import { useFocusEffect } from "expo-router";
+import { AppState, AppStateStatus } from "react-native";
 import PermissionModule, {
   PermissionResponse,
 } from "../modules/PermissionModule";
@@ -11,7 +12,7 @@ export const useAccessibilityPermission = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const checkPermissionStatus = async () => {
+  const checkPermissionStatus = useCallback(async () => {
     try {
       setIsLoading(true);
       setError(null);
@@ -22,7 +23,7 @@ export const useAccessibilityPermission = () => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, []);
 
   const requestPermission = async () => {
     try {
@@ -41,6 +42,23 @@ export const useAccessibilityPermission = () => {
       setIsLoading(false);
     }
   };
+
+  useEffect(() => {
+    const handleAppStateChange = (nextAppState: AppStateStatus) => {
+      if (nextAppState === "active") {
+        checkPermissionStatus();
+      }
+    };
+
+    const subscription = AppState.addEventListener(
+      "change",
+      handleAppStateChange
+    );
+
+    return () => {
+      subscription?.remove();
+    };
+  }, [checkPermissionStatus]);
 
   useFocusEffect(
     useCallback(() => {

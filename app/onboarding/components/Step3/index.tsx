@@ -16,14 +16,22 @@ const Step3 = () => {
   const onBackgroundColor = useThemeColor("onBackground");
   const onQuestStatColor = useThemeColor("questStat");
 
-  const { requestPermission: requestUsageStatsPermission } =
-    useUsageStatsPermission();
-  const { requestPermission: requestOverlayPermission } =
-    useOverlayPermission();
-  const { requestPermission: requestAccessibilityPermission } =
-    useAccessibilityPermission();
+  const {
+    requestPermission: requestUsageStatsPermission,
+    permissionStatus: usageStatsPermissionStatus,
+  } = useUsageStatsPermission();
+  const {
+    requestPermission: requestOverlayPermission,
+    permissionStatus: overlayPermissionStatus,
+  } = useOverlayPermission();
+  const {
+    requestPermission: requestAccessibilityPermission,
+    permissionStatus: accessibilityPermissionStatus,
+  } = useAccessibilityPermission();
 
   const intl = useIntl();
+
+  console.log("Status ", usageStatsPermissionStatus);
 
   return (
     <View style={styles.stepContainer}>
@@ -49,19 +57,19 @@ const Step3 = () => {
         </View>
       </View>
       <PermissionCard
-        permissionGranted={false}
+        permissionGranted={usageStatsPermissionStatus?.status == "approved"}
         permissionName={intl.formatMessage({ id: "usage_stats_permission" })}
         permissionReason={intl.formatMessage({ id: "usage_stats_reason" })}
         onClick={requestUsageStatsPermission}
       />
       <PermissionCard
-        permissionGranted={false}
+        permissionGranted={overlayPermissionStatus?.status == "approved"}
         permissionName={intl.formatMessage({ id: "overlay_permission" })}
         permissionReason={intl.formatMessage({ id: "overlay_reason" })}
         onClick={requestOverlayPermission}
       />
       <PermissionCard
-        permissionGranted={false}
+        permissionGranted={accessibilityPermissionStatus?.status == "approved"}
         permissionName={intl.formatMessage({ id: "accessibility_permission" })}
         permissionReason={intl.formatMessage({ id: "accessibility_reason" })}
         onClick={requestAccessibilityPermission}

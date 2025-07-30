@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 
-import ScreenTimeModule, {
+import PermissionModule, {
   PermissionResponse,
-} from "../modules/ScreenTimeModule";
+} from "../modules/PermissionModule";
 
 export const useScreenTimePermission = () => {
   const [permissionStatus, setPermissionStatus] =
@@ -14,7 +14,7 @@ export const useScreenTimePermission = () => {
     try {
       setIsLoading(true);
       setError(null);
-      const status = await ScreenTimeModule.getScreenTimePermissionStatus();
+      const status = await PermissionModule.getScreenTimePermissionStatus();
       setPermissionStatus(status);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Unknown error occurred");
@@ -27,7 +27,7 @@ export const useScreenTimePermission = () => {
     try {
       setIsLoading(true);
       setError(null);
-      const result = await ScreenTimeModule.requestScreenTimePermission();
+      const result = await PermissionModule.requestScreenTimePermission();
       setPermissionStatus(result);
       return result;
     } catch (err) {

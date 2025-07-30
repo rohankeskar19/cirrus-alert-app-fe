@@ -5,7 +5,7 @@ export interface PermissionResponse {
   message: string;
 }
 
-interface ScreenTimeModuleInterface {
+interface PermissionModuleInterface {
   requestScreenTimePermission(): Promise<PermissionResponse>;
   getScreenTimePermissionStatus(): Promise<PermissionResponse>;
   requestUsageStatsPermission(): Promise<PermissionResponse>;
@@ -16,6 +16,6 @@ interface ScreenTimeModuleInterface {
   getAccessibilityPermissionStatus(): Promise<PermissionResponse>;
 }
 
-const { ScreenTimeModule } = NativeModules;
+const { PermissionModule } = NativeModules;
 
-export default ScreenTimeModule as ScreenTimeModuleInterface;
+export default PermissionModule as PermissionModuleInterface;

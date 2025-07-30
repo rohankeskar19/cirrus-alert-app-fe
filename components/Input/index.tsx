@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 
 import {
   StyleSheet,
@@ -48,7 +48,7 @@ const Input: React.FC<InputProps> = ({
 }) => {
   const [inputFocus, setInputFocus] = useState<boolean>(false);
   const [secureTextEntry, setSecureTextEntry] = useState<boolean>(
-    type === "password",
+    type === "password"
   );
 
   const inputBg = useThemeColor("inputBg");
@@ -56,6 +56,14 @@ const Input: React.FC<InputProps> = ({
   const placeholderGray = useThemeColor("placeholderGray");
   const accentColor = useThemeColor("accentColor");
   const onBackground = useThemeColor("onBackground");
+
+  const isMounted = useRef(true);
+
+  useEffect(() => {
+    return () => {
+      isMounted.current = false;
+    };
+  }, []);
 
   // Determine keyboard type based on input type
   const getKeyboardType = (): "email-address" | "default" => {
@@ -90,6 +98,10 @@ const Input: React.FC<InputProps> = ({
     return null;
   };
 
+  const safeOnChangeText = (text: string) => {
+    if (isMounted.current) onChangeText(text);
+  };
+
   return (
     <View style={[{ borderRadius: moderateScale(20), width: "100%" }, style]}>
       <View
@@ -110,7 +122,7 @@ const Input: React.FC<InputProps> = ({
             placeholder={placeholder}
             placeholderTextColor={placeholderGray}
             value={value}
-            onChangeText={onChangeText}
+            onChangeText={safeOnChangeText}
             secureTextEntry={secureTextEntry}
             keyboardType={getKeyboardType()}
             autoCapitalize={type === "email" ? "none" : "sentences"}

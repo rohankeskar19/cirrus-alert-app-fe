@@ -1,8 +1,9 @@
-import { useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 
-import ScreenTimeModule, {
+import { useFocusEffect } from "expo-router";
+import PermissionModule, {
   PermissionResponse,
-} from "../modules/ScreenTimeModule";
+} from "../modules/PermissionModule";
 
 export const useOverlayPermission = () => {
   const [permissionStatus, setPermissionStatus] =
@@ -14,7 +15,7 @@ export const useOverlayPermission = () => {
     try {
       setIsLoading(true);
       setError(null);
-      const status = await ScreenTimeModule.getOverlayPermissionStatus();
+      const status = await PermissionModule.getOverlayPermissionStatus();
       setPermissionStatus(status);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Unknown error occurred");
@@ -27,7 +28,7 @@ export const useOverlayPermission = () => {
     try {
       setIsLoading(true);
       setError(null);
-      const result = await ScreenTimeModule.requestOverlayPermission();
+      const result = await PermissionModule.requestOverlayPermission();
       setPermissionStatus(result);
       return result;
     } catch (err) {
@@ -41,9 +42,11 @@ export const useOverlayPermission = () => {
     }
   };
 
-  useEffect(() => {
-    checkPermissionStatus();
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      checkPermissionStatus();
+    }, [checkPermissionStatus])
+  );
 
   return {
     permissionStatus,

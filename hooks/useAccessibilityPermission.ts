@@ -1,8 +1,9 @@
-import { useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 
-import ScreenTimeModule, {
+import { useFocusEffect } from "expo-router";
+import PermissionModule, {
   PermissionResponse,
-} from "../modules/ScreenTimeModule";
+} from "../modules/PermissionModule";
 
 export const useAccessibilityPermission = () => {
   const [permissionStatus, setPermissionStatus] =
@@ -14,7 +15,7 @@ export const useAccessibilityPermission = () => {
     try {
       setIsLoading(true);
       setError(null);
-      const status = await ScreenTimeModule.getAccessibilityPermissionStatus();
+      const status = await PermissionModule.getAccessibilityPermissionStatus();
       setPermissionStatus(status);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Unknown error occurred");
@@ -27,7 +28,7 @@ export const useAccessibilityPermission = () => {
     try {
       setIsLoading(true);
       setError(null);
-      const result = await ScreenTimeModule.requestAccessibilityPermission();
+      const result = await PermissionModule.requestAccessibilityPermission();
       setPermissionStatus(result);
       return result;
     } catch (err) {
@@ -41,9 +42,11 @@ export const useAccessibilityPermission = () => {
     }
   };
 
-  useEffect(() => {
-    checkPermissionStatus();
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      checkPermissionStatus();
+    }, [checkPermissionStatus])
+  );
 
   return {
     permissionStatus,

@@ -116,6 +116,9 @@ const styles = StyleSheet.create({
     height: moderateScale(28),
     marginRight: 16,
     marginTop: 2,
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
   },
   checkmark: {
     color: "white",

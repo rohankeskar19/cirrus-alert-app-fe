@@ -16,7 +16,7 @@ export const useUsageStatsPermission = () => {
       setIsLoading(true);
       setError(null);
       const status = await PermissionModule.getUsageStatsPermissionStatus();
-      console.log("Usage stats permission status: ", status);
+
       setPermissionStatus(status);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Unknown error occurred");

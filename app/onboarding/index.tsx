@@ -49,12 +49,9 @@ const OnboardingScreen = () => {
 
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
-  const [age, setAge] = useState(18);
-  const [selectedInterests, setSelectedInterests] = useState<string[]>([]);
-  const [selectedGoal, setSelectedGoal] = useState<string>("");
-  const [selectedTime, setSelectedTime] = useState<string>("");
 
   const backgroundColor = useThemeColor("background");
+  const onBackground = useThemeColor("onBackground");
   const progressBg = useThemeColor("questStat");
 
   const {
@@ -77,13 +74,9 @@ const OnboardingScreen = () => {
       updateUserProfile({
         first_name: firstName,
         last_name: lastName,
-        age: age,
-        interests: selectedInterests,
-        learning_goal: selectedGoal,
-        learning_routine: selectedTime,
       })
     );
-  }, [firstName, lastName, age, selectedInterests, selectedGoal, selectedTime]);
+  }, [firstName, lastName]);
 
   useEffect(() => {
     if (currentStep === 0) {
@@ -114,47 +107,13 @@ const OnboardingScreen = () => {
       content: <Step3 />,
     },
     {
-      content: (
-        <Step4
-          selectedInterests={selectedInterests}
-          onOptionSelect={(interest, selected) => {
-            if (selected) {
-              setSelectedInterests(
-                interest === "Other"
-                  ? [interest]
-                  : [
-                      ...selectedInterests.filter(
-                        (interest) => interest != "Other"
-                      ),
-                      interest,
-                    ]
-              );
-            } else {
-              setSelectedInterests(
-                selectedInterests.filter(
-                  (selectedInterest) => selectedInterest != interest
-                )
-              );
-            }
-          }}
-        />
-      ),
+      content: <Step4 />,
     },
     {
-      content: (
-        <Step5
-          selectedGoal={selectedGoal}
-          onOptionSelect={(goal) => setSelectedGoal(goal)}
-        />
-      ),
+      content: <Step5 />,
     },
     {
-      content: (
-        <Step6
-          selectedTime={selectedTime}
-          onOptionSelect={(time) => setSelectedTime(time)}
-        />
-      ),
+      content: <Step6 />,
     },
     {
       content: <Step7 />,
@@ -238,16 +197,10 @@ const OnboardingScreen = () => {
         return true;
     }
 
-    if (currentStep == 3) {
-      if (selectedInterests.length == 0) return true;
-    }
-
     if (currentStep == 4) {
-      if (selectedGoal.length == 0) return true;
     }
 
     if (currentStep == 5) {
-      if (selectedTime.length == 0) return true;
     }
   };
 
@@ -346,7 +299,9 @@ const OnboardingScreen = () => {
             >
               <Text
                 style={{
-                  color: "#000000",
+                  color: onBackground,
+                  fontFamily: "Outfit-Medium",
+                  fontSize: moderateScale(14),
                 }}
               >
                 <FormattedMessage id={"no_thanks"} />

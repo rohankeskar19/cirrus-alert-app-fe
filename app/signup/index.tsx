@@ -76,7 +76,7 @@ const SignupScreen = () => {
                 }}
                 disabled={false}
                 loading={false}
-                icon={<AppleLogo />}
+                icon={<AppleLogo color={onBackground} />}
               >
                 <Text>
                   <FormattedMessage id="continue_with_apple" />

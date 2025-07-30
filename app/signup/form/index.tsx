@@ -191,11 +191,12 @@ const styles = StyleSheet.create({
     color: "#888888",
     fontSize: moderateScale(14),
     marginTop: verticalScale(10),
+    fontFamily: "Outfit-Medium",
   },
   linkText: {
     color: "#888888",
     textDecorationLine: "underline",
-    fontSize: moderateScale(16),
+    fontSize: moderateScale(14),
   },
   loginContainer: {
     marginTop: "auto",
@@ -206,6 +207,7 @@ const styles = StyleSheet.create({
     fontSize: moderateScale(15),
     color: "#888888",
     padding: moderateScale(5),
+    fontFamily: "Outfit-Medium",
   },
   backButton: {
     padding: moderateScale(5),

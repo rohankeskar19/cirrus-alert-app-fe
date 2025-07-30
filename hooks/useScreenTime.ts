@@ -58,7 +58,7 @@ export const useScreenTime = () => {
       setIsLoading(true);
       setError(null);
       const data = await ScreenTimeModule.getScreenTimeData();
-      console.log("Screen time data: ", data);
+
       setScreenTimeData(data);
       return data;
     } catch (err) {
@@ -77,7 +77,7 @@ export const useScreenTime = () => {
       setIsLoading(true);
       setError(null);
       const data = await ScreenTimeModule.getDetailedAppUsage();
-      console.log("Detailed app usage: ", data);
+
       setDetailedAppUsage(data);
       return data;
     } catch (err) {

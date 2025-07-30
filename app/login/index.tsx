@@ -137,7 +137,7 @@ const LoginScreen = () => {
                 }}
                 disabled={false}
                 loading={false}
-                icon={<AppleLogo />}
+                icon={<AppleLogo color={onBackground} />}
               >
                 <Text>
                   <FormattedMessage id="continue_with_apple" />
@@ -196,7 +196,7 @@ const LoginScreen = () => {
           </View>
           <View style={styles.signupContainer}>
             <Text style={styles.signupText} onPress={navigateToSignup}>
-              <FormattedMessage id="already_have_account" />
+              <FormattedMessage id="dont_have_account" />
               <Text style={styles.linkText}>
                 <FormattedMessage id="signup" />
               </Text>

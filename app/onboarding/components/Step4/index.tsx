@@ -1,8 +1,8 @@
 import ClockIcon from "@/assets/icons/clock.svg";
-import { useScreenTime } from "@/hooks/useScreenTime";
+import { formatScreenTime, useScreenTime } from "@/hooks/useScreenTime";
 import { useThemeColor } from "@/hooks/useThemeColor";
 import { DAYS_OF_WEEK } from "@/utils/constants";
-import { moderateScale, verticalScale } from "@/utils/metrics";
+import { horizontalScale, moderateScale, verticalScale } from "@/utils/metrics";
 
 import dayjs from "dayjs";
 import React from "react";
@@ -10,41 +10,64 @@ import { FormattedMessage } from "react-intl";
 import { Image, StyleSheet, Text, View } from "react-native";
 
 const Step4 = () => {
-  // Sample data - replace with real data later
   const { screenTimeData, detailedAppUsage } = useScreenTime();
 
   const onBackgroundColor = useThemeColor("onBackground");
-  const onQuestStatColor = useThemeColor("questStat");
+  const questStatColor = useThemeColor("questStat");
+  const redColor = useThemeColor("redColor");
+  const accentColor = useThemeColor("accentColor");
+  const averageLine = useThemeColor("averageLine");
 
-  const weeklyData = [
-    { day: "M", usage: 2.5, isToday: false }, // 2.5 hours
-    { day: "T", usage: 4.2, isToday: false }, // 4.2 hours
-    { day: "W", usage: 1.8, isToday: false }, // 1.8 hours
-    { day: "Th", usage: 3.1, isToday: false }, // 3.1 hours
-    { day: "F", usage: 1.5, isToday: false }, // 1.5 hours
-    { day: "Sa", usage: 6.8, isToday: false }, // 6.8 hours
-    { day: "S", usage: 5.2, isToday: true }, // 5.2 hours (today)
-  ];
-
-  const apps = [
-    { name: "Instagram", time: "3h 45m", color: "#E4405F" },
-    { name: "YouTube", time: "2h 30m", color: "#FF0000" },
-    { name: "WhatsApp", time: "1h 15m", color: "#25D366" },
-    { name: "Chrome", time: "45m", color: "#4285F4" },
-    { name: "Spotify", time: "30m", color: "#1DB954" },
-  ];
-
-  const totalTime = "5h 20m";
-  const maxUsage = Math.max(...weeklyData.map((d) => d.usage));
+  // Calculate average screen time
+  const averageScreenTime = React.useMemo(() => {
+    if (!screenTimeData?.dailyData || screenTimeData.dailyData.length === 0) {
+      return 0;
+    }
+    const total = screenTimeData.dailyData.reduce(
+      (sum, data) => sum + data.totalScreenTime,
+      0
+    );
+    return total / screenTimeData.dailyData.length;
+  }, [screenTimeData]);
 
   const getBarHeight = (usage: number) => {
-    const maxHeight = moderateScale(120);
-    return (usage / maxUsage) * maxHeight;
+    if (screenTimeData) {
+      const maxUsage =
+        screenTimeData?.dailyData.sort(
+          (a, b) => b.totalScreenTime - a.totalScreenTime
+        )[0]?.totalScreenTime / 3600 || 1;
+
+      const maxHeight = verticalScale(140);
+
+      return Math.min((usage / maxUsage) * maxHeight, verticalScale(140));
+    }
+
+    return moderateScale(20);
   };
 
-  const getBarColor = (isToday: boolean, usage: number) => {
-    if (isToday) return "#FF6B6B";
-    return usage > 4 ? "#FF9999" : "#87CEEB";
+  // Calculate the position of the average line
+  const getAverageLinePosition = () => {
+    if (!screenTimeData?.dailyData) {
+      return 0;
+    }
+    const maxUsage =
+      screenTimeData?.dailyData.sort(
+        (a, b) => b.totalScreenTime - a.totalScreenTime
+      )[0]?.totalScreenTime / 3600 || 1;
+
+    const maxHeight = verticalScale(140);
+
+    const averageInHours = averageScreenTime / 3600;
+
+    return Math.min(
+      (averageInHours / maxUsage) * maxHeight,
+      verticalScale(140)
+    );
+  };
+
+  // Determine bar color based on whether usage is above or below average
+  const getBarColor = (usage: number) => {
+    return usage > averageScreenTime ? redColor : accentColor;
   };
 
   return (
@@ -52,33 +75,49 @@ const Step4 = () => {
       <View style={styles.totalUsageContainer}>
         <ClockIcon color={onBackgroundColor} />
         <Text style={[{ color: onBackgroundColor }, styles.totalUsageTime]}>
-          {totalTime}
+          {formatScreenTime(screenTimeData?.totalScreenTime || 0)}
         </Text>
       </View>
       <View style={styles.chartContainer}>
         <View style={styles.barsContainer}>
           {screenTimeData?.dailyData.map((data, index) => (
-            <View key={index} style={styles.barColumn}>
+            <View style={styles.barColumnContainer} key={index}>
               <View
-                style={[
-                  styles.bar,
-                  {
-                    height: getBarHeight(data.totalScreenTime / 3600),
-                    // backgroundColor: getBarColor(data., data.usage),
-                  },
-                ]}
-              />
+                style={[styles.barColumn, { backgroundColor: questStatColor }]}
+              >
+                <View
+                  style={[
+                    {
+                      height: getBarHeight(data.totalScreenTime / 3600),
+                      backgroundColor: getBarColor(data.totalScreenTime),
+                    },
+                    styles.bar,
+                  ]}
+                />
+              </View>
               <Text style={styles.dayLabel}>
                 {DAYS_OF_WEEK[dayjs(data.date).day()].label}
               </Text>
             </View>
           ))}
         </View>
-        <View style={styles.horizontalLine} />
+        <View
+          style={[{ backgroundColor: questStatColor }, styles.horizontalLine]}
+        />
+
+        <View
+          style={[
+            {
+              bottom: moderateScale(25) + getAverageLinePosition(),
+            },
+            styles.averageLine,
+            { borderTopColor: averageLine },
+          ]}
+        />
       </View>
 
       <View style={styles.appsSection}>
-        <Text style={styles.appsSectionTitle}>
+        <Text style={[{ color: onBackgroundColor }, styles.appsSectionTitle]}>
           <FormattedMessage id="most_distracting_apps" />
         </Text>
         {detailedAppUsage?.apps.slice(0, 5).map((app, index) => (
@@ -92,7 +131,16 @@ const Step4 = () => {
             </View>
             <View style={styles.appInfo}>
               <Text style={styles.appName}>{app.appName}</Text>
-              <Text style={styles.appTime}>{app.totalTimeInForeground}</Text>
+              <View style={{ flexDirection: "row", alignItems: "center" }}>
+                <ClockIcon
+                  color={redColor}
+                  width={moderateScale(17)}
+                  height={moderateScale(17)}
+                />
+                <Text style={[{ color: redColor }, styles.appTime]}>
+                  {formatScreenTime(app.totalTimeInForeground)}
+                </Text>
+              </View>
             </View>
           </View>
         ))}
@@ -109,40 +157,48 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "flex-start",
     paddingTop: verticalScale(34),
-    paddingHorizontal: moderateScale(20),
   },
   totalUsageContainer: {
     alignItems: "center",
     marginBottom: verticalScale(30),
+    flexDirection: "row",
   },
   totalUsageTime: {
     fontSize: moderateScale(30),
     fontFamily: "Outfit-SemiBold",
+    marginLeft: horizontalScale(15),
   },
   chartContainer: {
-    width: "100%",
+    width: "90%",
     alignItems: "center",
-    marginBottom: verticalScale(40),
+    marginBottom: verticalScale(33),
     position: "relative",
+  },
+  barColumnContainer: {
+    flexDirection: "column",
+    alignItems: "center",
   },
   barsContainer: {
     flexDirection: "row",
     alignItems: "flex-end",
     justifyContent: "space-between",
     width: "85%",
-    height: moderateScale(140),
-    paddingBottom: moderateScale(25),
+    height: verticalScale(140),
   },
   barColumn: {
     alignItems: "center",
+    justifyContent: "flex-end",
     flex: 1,
+    height: verticalScale(140),
     marginHorizontal: moderateScale(4),
+    borderRadius: moderateScale(4),
+    marginBottom: verticalScale(20),
+    overflow: "hidden",
   },
   bar: {
-    width: moderateScale(24),
-    borderRadius: moderateScale(12),
-    marginBottom: moderateScale(8),
-    minHeight: moderateScale(20),
+    width: moderateScale(16),
+    borderRadius: moderateScale(4),
+    maxHeight: verticalScale(140),
   },
   dayLabel: {
     fontSize: moderateScale(14),
@@ -151,42 +207,39 @@ const styles = StyleSheet.create({
     fontFamily: "Outfit-Medium",
   },
   horizontalLine: {
+    width: "101%",
     position: "absolute",
-    bottom: moderateScale(20),
-    left: 0,
-    right: 0,
-    height: 1,
-    backgroundColor: "rgba(255, 255, 255, 0.3)",
+    bottom: moderateScale(25),
+    borderRadius: 100,
+    height: 3,
     marginHorizontal: moderateScale(30),
   },
+  averageLine: {
+    width: "101%",
+    position: "absolute",
+    borderTopWidth: 4,
+    borderStyle: "dashed",
+  },
   appsSection: {
-    flex: 1,
     width: "100%",
+    paddingBottom: verticalScale(20),
   },
   appsSectionTitle: {
-    fontSize: moderateScale(18),
-    fontWeight: "600",
-    color: "#FFFFFF",
-    marginBottom: verticalScale(20),
-    fontFamily: "Outfit-SemiBold",
+    fontSize: moderateScale(20),
+    marginBottom: verticalScale(15),
+    fontFamily: "Outfit-Medium",
   },
   appItem: {
     flexDirection: "row",
     alignItems: "center",
     paddingVertical: verticalScale(12),
-    paddingHorizontal: moderateScale(4),
   },
   appIcon: {
     width: moderateScale(43),
     height: moderateScale(43),
   },
   appIconContainer: {
-    marginRight: moderateScale(16),
-  },
-  appIconPlaceholder: {
-    width: moderateScale(40),
-    height: moderateScale(40),
-    borderRadius: moderateScale(8),
+    marginRight: moderateScale(18),
   },
   appInfo: {
     flexGrow: 1,
@@ -202,8 +255,8 @@ const styles = StyleSheet.create({
   },
   appTime: {
     fontSize: moderateScale(14),
-    color: "#FF9999",
     fontFamily: "Outfit-Regular",
+    marginLeft: horizontalScale(6),
   },
 });
 

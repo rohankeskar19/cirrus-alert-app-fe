@@ -14,7 +14,7 @@ export const DAYS_OF_WEEK = [
     day: "Wednesday",
   },
   {
-    label: "T",
+    label: "Th",
     day: "Thursday",
   },
   {
@@ -22,7 +22,7 @@ export const DAYS_OF_WEEK = [
     day: "Friday",
   },
   {
-    label: "S",
+    label: "Sa",
     day: "Saturday",
   },
   {

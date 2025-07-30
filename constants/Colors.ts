@@ -30,6 +30,7 @@ export const Colors = {
     dialogBorder: "#E0E0E0",
     dialogText: "#000000",
     radioUntick: "#767676",
+    averageLine: "#A4A4A4",
   },
   dark: {
     background: "#363636",
@@ -57,5 +58,6 @@ export const Colors = {
     dialogBorder: "#E0E0E0",
     dialogText: "#000000",
     radioUntick: "#767676",
+    averageLine: "#A4A4A4",
   },
 };

@@ -1,16 +1,16 @@
 import React, { useEffect, useState } from "react";
 
-import { SafeAreaView, ScrollView, StyleSheet, Text, View } from "react-native";
+import { ScrollView, StyleSheet, Text, View } from "react-native";
 
 import { router } from "expo-router";
-import LottieView from "lottie-react-native";
 import { FormattedMessage, useIntl } from "react-intl";
 
 import Button from "@/components/Button";
 import AnimatedCharacter from "@/components/Character";
 import { CharacterStates } from "@/constants/CharacterStates";
 import { useThemeColor } from "@/hooks/useThemeColor";
-import { moderateScale, verticalScale } from "@/utils/metrics";
+import { verticalScale } from "@/utils/metrics";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 const WelcomeScreen = () => {
   const intl = useIntl();

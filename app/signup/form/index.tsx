@@ -2,7 +2,6 @@ import React, { useState } from "react";
 
 import {
   Alert,
-  SafeAreaView,
   ScrollView,
   StyleSheet,
   Text,
@@ -23,6 +22,7 @@ import { useThemeColor } from "@/hooks/useThemeColor";
 import { selectUserProfile } from "@/slices/onboarding";
 import { signupUser } from "@/utils/apiUtils";
 import { horizontalScale, moderateScale, verticalScale } from "@/utils/metrics";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 const SignupFormScreen = () => {
   const [email, setEmail] = useState("");
@@ -57,7 +57,7 @@ const SignupFormScreen = () => {
 
     if (password.trim() !== confirmPassword.trim()) {
       setConfirmPasswordError(
-        intl.formatMessage({ id: "password_not_matching_error" }),
+        intl.formatMessage({ id: "password_not_matching_error" })
       );
       return false;
     }
@@ -78,7 +78,7 @@ const SignupFormScreen = () => {
       }
     } catch (err) {
       Alert.alert(
-        get(err, "message", intl.formatMessage({ id: "user_creation_error" })),
+        get(err, "message", intl.formatMessage({ id: "user_creation_error" }))
       );
       setLoading(false);
     }

@@ -1,10 +1,8 @@
 import React, { useEffect, useRef, useState } from "react";
 
 import {
-  Alert,
   Animated,
   Dimensions,
-  SafeAreaView,
   ScrollView,
   StyleSheet,
   Text,
@@ -27,6 +25,7 @@ import { useThemeColor } from "@/hooks/useThemeColor";
 import { updateUserProfile } from "@/slices/onboarding";
 import { horizontalScale, moderateScale, verticalScale } from "@/utils/metrics";
 
+import { SafeAreaView } from "react-native-safe-area-context";
 import Step1 from "./components/Step1";
 import Step2 from "./components/Step2";
 import Step3 from "./components/Step3";
@@ -82,7 +81,7 @@ const OnboardingScreen = () => {
         interests: selectedInterests,
         learning_goal: selectedGoal,
         learning_routine: selectedTime,
-      }),
+      })
     );
   }, [firstName, lastName, age, selectedInterests, selectedGoal, selectedTime]);
 
@@ -125,16 +124,16 @@ const OnboardingScreen = () => {
                   ? [interest]
                   : [
                       ...selectedInterests.filter(
-                        (interest) => interest != "Other",
+                        (interest) => interest != "Other"
                       ),
                       interest,
-                    ],
+                    ]
               );
             } else {
               setSelectedInterests(
                 selectedInterests.filter(
-                  (selectedInterest) => selectedInterest != interest,
-                ),
+                  (selectedInterest) => selectedInterest != interest
+                )
               );
             }
           }}
@@ -201,7 +200,7 @@ const OnboardingScreen = () => {
         () => {
           setCharacterState(CharacterStates.NOTEPAD_WRITING_IDLE);
         },
-        currentStep == 0 ? 0 : 500,
+        currentStep == 0 ? 0 : 500
       );
     }
   };

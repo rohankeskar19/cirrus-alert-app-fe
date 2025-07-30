@@ -1,7 +1,6 @@
 import React from "react";
 
 import {
-  SafeAreaView,
   ScrollView,
   StyleSheet,
   Text,
@@ -18,6 +17,7 @@ import GoogleLogo from "@/assets/icons/google-logo.svg";
 import Button from "@/components/Button";
 import { useThemeColor } from "@/hooks/useThemeColor";
 import { horizontalScale, moderateScale, verticalScale } from "@/utils/metrics";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 const SignupScreen = () => {
   const backgroundColor = useThemeColor("background");

@@ -2,7 +2,6 @@ import React, { useState } from "react";
 
 import {
   Alert,
-  SafeAreaView,
   ScrollView,
   StyleSheet,
   Text,
@@ -21,6 +20,7 @@ import Input from "@/components/Input";
 import { useThemeColor } from "@/hooks/useThemeColor";
 import { forgotPassword } from "@/utils/apiUtils";
 import { horizontalScale, moderateScale, verticalScale } from "@/utils/metrics";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 const ForgotPasswordScreen = () => {
   const [email, setEmail] = useState("");
@@ -47,7 +47,7 @@ const ForgotPasswordScreen = () => {
       const error = get(
         err,
         "message",
-        intl.formatMessage({ id: "login_error" }),
+        intl.formatMessage({ id: "login_error" })
       );
 
       Alert.alert(error);

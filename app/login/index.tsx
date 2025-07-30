@@ -2,7 +2,6 @@ import React, { useState } from "react";
 
 import {
   Alert,
-  SafeAreaView,
   ScrollView,
   StyleSheet,
   Text,
@@ -23,6 +22,7 @@ import Input from "@/components/Input";
 import { useThemeColor } from "@/hooks/useThemeColor";
 import { loginUser } from "@/utils/apiUtils";
 import { horizontalScale, moderateScale, verticalScale } from "@/utils/metrics";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 const LoginScreen = () => {
   const [loading, setLoading] = useState(false);
@@ -78,7 +78,7 @@ const LoginScreen = () => {
       const error = get(
         err,
         "message",
-        intl.formatMessage({ id: "login_error" }),
+        intl.formatMessage({ id: "login_error" })
       );
 
       Alert.alert(error);

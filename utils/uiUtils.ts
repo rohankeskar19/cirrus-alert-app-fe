@@ -1,5 +1,7 @@
 // utils/lessonUtils.ts
 
+import { Platform } from "react-native";
+
 /**
  * Determines the position (center, left, right) of a lesson based on its index
  * in the pattern: 1 center, 2 left, 2 right, 2 left, 2 right, etc.
@@ -8,7 +10,7 @@
  * @returns "center", "left", or "right"
  */
 export const determineLessonPosition = (
-  index: number,
+  index: number
 ): "center" | "left" | "right" => {
   if (index === 0) {
     // First lesson is center
@@ -37,7 +39,7 @@ export const determineLessonPosition = (
 export const determineConnectorType = (
   position: "center" | "left" | "right",
   index: number,
-  totalCount: number,
+  totalCount: number
 ): "vertical" | "horizontal" | "none" => {
   if (index === totalCount - 1) {
     // Last lesson has no connector
@@ -69,16 +71,13 @@ export const determineConnectorType = (
  * @returns Object mapping chapter IDs to lesson counts
  */
 export const getLessonCountsByChapter = (
-  lessons: Array<{ chapterId: number }>,
+  lessons: Array<{ chapterId: number }>
 ): Record<number, number> => {
-  return lessons.reduce(
-    (counts, lesson) => {
-      const { chapterId } = lesson;
-      counts[chapterId] = (counts[chapterId] || 0) + 1;
-      return counts;
-    },
-    {} as Record<number, number>,
-  );
+  return lessons.reduce((counts, lesson) => {
+    const { chapterId } = lesson;
+    counts[chapterId] = (counts[chapterId] || 0) + 1;
+    return counts;
+  }, {} as Record<number, number>);
 };
 
 /**
@@ -90,7 +89,7 @@ export const getLessonCountsByChapter = (
  */
 export const isFirstLessonInChapter = (
   lessons: Array<{ chapterId: number }>,
-  index: number,
+  index: number
 ): boolean => {
   if (index === 0) return true;
 
@@ -107,7 +106,7 @@ export const isFirstLessonInChapter = (
  * @returns Object mapping chapter IDs to their starting index in the lesson array
  */
 export const getChapterStartIndices = (
-  lessons: Array<{ chapterId: number }>,
+  lessons: Array<{ chapterId: number }>
 ): Record<number, number> => {
   const indices: Record<number, number> = {};
 
@@ -133,5 +132,9 @@ export const getShadowColor = (hexColor: string): string => {
   const darkerG = Math.max(0, Math.floor(g * (1 - darkenFactor)));
   const darkerB = Math.max(0, Math.floor(b * (1 - darkenFactor)));
 
-  return `#${darkerR.toString(16).padStart(2, "0")}${darkerG.toString(16).padStart(2, "0")}${darkerB.toString(16).padStart(2, "0")}`;
+  return `#${darkerR.toString(16).padStart(2, "0")}${darkerG
+    .toString(16)
+    .padStart(2, "0")}${darkerB.toString(16).padStart(2, "0")}`;
 };
+
+export const isIos = () => Platform.OS === "ios";

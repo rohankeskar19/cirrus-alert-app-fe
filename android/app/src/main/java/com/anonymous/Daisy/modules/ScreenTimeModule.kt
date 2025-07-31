@@ -228,7 +228,7 @@ class ScreenTimeModule(reactContext: ReactApplicationContext) :
                 totalScreenTime = apps.values.sumOf { it.totalTimeInForeground },
                 apps = apps.values.sortedByDescending { it.totalTimeInForeground }
             )
-        }.sortedBy { it.date }
+        }
     }
 
     private fun createResultMap(

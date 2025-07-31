@@ -31,6 +31,8 @@ export const Colors = {
     dialogText: "#000000",
     radioUntick: "#767676",
     averageLine: "#A4A4A4",
+    ringColor: "#5B5555",
+    sliderTrack: "#5D5D5D",
   },
   dark: {
     background: "#363636",
@@ -53,11 +55,13 @@ export const Colors = {
     cooldownColor: "#47C5FF",
     cooldownBorderColor: "#7BD5FF",
     unlockableAppColor: "#595959",
-    blockCardColor: "#4C4C4C",
+    blockCardColor: "#464646",
     dialogBg: "#FFFFFF",
     dialogBorder: "#E0E0E0",
     dialogText: "#000000",
     radioUntick: "#767676",
     averageLine: "#A4A4A4",
+    ringColor: "#5B5555",
+    sliderTrack: "#5D5D5D",
   },
 };

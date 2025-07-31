@@ -18,7 +18,6 @@ const Step4 = () => {
   const accentColor = useThemeColor("accentColor");
   const averageLine = useThemeColor("averageLine");
 
-  // Calculate average screen time
   const averageScreenTime = React.useMemo(() => {
     if (!screenTimeData?.dailyData || screenTimeData.dailyData.length === 0) {
       return 0;
@@ -29,6 +28,13 @@ const Step4 = () => {
     );
     return total / screenTimeData.dailyData.length;
   }, [screenTimeData]);
+
+  const sortedDailyData = React.useMemo(() => {
+    if (!screenTimeData?.dailyData) return [];
+    return [...screenTimeData.dailyData].sort((a, b) =>
+      dayjs(a.date).isBefore(dayjs(b.date)) ? -1 : 1
+    );
+  }, [screenTimeData?.dailyData]);
 
   const getBarHeight = (usage: number) => {
     if (screenTimeData) {
@@ -45,7 +51,6 @@ const Step4 = () => {
     return moderateScale(20);
   };
 
-  // Calculate the position of the average line
   const getAverageLinePosition = () => {
     if (!screenTimeData?.dailyData) {
       return 0;
@@ -65,7 +70,6 @@ const Step4 = () => {
     );
   };
 
-  // Determine bar color based on whether usage is above or below average
   const getBarColor = (usage: number) => {
     return usage > averageScreenTime ? redColor : accentColor;
   };
@@ -80,26 +84,31 @@ const Step4 = () => {
       </View>
       <View style={styles.chartContainer}>
         <View style={styles.barsContainer}>
-          {screenTimeData?.dailyData.map((data, index) => (
-            <View style={styles.barColumnContainer} key={index}>
-              <View
-                style={[styles.barColumn, { backgroundColor: questStatColor }]}
-              >
+          {sortedDailyData.map((data, index) => {
+            return (
+              <View style={styles.barColumnContainer} key={index}>
                 <View
                   style={[
-                    {
-                      height: getBarHeight(data.totalScreenTime / 3600),
-                      backgroundColor: getBarColor(data.totalScreenTime),
-                    },
-                    styles.bar,
+                    styles.barColumn,
+                    { backgroundColor: questStatColor },
                   ]}
-                />
+                >
+                  <View
+                    style={[
+                      {
+                        height: getBarHeight(data.totalScreenTime / 3600),
+                        backgroundColor: getBarColor(data.totalScreenTime),
+                      },
+                      styles.bar,
+                    ]}
+                  />
+                </View>
+                <Text style={styles.dayLabel}>
+                  {DAYS_OF_WEEK[dayjs(data.date).day()].label}
+                </Text>
               </View>
-              <Text style={styles.dayLabel}>
-                {DAYS_OF_WEEK[dayjs(data.date).day()].label}
-              </Text>
-            </View>
-          ))}
+            );
+          })}
         </View>
         <View
           style={[{ backgroundColor: questStatColor }, styles.horizontalLine]}

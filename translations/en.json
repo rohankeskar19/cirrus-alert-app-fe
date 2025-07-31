@@ -167,5 +167,6 @@
   "overlay_permission": "Overlay permission",
   "overlay_reason": "This is required in order to block apps and show overlays",
   "accessibility_permission": "Accessibility permission",
-  "accessibility_reason": "This is to help us better understand how you use other apps"
+  "accessibility_reason": "This is to help us better understand how you use other apps",
+  "app_cost": "{cost}/m"
 }

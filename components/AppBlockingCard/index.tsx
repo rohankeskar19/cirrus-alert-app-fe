@@ -2,7 +2,7 @@ import ClockIcon from "@/assets/icons/clock.svg";
 import { AppUsageData } from "@/hooks/useScreenTime";
 import { useThemeColor } from "@/hooks/useThemeColor";
 import { horizontalScale, moderateScale, verticalScale } from "@/utils/metrics";
-import { Slider } from "@rneui/themed";
+import Slider from "@react-native-community/slider";
 import React, { useState } from "react";
 import { Image, StyleSheet, Text, View } from "react-native";
 
@@ -11,21 +11,17 @@ import { FormattedMessage } from "react-intl";
 
 interface AppBlockingCardProps {
   app: AppUsageData;
-  onProceed: (appsWithCosts: { app: AppUsageData; cost: number }[]) => void;
   maxCost?: number;
-  currency?: string;
 }
 
 const AppBlockingCard: React.FC<AppBlockingCardProps> = ({
   app,
-  onProceed,
   maxCost = 50,
-  currency = "m",
 }) => {
   const [appCost, setAppCost] = useState<number>(0);
 
   const handleSliderChange = (value: number) => {
-    setAppCost(Math.round(value));
+    setAppCost(parseInt(value.toString()));
   };
 
   const onBackgroundColor = useThemeColor("onBackground");
@@ -80,20 +76,15 @@ const AppBlockingCard: React.FC<AppBlockingCardProps> = ({
 
       <View style={styles.sliderContainer}>
         <Slider
-          value={appCost}
-          onValueChange={setAppCost}
-          maximumValue={50}
-          minimumValue={1}
+          style={styles.slider}
           step={1}
-          allowTouchTrack
+          minimumValue={1}
+          maximumValue={maxCost}
+          value={appCost}
+          onValueChange={(value: number) => handleSliderChange(value)}
           minimumTrackTintColor={accentColor}
-          maximumTrackTintColor={sliderTrack}
-          thumbStyle={{
-            height: moderateScale(14),
-            width: moderateScale(14),
-            backgroundColor: accentColor,
-            marginTop: verticalScale(-4),
-          }}
+          maximumTrackTintColor={onBackgroundColor}
+          thumbTintColor={accentColor}
         />
       </View>
     </View>

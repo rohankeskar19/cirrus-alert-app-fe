@@ -61,5 +61,8 @@
     "eslint-config-expo": "~9.2.0",
     "typescript": "~5.8.3"
   },
+  "resolutions": {
+    "@types/react": "~19.0.10"
+  },
   "private": true
 }

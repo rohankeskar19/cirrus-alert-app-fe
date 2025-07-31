@@ -33,6 +33,7 @@ import Step4 from "./components/Step4";
 import Step5 from "./components/Step5";
 import Step6 from "./components/Step6";
 import Step7 from "./components/Step7";
+import Step8 from "./components/Step8";
 
 const { width } = Dimensions.get("window");
 
@@ -54,18 +55,11 @@ const OnboardingScreen = () => {
   const onBackground = useThemeColor("onBackground");
   const progressBg = useThemeColor("questStat");
 
-  const {
-    permissionStatus: usageStatsPermissionStatus,
-    requestPermission: requestUsageStatsPermission,
-  } = useScreenTimePermission();
-  const {
-    permissionStatus: overlayPermissionStatus,
-    requestPermission: requestOverlayPermission,
-  } = useOverlayPermission();
-  const {
-    permissionStatus: accessibilityPermissionStatus,
-    requestPermission: requestAccessibilityPermission,
-  } = useAccessibilityPermission();
+  const { permissionStatus: usageStatsPermissionStatus } =
+    useScreenTimePermission();
+  const { permissionStatus: overlayPermissionStatus } = useOverlayPermission();
+  const { permissionStatus: accessibilityPermissionStatus } =
+    useAccessibilityPermission();
 
   const dispatch = useDispatch();
 
@@ -117,6 +111,9 @@ const OnboardingScreen = () => {
     },
     {
       content: <Step7 />,
+    },
+    {
+      content: <Step8 />,
     },
   ];
 
@@ -207,7 +204,7 @@ const OnboardingScreen = () => {
   const getButtonText = () => {
     if (currentStep < 1) {
       return intl.formatMessage({ id: "continue" });
-    } else if (currentStep === 6) {
+    } else if (currentStep === 7) {
       return intl.formatMessage({ id: "allow_notifications" });
     } else {
       return intl.formatMessage({ id: "next" });
@@ -256,6 +253,7 @@ const OnboardingScreen = () => {
                 intl.formatMessage({ id: "step5_dialog" }),
                 intl.formatMessage({ id: "step6_dialog" }),
                 intl.formatMessage({ id: "step7_dialog" }),
+                intl.formatMessage({ id: "step8_dialog" }),
               ][currentStep]
             }
             dialogPosition="right"
@@ -288,7 +286,7 @@ const OnboardingScreen = () => {
             <Text>{getButtonText()}</Text>
           </Button>
 
-          {currentStep === 6 && (
+          {currentStep === 7 && (
             <TouchableOpacity
               style={{
                 marginTop: verticalScale(5),
@@ -375,6 +373,7 @@ const styles = StyleSheet.create({
   },
   illustrationContainer: {
     marginTop: verticalScale(25),
+    paddingBottom: verticalScale(20),
   },
 });
 

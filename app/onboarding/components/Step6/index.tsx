@@ -14,11 +14,7 @@ const Step6 = () => {
   return (
     <View style={styles.stepContainer}>
       {detailedAppUsage?.apps.map((app) => (
-        <AppBlockingCard
-          key={app.packageName}
-          app={app}
-          onProceed={(appsWithCosts) => console.log(appsWithCosts)}
-        />
+        <AppBlockingCard key={app.packageName} app={app} />
       ))}
     </View>
   );

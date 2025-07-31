@@ -88,7 +88,7 @@
   "exit_confirmation": "Are you sure want to exit without saving?",
   "selected_apps_blocked_info": "These apps will remain blocked until you complete the goal",
   "error": "Error",
-  "welcome_greeting": "Hello! I'm daisy the ghost",
+  "welcome_greeting": "Hello! I'm Whispy the ghost",
   "welcome_greeting_2": "Nice to meet you!",
   "step1_dialog": "Let’s get you started",
   "step2_dialog": "What should I call you?",
@@ -97,7 +97,7 @@
   "step5_dialog": "Let’s set a daily limit for your phone usage.",
   "step6_dialog": "Now let’s block your most distracting apps by setting a cost to unlock them",
   "step7_dialog": "Thank you!, Now let’s begin by setting your first quest",
-  "step8_dialog": "Should I remind you to complete your quest?",
+  "step8_dialog": "Do you want to get notified when you get something important?",
   "years_old": "years old",
   "allow_notifications": "Allow notifications",
   "no_thanks": "No thanks",
@@ -168,5 +168,5 @@
   "overlay_reason": "This is required in order to block apps and show overlays",
   "accessibility_permission": "Accessibility permission",
   "accessibility_reason": "This is to help us better understand how you use other apps",
-  "app_cost": "{cost}/m"
+  "app_cost": "{cost}/minute"
 }

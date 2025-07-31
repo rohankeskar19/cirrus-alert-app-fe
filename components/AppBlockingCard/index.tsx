@@ -18,7 +18,7 @@ const AppBlockingCard: React.FC<AppBlockingCardProps> = ({
   app,
   maxCost = 50,
 }) => {
-  const [appCost, setAppCost] = useState<number>(0);
+  const [appCost, setAppCost] = useState<number>(1);
 
   const handleSliderChange = (value: number) => {
     setAppCost(parseInt(value.toString()));
@@ -103,7 +103,7 @@ const styles = StyleSheet.create({
   appHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
-    alignItems: "center",
+    alignItems: "flex-start",
     marginBottom: 12,
   },
   appInfo: {

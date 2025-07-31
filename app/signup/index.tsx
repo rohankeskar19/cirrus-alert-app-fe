@@ -157,6 +157,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: horizontalScale(10),
     color: "#E5E5E5",
     fontSize: moderateScale(13),
+    fontFamily: "Outfit-Medium",
   },
   backButton: {
     padding: moderateScale(5),

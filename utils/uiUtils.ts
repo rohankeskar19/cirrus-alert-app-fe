@@ -137,4 +137,17 @@ export const getShadowColor = (hexColor: string): string => {
     .padStart(2, "0")}${darkerB.toString(16).padStart(2, "0")}`;
 };
 
+export const formatMinutes = (minutes: number) => {
+  if (minutes < 60) {
+    return `${minutes} ${minutes === 1 ? "minute" : "minutes"}`;
+  }
+  const hours = Math.floor(minutes / 60);
+  const remainingMinutes = minutes % 60;
+
+  if (remainingMinutes === 0) {
+    return `${hours} ${hours === 1 ? "hour" : "hours"}`;
+  }
+  return `${hours}h ${remainingMinutes}m`;
+};
+
 export const isIos = () => Platform.OS === "ios";

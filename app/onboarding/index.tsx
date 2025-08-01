@@ -50,6 +50,7 @@ const OnboardingScreen = () => {
 
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
+  const [selectedQuests, setSelectedQuests] = useState<string[]>([]);
 
   const backgroundColor = useThemeColor("background");
   const onBackground = useThemeColor("onBackground");
@@ -110,7 +111,12 @@ const OnboardingScreen = () => {
       content: <Step6 />,
     },
     {
-      content: <Step7 />,
+      content: (
+        <Step7
+          selectedQuests={selectedQuests}
+          setSelectedQuests={setSelectedQuests}
+        />
+      ),
     },
     {
       content: <Step8 />,
@@ -198,6 +204,10 @@ const OnboardingScreen = () => {
     }
 
     if (currentStep == 5) {
+    }
+
+    if (currentStep == 6) {
+      if (selectedQuests.length === 0) return true;
     }
   };
 
@@ -323,6 +333,7 @@ const styles = StyleSheet.create({
     marginTop: "auto",
     display: "flex",
     alignItems: "center",
+    paddingTop: verticalScale(20),
   },
   container: {
     flex: 1,

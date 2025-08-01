@@ -4,7 +4,6 @@ import { StyleSheet, View } from "react-native";
 
 import AppBlockingCard from "@/components/AppBlockingCard";
 import { useScreenTime } from "@/hooks/useScreenTime";
-import { verticalScale } from "@/utils/metrics";
 
 type Step6Props = {};
 
@@ -27,7 +26,6 @@ const styles = StyleSheet.create({
     display: "flex",
     alignItems: "center",
     justifyContent: "flex-start",
-    paddingTop: verticalScale(34),
   },
 });
 

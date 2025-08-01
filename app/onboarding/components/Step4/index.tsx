@@ -142,11 +142,11 @@ const Step4 = () => {
               <Text style={styles.appName}>{app.appName}</Text>
               <View style={{ flexDirection: "row", alignItems: "center" }}>
                 <ClockIcon
-                  color={redColor}
+                  color={onBackgroundColor}
                   width={moderateScale(17)}
                   height={moderateScale(17)}
                 />
-                <Text style={[{ color: redColor }, styles.appTime]}>
+                <Text style={[{ color: onBackgroundColor }, styles.appTime]}>
                   {formatScreenTime(app.totalTimeInForeground)}
                 </Text>
               </View>
@@ -165,7 +165,6 @@ const styles = StyleSheet.create({
     display: "flex",
     alignItems: "center",
     justifyContent: "flex-start",
-    paddingTop: verticalScale(34),
   },
   totalUsageContainer: {
     alignItems: "center",

@@ -1,23 +1,40 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 
 import { StyleSheet, View } from "react-native";
 
-import { useIntl } from "react-intl";
+import OnboardingQuestCard from "@/components/OnboardingQuestCard";
+import { QuestTemplates } from "@/constants/QuestTemplates";
 
-const Step7 = () => {
-  const [currentDialogIndex, setCurrentDialogIndex] = useState(-1);
+type Step7Props = {
+  selectedQuests: string[];
+  setSelectedQuests: (quests: string[]) => void;
+};
 
-  const intl = useIntl();
-
-  useEffect(() => {
-    const dialogTimer = setTimeout(() => {
-      if (currentDialogIndex < 1) setCurrentDialogIndex(currentDialogIndex + 1);
-    }, 1000);
-
-    return () => clearTimeout(dialogTimer);
-  }, [currentDialogIndex]);
-
-  return <View style={styles.stepContainer}></View>;
+const Step7 = ({ selectedQuests, setSelectedQuests }: Step7Props) => {
+  return (
+    <View style={styles.stepContainer}>
+      {QuestTemplates.map((quest: any) => (
+        <OnboardingQuestCard
+          key={quest.id}
+          isSelected={selectedQuests.includes(quest.id)}
+          quest={quest}
+          onAddToggle={(quest) => {
+            if (selectedQuests.includes(quest.id)) {
+              setSelectedQuests(
+                selectedQuests.filter(
+                  (id) => id !== quest.id && id !== quest.title
+                )
+              );
+              return;
+            } else {
+              setSelectedQuests([...selectedQuests, quest.id]);
+            }
+          }}
+          onEdit={(quest) => {}}
+        />
+      ))}
+    </View>
+  );
 };
 
 const styles = StyleSheet.create({

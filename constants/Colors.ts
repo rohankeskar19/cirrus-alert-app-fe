@@ -33,6 +33,8 @@ export const Colors = {
     averageLine: "#A4A4A4",
     ringColor: "#5B5555",
     sliderTrack: "#5D5D5D",
+    dropdownBg: "#3B3B3B",
+    dropdownBorder: "#727272",
   },
   dark: {
     background: "#363636",
@@ -63,5 +65,7 @@ export const Colors = {
     averageLine: "#A4A4A4",
     ringColor: "#5B5555",
     sliderTrack: "#5D5D5D",
+    dropdownBg: "#3B3B3B",
+    dropdownBorder: "#727272",
   },
 };

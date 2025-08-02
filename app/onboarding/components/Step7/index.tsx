@@ -1,9 +1,11 @@
-import React from "react";
+import React, { useState } from "react";
 
 import { StyleSheet, View } from "react-native";
 
 import OnboardingQuestCard from "@/components/OnboardingQuestCard";
+import QuestBottomSheet from "@/components/QuestBottomSheet";
 import { QuestTemplates } from "@/constants/QuestTemplates";
+import { Quest } from "@/types";
 
 type Step7Props = {
   selectedQuests: string[];
@@ -11,6 +13,8 @@ type Step7Props = {
 };
 
 const Step7 = ({ selectedQuests, setSelectedQuests }: Step7Props) => {
+  const [currentQuest, setCurrentQuest] = useState<Quest | null>(null);
+
   return (
     <View style={styles.stepContainer}>
       {QuestTemplates.map((quest: any) => (
@@ -30,9 +34,23 @@ const Step7 = ({ selectedQuests, setSelectedQuests }: Step7Props) => {
               setSelectedQuests([...selectedQuests, quest.id]);
             }
           }}
-          onEdit={(quest) => {}}
+          onEdit={(quest) => {
+            setCurrentQuest(quest);
+          }}
         />
       ))}
+
+      <QuestBottomSheet
+        visible={currentQuest != null}
+        editingQuest={currentQuest}
+        onDismiss={() => setCurrentQuest(null)}
+        onQuestCreated={(updatedQuest) => {
+          setCurrentQuest(null);
+        }}
+        onQuestUpdated={(updatedQuest) => {
+          setCurrentQuest(null);
+        }}
+      />
     </View>
   );
 };

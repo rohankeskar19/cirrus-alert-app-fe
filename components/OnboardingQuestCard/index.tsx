@@ -18,8 +18,8 @@ import { FormattedMessage } from "react-intl";
 interface QuestCardProps {
   isSelected: boolean;
   quest: Quest;
-  onAddToggle?: (quest: Quest) => void;
-  onEdit?: (quest: Quest) => void;
+  onAddToggle: (quest: Quest) => void;
+  onEdit: (quest: Quest) => void;
 }
 
 const OnboardingQuestCard = ({
@@ -41,7 +41,7 @@ const OnboardingQuestCard = ({
         <TouchableOpacity
           style={styles.editButton}
           activeOpacity={1}
-          onPress={() => onEdit && onEdit(quest)}
+          onPress={() => onEdit(quest)}
         >
           <EditPenIcon color={accentColor} />
         </TouchableOpacity>
@@ -66,7 +66,7 @@ const OnboardingQuestCard = ({
         </View>
         <TouchableOpacity
           style={styles.addButton}
-          onPress={() => onAddToggle && onAddToggle(quest)}
+          onPress={() => onAddToggle(quest)}
           activeOpacity={1}
         >
           {!isSelected ? (
@@ -119,10 +119,6 @@ const styles = StyleSheet.create({
   },
   editButton: {
     padding: 4,
-  },
-  editIcon: {
-    fontSize: 16,
-    color: "#6B7280",
   },
   content: {
     justifyContent: "space-between",

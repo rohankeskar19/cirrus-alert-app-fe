@@ -1,10 +1,11 @@
 export type QuestType =
+  | "ONE_TIME"
+  | "REPEATABLE"
   | "DAILY"
   | "WEEKLY"
-  | "MONTHLY"
-  | "ONE_TIME"
-  | "RECURRING";
+  | "COOLDOWN";
 export type QuestStatus = "ACTIVE" | "COMPLETED" | "PAUSED" | "EXPIRED";
+export type QuestVariant = "TIME_BASED" | "TASK";
 
 export interface Quest {
   id: string;

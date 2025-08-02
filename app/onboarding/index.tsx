@@ -43,7 +43,7 @@ const OnboardingScreen = () => {
   const [characterState, setCharacterState] = useState<
     (typeof CharacterStates)[keyof typeof CharacterStates]
   >(CharacterStates.IDLE);
-  const [currentStep, setCurrentStep] = useState(0);
+  const [currentStep, setCurrentStep] = useState(6);
   const slideAnim = useRef(new Animated.Value(0)).current;
   const progressAnim = useRef(new Animated.Value(0)).current;
   const [buttonDisabled, setButtonDisabled] = useState(true);

@@ -1,5 +1,4 @@
-import React, { useState } from "react";
-import { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 
 import { StatusBar, useColorScheme } from "react-native";
 
@@ -14,6 +13,7 @@ import { Provider } from "react-redux";
 import { getCurrentUser } from "@/utils/apiUtils";
 import { SCREEN_BACKGROUNDS, THEMES } from "@/utils/constants";
 
+import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
 import store from "../store";
 import messages from "../translations/en.json";
 
@@ -94,20 +94,22 @@ export default function RootLayout() {
       <ThemeContext.Provider value={themeData as any}>
         <GestureHandlerRootView>
           <IntlProvider locale="en" defaultLocale="en" messages={messages}>
-            <Stack
-              initialRouteName="welcome/index"
-              screenOptions={{ headerShown: false }}
-            >
-              <Stack.Screen name="welcome/index" />
-              <Stack.Screen name="onboarding/index" />
-              <Stack.Screen name="signup/index" />
-              <Stack.Screen name="signup/form/index" />
-              <Stack.Screen name="login/index" />
-              <Stack.Screen name="forgot-password/index" />
-              <Stack.Screen name="home" />
-              <Stack.Screen name="splash/index" />
-            </Stack>
-            {redirectRoute && <Redirect href={redirectRoute}></Redirect>}
+            <BottomSheetModalProvider>
+              <Stack
+                initialRouteName="welcome/index"
+                screenOptions={{ headerShown: false }}
+              >
+                <Stack.Screen name="welcome/index" />
+                <Stack.Screen name="onboarding/index" />
+                <Stack.Screen name="signup/index" />
+                <Stack.Screen name="signup/form/index" />
+                <Stack.Screen name="login/index" />
+                <Stack.Screen name="forgot-password/index" />
+                <Stack.Screen name="home" />
+                <Stack.Screen name="splash/index" />
+              </Stack>
+              {redirectRoute && <Redirect href={redirectRoute}></Redirect>}
+            </BottomSheetModalProvider>
           </IntlProvider>
         </GestureHandlerRootView>
       </ThemeContext.Provider>

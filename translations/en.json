@@ -169,5 +169,18 @@
   "accessibility_permission": "Accessibility permission",
   "accessibility_reason": "This is to help us better understand how you use other apps",
   "app_cost": "{cost}/minute",
-  "remove": "Remove"
+  "remove": "Remove",
+  "edit_quest": "Edit quest",
+  "new_quest": "New quest",
+  "update_quest": "Update quest",
+  "create_quest": "Create quest",
+  "timer_based": "Time based",
+  "task_based": "Task",
+  "quest_title": "Quest Title",
+  "quest_title_placeholder": "Study, Touch grass etc.",
+  "reward": "Reward",
+  "quest_frequency": "Quest frequency",
+  "daily_completions": "Daily completions",
+  "weekly_completions": "Weekly completions",
+  "cooldown_period": "Cooldown period"
 }

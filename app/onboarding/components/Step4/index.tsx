@@ -139,7 +139,9 @@ const Step4 = () => {
               />
             </View>
             <View style={styles.appInfo}>
-              <Text style={styles.appName}>{app.appName}</Text>
+              <Text style={[styles.appName, { color: onBackgroundColor }]}>
+                {app.appName}
+              </Text>
               <View style={{ flexDirection: "row", alignItems: "center" }}>
                 <ClockIcon
                   color={onBackgroundColor}

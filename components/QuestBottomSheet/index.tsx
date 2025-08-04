@@ -457,7 +457,7 @@ const QuestBottomSheet: React.FC<QuestBottomSheetProps> = ({
             "",
             1,
             1,
-            100
+            300
           )}
         </View>
         <View style={styles.section}>
@@ -474,6 +474,7 @@ const QuestBottomSheet: React.FC<QuestBottomSheetProps> = ({
                 },
               ]}
               onPress={() => setSelectedQuestVariant("TIME_BASED")}
+              activeOpacity={1}
             >
               <TimerClock width={25} height={25} />
 
@@ -503,6 +504,7 @@ const QuestBottomSheet: React.FC<QuestBottomSheetProps> = ({
                 },
               ]}
               onPress={() => setSelectedQuestVariant("TASK")}
+              activeOpacity={1}
             >
               <TaskTick width={25} height={25} />
               <Text
@@ -675,7 +677,7 @@ const QuestBottomSheet: React.FC<QuestBottomSheetProps> = ({
         >
           <View style={styles.buttonCta}>
             <SwordCrossIcon width={28} height={28} />
-            <Text style={styles.createButtonText}>
+            <Text style={[styles.createButtonText, { color: backgroundColor }]}>
               <FormattedMessage
                 id={isEditMode ? "update_quest" : "create_quest"}
               />

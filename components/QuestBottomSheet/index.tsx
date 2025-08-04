@@ -68,6 +68,8 @@ const QuestBottomSheet: React.FC<QuestBottomSheetProps> = ({
 
   // Changed from BottomSheet to BottomSheetModal
   const bottomSheetModalRef = useRef<BottomSheetModal>(null);
+  const questTypeModalRef = useRef<BottomSheetModal>(null);
+
   const scrollViewRef = useRef<ScrollView>(null);
   const scrollY = useRef(new Animated.Value(0)).current;
 
@@ -190,6 +192,10 @@ const QuestBottomSheet: React.FC<QuestBottomSheetProps> = ({
     if (questName.trim().length > 50)
       return "Quest name must be less than 50 characters";
     return null;
+  };
+
+  const openQuestTypeDropdown = () => {
+    questTypeModalRef.current?.present();
   };
 
   const formatDuration = (h: number, m: number): string => {
@@ -533,26 +539,30 @@ const QuestBottomSheet: React.FC<QuestBottomSheetProps> = ({
               styles.dropdown,
               { backgroundColor: dropdownBg, borderColor: dropdownBorder },
             ]}
-            onPress={() =>
-              setQuestTypeDropdownVisible(!questTypeDropdownVisible)
-            }
+            onPress={openQuestTypeDropdown}
           >
             <Text style={[styles.dropdownText, { color: onBackgroundColor }]}>
               {formatQuestType(selectedQuestType)}
             </Text>
             <ChevronDown width={12} height={12} />
           </TouchableOpacity>
-          {questTypeDropdownVisible && (
-            <View
-              style={[styles.dropdownMenu, { backgroundColor: dropdownBg }]}
-            >
+
+          <BottomSheetModal
+            ref={questTypeModalRef}
+            snapPoints={["35%"]}
+            enablePanDownToClose
+            handleStyle={{ backgroundColor }}
+            handleIndicatorStyle={{ backgroundColor: onBackgroundColor }}
+            backgroundStyle={{ backgroundColor }}
+          >
+            <BottomSheetScrollView>
               {questTypes.map((type) => (
                 <TouchableOpacity
                   key={type}
                   style={styles.dropdownItem}
                   onPress={() => {
                     setSelectedQuestType(type);
-                    setQuestTypeDropdownVisible(false);
+                    questTypeModalRef.current?.dismiss();
                   }}
                 >
                   <Text
@@ -565,8 +575,8 @@ const QuestBottomSheet: React.FC<QuestBottomSheetProps> = ({
                   </Text>
                 </TouchableOpacity>
               ))}
-            </View>
-          )}
+            </BottomSheetScrollView>
+          </BottomSheetModal>
         </View>
         {selectedQuestType === "DAILY" && (
           <View style={styles.section}>

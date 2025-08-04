@@ -13,11 +13,12 @@ type Step7Props = {
 };
 
 const Step7 = ({ selectedQuests, setSelectedQuests }: Step7Props) => {
+  const [questData, setQuestData] = useState(QuestTemplates);
   const [currentQuest, setCurrentQuest] = useState<Quest | null>(null);
 
   return (
     <View style={styles.stepContainer}>
-      {QuestTemplates.map((quest: any) => (
+      {questData.map((quest: any) => (
         <OnboardingQuestCard
           key={quest.id}
           isSelected={selectedQuests.includes(quest.id)}
@@ -44,10 +45,13 @@ const Step7 = ({ selectedQuests, setSelectedQuests }: Step7Props) => {
         visible={currentQuest != null}
         editingQuest={currentQuest}
         onDismiss={() => setCurrentQuest(null)}
-        onQuestCreated={(updatedQuest) => {
-          setCurrentQuest(null);
-        }}
+        onQuestCreated={() => {}}
         onQuestUpdated={(updatedQuest) => {
+          setQuestData((prevState: any) =>
+            prevState.map((quest: Quest) =>
+              quest.id === updatedQuest.id ? updatedQuest : quest
+            )
+          );
           setCurrentQuest(null);
         }}
       />

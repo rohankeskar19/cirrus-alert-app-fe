@@ -280,9 +280,6 @@ const QuestBottomSheet: React.FC<QuestBottomSheetProps> = ({
         lastCompletedAt: editingQuest?.lastCompletedAt || null,
       };
 
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-
       if (isEditMode) {
         onQuestUpdated?.(questData);
       } else {
@@ -454,13 +451,13 @@ const QuestBottomSheet: React.FC<QuestBottomSheetProps> = ({
         <View style={styles.section}>
           {renderInputLabel(intl.formatMessage({ id: "reward" }), RewardBox)}
           {renderCounter(
-            100,
+            rewardAmount,
             setRewardAmount,
             <CoinIcon width={35} height={35} />,
             "",
             1,
             1,
-            20
+            100
           )}
         </View>
         <View style={styles.section}>
@@ -525,8 +522,42 @@ const QuestBottomSheet: React.FC<QuestBottomSheetProps> = ({
           </View>
         </View>
         {selectedQuestVariant === "TIME_BASED" && (
-          <View style={styles.section}>
-            {renderCounter(maxCompletions, () => {}, null, "per day", 1, 1, 20)}
+          <View
+            style={[
+              styles.counterContainer,
+              { marginBottom: verticalScale(40) },
+            ]}
+          >
+            <TouchableOpacity
+              style={[
+                styles.counterButton,
+                {
+                  backgroundColor: onBackgroundColor,
+                  marginRight: horizontalScale(40),
+                },
+              ]}
+              activeOpacity={1}
+              onPress={() => adjustTime(false)}
+            >
+              <MinusIcon color={backgroundColor} width={14} height={14} />
+            </TouchableOpacity>
+            <Text style={[styles.counterValue, { color: onBackgroundColor }]}>
+              {`${hours}h ${minutes}m`}
+            </Text>
+
+            <TouchableOpacity
+              style={[
+                styles.counterButton,
+                {
+                  backgroundColor: onBackgroundColor,
+                  marginLeft: horizontalScale(40),
+                },
+              ]}
+              activeOpacity={1}
+              onPress={() => adjustTime(true)}
+            >
+              <PlusIcon color={backgroundColor} width={14} height={14} />
+            </TouchableOpacity>
           </View>
         )}
         <View style={styles.section}>

@@ -5,6 +5,7 @@ import CharacterIdle2 from "@/assets/icons/character-idle-2.svg";
 import CharacterIdle3 from "@/assets/icons/character-idle-3.svg";
 import CharacterNotepadIdle1 from "@/assets/icons/character-notepad-idle-1.svg";
 import CharacterNotepadIdle2 from "@/assets/icons/character-notepad-idle-2.svg";
+import CharacterNotepadShocked from "@/assets/icons/character-notepad-shocked.svg";
 import CharacterNotepadWriting1 from "@/assets/icons/character-notepad-writing-1.svg";
 import CharacterNotepadWriting2 from "@/assets/icons/character-notepad-writing-2.svg";
 import CharacterNotepadWriting3 from "@/assets/icons/character-notepad-writing-3.svg";
@@ -18,6 +19,7 @@ export const CharacterStates = {
   NOTEPAD_TALKING: "notepad_talking",
   NOTEPAD_WRITING_IDLE: "notepad_writing_idle",
   NOTEPAD_WRITING: "notepad_writing",
+  NOTEPAD_SHOCKED: "notepad_shocked",
 } as const;
 
 export type AnimationBehavior = "loop" | "once" | "hold_last";
@@ -188,6 +190,24 @@ export const CharacterStateConfigs: Record<string, StateAnimationConfig> = {
     behavior: "once",
     defaultFrameDuration: 400,
   },
+  [CharacterStates.NOTEPAD_SHOCKED]: {
+    frames: [
+      {
+        icon: (
+          <CharacterNotepadShocked
+            key="notepad-shocked"
+            width={"100%"}
+            height={"100%"}
+          />
+        ),
+        duration: 1200,
+      },
+      ...WRITING_LOOP,
+      ...WRITING_LOOP,
+    ],
+    behavior: "once",
+    defaultFrameDuration: 1800,
+  },
 };
 
 export const CharacterStateIcons = Object.keys(CharacterStateConfigs).reduce(
@@ -195,7 +215,7 @@ export const CharacterStateIcons = Object.keys(CharacterStateConfigs).reduce(
     acc[state] = CharacterStateConfigs[state].frames.map((frame) => frame.icon);
     return acc;
   },
-  {} as Record<string, React.ReactElement[]>,
+  {} as Record<string, React.ReactElement[]>
 );
 
 export const getAnimationConfig = (state: string): StateAnimationConfig => {

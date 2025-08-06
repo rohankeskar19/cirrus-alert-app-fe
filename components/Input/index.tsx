@@ -79,19 +79,17 @@ const Input: React.FC<InputProps> = ({
     }
   };
 
-  // Toggle password visibility
   const toggleSecureEntry = (): void => {
     setSecureTextEntry(!secureTextEntry);
   };
 
-  // Render eye icon for password fields
   const renderEyeIcon = (): React.ReactNode => {
     if (type === "password") {
       return (
         <TouchableOpacity
           style={styles.eyeIconContainer}
           onPress={toggleSecureEntry}
-          activeOpacity={0.7}
+          activeOpacity={1}
         >
           <View>{secureTextEntry ? <EyeOn /> : <EyeOff />}</View>
         </TouchableOpacity>

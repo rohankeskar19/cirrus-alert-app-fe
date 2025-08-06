@@ -25,6 +25,7 @@ import { useThemeColor } from "@/hooks/useThemeColor";
 import { updateUserProfile } from "@/slices/onboarding";
 import { horizontalScale, moderateScale, verticalScale } from "@/utils/metrics";
 
+import { useScreenTime } from "@/hooks/useScreenTime";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Step1 from "./components/Step1";
 import Step2 from "./components/Step2";
@@ -47,10 +48,13 @@ const OnboardingScreen = () => {
   const slideAnim = useRef(new Animated.Value(0)).current;
   const progressAnim = useRef(new Animated.Value(0)).current;
   const [buttonDisabled, setButtonDisabled] = useState(true);
+  const [customDialogText, setCustomDialogText] = useState<string | null>(null);
 
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [selectedQuests, setSelectedQuests] = useState<string[]>([]);
+
+  const [shownShockedAnimation, setShownShockAnimation] = useState(false);
 
   const backgroundColor = useThemeColor("background");
   const onBackground = useThemeColor("onBackground");
@@ -61,6 +65,8 @@ const OnboardingScreen = () => {
   const { permissionStatus: overlayPermissionStatus } = useOverlayPermission();
   const { permissionStatus: accessibilityPermissionStatus } =
     useAccessibilityPermission();
+
+  const { isLoading, screenTimeData } = useScreenTime();
 
   const dispatch = useDispatch();
 
@@ -78,6 +84,34 @@ const OnboardingScreen = () => {
       setCharacterState(CharacterStates.NOTEPAD_TALKING);
     }
   }, [currentStep]);
+
+  useEffect(() => {
+    setCustomDialogText("");
+    if (!isLoading && currentStep === 3 && !shownShockedAnimation) {
+      const totalMinutes = Math.floor(
+        (screenTimeData?.totalScreenTime || 0) / (1000 * 60)
+      );
+      const hours = Math.floor(totalMinutes / 60);
+
+      if (hours > 3) {
+        setShownShockAnimation(true);
+
+        setTimeout(() => {
+          setCharacterState(CharacterStates.NOTEPAD_SHOCKED);
+
+          setTimeout(() => {
+            setCharacterState(CharacterStates.NOTEPAD_WRITING_IDLE);
+          }, 1800);
+        }, 600);
+
+        setTimeout(() => {
+          setCustomDialogText(
+            intl.formatMessage({ id: "step3_warning_dialog" })
+          );
+        }, 1500);
+      }
+    }
+  }, [isLoading, currentStep]);
 
   const steps = [
     {
@@ -158,12 +192,14 @@ const OnboardingScreen = () => {
         setCharacterState(CharacterStates.NOTEPAD_WRITING);
       }
 
-      setTimeout(
-        () => {
-          setCharacterState(CharacterStates.NOTEPAD_WRITING_IDLE);
-        },
-        currentStep == 0 ? 0 : 500
-      );
+      if (currentStep + 1 != 3) {
+        setTimeout(
+          () => {
+            setCharacterState(CharacterStates.NOTEPAD_WRITING_IDLE);
+          },
+          currentStep == 0 ? 0 : 500
+        );
+      }
     }
   };
 
@@ -255,6 +291,7 @@ const OnboardingScreen = () => {
           <AnimatedCharacter
             characterState={characterState}
             dialogText={
+              customDialogText ||
               [
                 intl.formatMessage({ id: "step1_dialog" }),
                 intl.formatMessage({ id: "step2_dialog" }),

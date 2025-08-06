@@ -182,5 +182,6 @@
   "quest_frequency": "Quest frequency",
   "daily_completions": "Daily completions",
   "weekly_completions": "Weekly completions",
-  "cooldown_period": "Cooldown period"
+  "cooldown_period": "Cooldown period",
+  "step3_warning_dialog": "But don't worry we can definitely get it down!"
 }

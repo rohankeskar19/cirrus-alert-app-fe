@@ -206,7 +206,7 @@ export const CharacterStateConfigs: Record<string, StateAnimationConfig> = {
       ...WRITING_LOOP,
     ],
     behavior: "once",
-    defaultFrameDuration: 1800,
+    defaultFrameDuration: 2000,
   },
 };
 

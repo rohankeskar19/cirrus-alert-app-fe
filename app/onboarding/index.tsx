@@ -101,7 +101,7 @@ const OnboardingScreen = () => {
 
           setTimeout(() => {
             setCharacterState(CharacterStates.NOTEPAD_WRITING_IDLE);
-          }, 1800);
+          }, 2000);
         }, 600);
 
         setTimeout(() => {

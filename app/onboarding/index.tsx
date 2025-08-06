@@ -98,11 +98,11 @@ const OnboardingScreen = () => {
 
         setTimeout(() => {
           setCharacterState(CharacterStates.NOTEPAD_SHOCKED);
-
-          setTimeout(() => {
-            setCharacterState(CharacterStates.NOTEPAD_WRITING_IDLE);
-          }, 2000);
         }, 600);
+
+        setTimeout(() => {
+          setCharacterState(CharacterStates.NOTEPAD_WRITING_IDLE);
+        }, 2800);
 
         setTimeout(() => {
           setCustomDialogText(
@@ -192,7 +192,7 @@ const OnboardingScreen = () => {
         setCharacterState(CharacterStates.NOTEPAD_WRITING);
       }
 
-      if (currentStep + 1 != 3) {
+      if (currentStep + 1 != 3 || shownShockedAnimation) {
         setTimeout(
           () => {
             setCharacterState(CharacterStates.NOTEPAD_WRITING_IDLE);

@@ -29,7 +29,7 @@ const WelcomeScreen = () => {
   useEffect(() => {
     const dialogTimer = setTimeout(() => {
       if (currentDialogIndex < 1) setCurrentDialogIndex(currentDialogIndex + 1);
-    }, 1000);
+    }, 1500);
 
     return () => clearTimeout(dialogTimer);
   }, [currentDialogIndex]);

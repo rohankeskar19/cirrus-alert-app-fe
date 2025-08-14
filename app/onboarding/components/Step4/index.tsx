@@ -1,120 +1,124 @@
+import React from "react";
+import { FormattedMessage, useIntl } from "react-intl";
+import { StyleSheet, Text, View } from "react-native";
+
+import DailyDigestIcon from "@/assets/icons/daily-digest.svg";
+import ThunderIcon from "@/assets/icons/thunder-icon.svg";
+import WeeklyIcon from "@/assets/icons/weekly.svg";
+
+import RadioOption from "@/components/RadioOption";
+import { useThemeColor } from "@/hooks/useThemeColor";
 import { horizontalScale, moderateScale, verticalScale } from "@/utils/metrics";
 
-import React from "react";
+type Step4Props = {
+  selectedType: string;
+  setSelectedType: (value: string) => void;
+};
 
-import { StyleSheet, View } from "react-native";
+const Step4 = ({ selectedType, setSelectedType }: Step4Props) => {
+  const textColor = useThemeColor("textColor");
+  const intl = useIntl();
 
-const Step4 = () => {
-  return <View style={styles.stepContainer}></View>;
+  const radioOptions = [
+    {
+      value: "immediately",
+      label: intl.formatMessage({ id: "immediately" }),
+      icon: <ThunderIcon />,
+    },
+    {
+      value: "daily",
+      label: intl.formatMessage({ id: "daily" }),
+      icon: <DailyDigestIcon />,
+    },
+    {
+      value: "weekly",
+      label: intl.formatMessage({ id: "weekly" }),
+      icon: <WeeklyIcon />,
+    },
+  ];
+
+  return (
+    <View style={styles.stepContainer}>
+      <Text style={[styles.title, { color: textColor }]}>
+        <FormattedMessage id="step4_title" />
+      </Text>
+
+      <View style={styles.radioGroup}>
+        {radioOptions.map((option) => (
+          <RadioOption
+            key={option.value}
+            label={option.label}
+            icon={option.icon}
+            isSelected={selectedType == option.value}
+            onSelect={() => setSelectedType(option.value)}
+          />
+        ))}
+      </View>
+    </View>
+  );
 };
 
 const styles = StyleSheet.create({
+  title: {
+    width: "100%",
+    fontSize: moderateScale(35),
+    marginBottom: verticalScale(27),
+    marginTop: verticalScale(20),
+    fontFamily: "SpaceGrotesk-Medium",
+  },
   stepContainer: {
     flex: 1,
     width: "100%",
     display: "flex",
     alignItems: "center",
-    justifyContent: "flex-start",
-  },
-  totalUsageContainer: {
-    alignItems: "center",
-    marginBottom: verticalScale(30),
-    flexDirection: "row",
-  },
-  totalUsageTime: {
-    fontSize: moderateScale(30),
-    fontFamily: "Outfit-SemiBold",
-    marginLeft: horizontalScale(15),
-  },
-  chartContainer: {
-    width: "90%",
-    alignItems: "center",
-    marginBottom: verticalScale(33),
-    position: "relative",
-  },
-  barColumnContainer: {
-    flexDirection: "column",
-    alignItems: "center",
-  },
-  barsContainer: {
-    flexDirection: "row",
-    alignItems: "flex-end",
-    justifyContent: "space-between",
-    width: "85%",
-    height: verticalScale(140),
-  },
-  barColumn: {
-    alignItems: "center",
-    justifyContent: "flex-end",
-    flex: 1,
-    height: verticalScale(140),
-    marginHorizontal: moderateScale(4),
-    borderRadius: moderateScale(4),
-    marginBottom: verticalScale(20),
-    overflow: "hidden",
-  },
-  bar: {
-    width: moderateScale(16),
-    borderRadius: moderateScale(4),
-    maxHeight: verticalScale(140),
-  },
-  dayLabel: {
-    fontSize: moderateScale(14),
-    color: "#FFFFFF",
-    fontWeight: "500",
-    fontFamily: "Outfit-Medium",
-  },
-  horizontalLine: {
-    width: "101%",
-    position: "absolute",
-    bottom: moderateScale(25),
-    borderRadius: 100,
-    height: 3,
-    marginHorizontal: moderateScale(30),
-  },
-  averageLine: {
-    width: "101%",
-    position: "absolute",
-    borderTopWidth: 4,
-    borderStyle: "dashed",
-  },
-  appsSection: {
-    width: "100%",
-    paddingBottom: verticalScale(20),
-  },
-  appsSectionTitle: {
-    fontSize: moderateScale(20),
-    marginBottom: verticalScale(15),
-    fontFamily: "Outfit-Medium",
-  },
-  appItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingVertical: verticalScale(12),
-  },
-  appIcon: {
-    width: moderateScale(43),
-    height: moderateScale(43),
-  },
-  appIconContainer: {
-    marginRight: moderateScale(18),
-  },
-  appInfo: {
-    flexGrow: 1,
-    flexDirection: "column",
     justifyContent: "center",
   },
-  appName: {
-    fontSize: moderateScale(16),
-    fontWeight: "500",
-    color: "#FFFFFF",
-    marginBottom: verticalScale(2),
-    fontFamily: "Outfit-Medium",
+  radioGroup: {
+    width: "100%",
+    gap: verticalScale(21),
   },
-  appTime: {
-    fontSize: moderateScale(14),
-    fontFamily: "Outfit-Regular",
-    marginLeft: horizontalScale(6),
+  radioContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: horizontalScale(20),
+    paddingVertical: verticalScale(16),
+    borderWidth: 2,
+    borderRadius: moderateScale(16),
+    backgroundColor: "#FFFFFF",
+  },
+  iconContainer: {
+    marginRight: horizontalScale(16),
+    width: moderateScale(32),
+    height: moderateScale(32),
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  iconText: {
+    fontSize: moderateScale(24),
+  },
+  radioText: {
+    flex: 1,
+    fontSize: moderateScale(18),
+    fontFamily: "SpaceGrotesk-Regular",
+  },
+  checkContainer: {
+    width: moderateScale(28),
+    height: moderateScale(28),
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  checkmark: {
+    width: moderateScale(28),
+    height: moderateScale(28),
+    borderRadius: moderateScale(14),
+    backgroundColor: "#B07CFF",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  checkmarkText: {
+    color: "white",
+    fontSize: moderateScale(16),
+    fontWeight: "bold",
   },
 });
 

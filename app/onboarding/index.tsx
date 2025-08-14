@@ -12,15 +12,13 @@ import {
 
 import { router } from "expo-router";
 import { useIntl } from "react-intl";
-import { useDispatch } from "react-redux";
 
 import ChevronLeft from "@/assets/icons/chevron-left.svg";
 import Button from "@/components/Button";
 import { useThemeColor } from "@/hooks/useThemeColor";
-import { updateUserProfile } from "@/slices/onboarding";
 import { horizontalScale, moderateScale, verticalScale } from "@/utils/metrics";
 
-import { signupUser } from "@/utils/apiUtils";
+import { getCurrentUser, signupUser } from "@/utils/apiUtils";
 import { SafeAreaView } from "react-native-safe-area-context";
 import validator from "validator";
 import Step1 from "./components/Step1";
@@ -46,20 +44,27 @@ const OnboardingScreen = () => {
 
   const [emailError, setEmailError] = useState<string>("");
   const [passwordError, setPasswordError] = useState<string>("");
+  const [alertTextError, setAlertTextError] = useState<string>("");
+  const [selectedSources, setSelectedSources] = useState<string[]>([]);
+  const [selectedType, setSelectedType] = useState<string>("immediately");
+  const [selectedVariant, setSelectedVariant] = useState<string>("summary");
 
   const backgroundColor = useThemeColor("background");
   const onBackground = useThemeColor("onBackground");
 
-  const dispatch = useDispatch();
-
   useEffect(() => {
-    dispatch(
-      updateUserProfile({
-        first_name: email,
-        last_name: password,
-      })
-    );
-  }, [email, password]);
+    handleStepNavigation();
+  }, []);
+
+  const handleStepNavigation = async () => {
+    const currentUser = await getCurrentUser();
+
+    if (currentUser) {
+      setCurrentStep(1);
+    } else {
+      setCurrentStep(0);
+    }
+  };
 
   const steps = [
     {
@@ -80,16 +85,34 @@ const OnboardingScreen = () => {
       ),
     },
     {
-      content: <Step2 />,
+      content: (
+        <Step2
+          alertText={alertText}
+          alertTextError={alertTextError}
+          setAlertText={setAlertText}
+        />
+      ),
     },
     {
-      content: <Step3 />,
+      content: (
+        <Step3
+          selectedSources={selectedSources}
+          setSelectedSources={setSelectedSources}
+        />
+      ),
     },
     {
-      content: <Step4 />,
+      content: (
+        <Step4 selectedType={selectedType} setSelectedType={setSelectedType} />
+      ),
     },
     {
-      content: <Step5 />,
+      content: (
+        <Step5
+          selectedVariant={selectedVariant}
+          setSelectedVariant={setSelectedVariant}
+        />
+      ),
     },
   ];
 
@@ -128,10 +151,18 @@ const OnboardingScreen = () => {
               );
             }
           } else {
-            // Handle signup
             setCreatingUser(true);
             await signupUser(email, password);
             setCreatingUser(false);
+            animateSlide("right");
+            setCurrentStep(currentStep + 1);
+          }
+        } else if (currentStep == 1) {
+          if (!validator.isLength(alertText, { min: 5, max: 150 })) {
+            setAlertTextError(
+              intl.formatMessage({ id: "invalid_alert_error" })
+            );
+          } else {
             animateSlide("right");
             setCurrentStep(currentStep + 1);
           }
@@ -141,9 +172,13 @@ const OnboardingScreen = () => {
         }
       }
     } catch (err: any) {
-      console.log("Error ", err);
       setCreatingUser(false);
-      setEmailError(err);
+
+      if (err.message.includes("duplicate key")) {
+        setEmailError(intl.formatMessage({ id: "user_exists_error" }));
+      } else {
+        setEmailError(err.message);
+      }
     }
   };
 
@@ -163,14 +198,17 @@ const OnboardingScreen = () => {
       if (email.trim() === "" || password.trim() === "") return true;
     }
 
+    if (currentStep == 1) {
+      if (alertText.trim() == "") return true;
+    }
+
     if (currentStep == 2) {
-      if (alertText.trim().length < 5) return true;
+    }
+
+    if (currentStep == 3) {
     }
 
     if (currentStep == 4) {
-    }
-
-    if (currentStep == 5) {
     }
   };
 
@@ -179,8 +217,8 @@ const OnboardingScreen = () => {
       return intl.formatMessage({ id: "signup" });
     } else if (currentStep < 1) {
       return intl.formatMessage({ id: "continue" });
-    } else if (currentStep === 7) {
-      return intl.formatMessage({ id: "allow_notifications" });
+    } else if (currentStep === 4) {
+      return intl.formatMessage({ id: "finish" });
     } else {
       return intl.formatMessage({ id: "next" });
     }

@@ -64,12 +64,19 @@ const LoginScreen = () => {
       if (validateLoginData()) {
         setLoading(true);
 
-        await loginUser(email, password);
+        const user = await loginUser(email, password);
 
-        navigation.reset({
-          index: 0,
-          routes: [{ name: "home" } as any],
-        });
+        if (user.profile.onboarding_done) {
+          navigation.reset({
+            index: 0,
+            routes: [{ name: "home" } as any],
+          });
+        } else {
+          navigation.reset({
+            index: 0,
+            routes: [{ name: "onboarding" } as any],
+          });
+        }
 
         setLoading(false);
       }

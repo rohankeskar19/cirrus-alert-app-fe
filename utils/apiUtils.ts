@@ -9,6 +9,7 @@ import api from "@/lib/api";
 
 export type UserProfile = {
   email: string;
+  onboarding_done: boolean;
 };
 
 const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL || "";
@@ -91,11 +92,7 @@ export const signupUser = async (
     {
       id: user.id,
       email: user.email,
-      // first_name: userData.first_name,
-      // age: userData.age,
-      // interests: userData.interests,
-      // learning_goal: userData.learning_goal,
-      // learning_routine: userData.learning_routine,
+      onboarding_done: false,
       created_at: new Date().toISOString(),
     },
   ]);
@@ -103,11 +100,6 @@ export const signupUser = async (
   if (profileError) {
     throw new Error(profileError.message);
   }
-
-  Alert.alert(
-    "Account created succesfully",
-    "Your account has been created!\nYou can now login to continue"
-  );
 
   // Return the user data
   return user;
@@ -127,6 +119,8 @@ export const loginUser = async (email: string, password: string) => {
     email,
     password,
   });
+
+  console.log("Error ", error);
 
   if (error) {
     throw new Error(error.message);

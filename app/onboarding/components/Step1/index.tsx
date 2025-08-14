@@ -8,7 +8,7 @@ import Input from "@/components/Input";
 import { useThemeColor } from "@/hooks/useThemeColor";
 import { moderateScale, verticalScale } from "@/utils/metrics";
 
-type Step2Props = {
+type Step1Props = {
   email: string;
   password: string;
   emailError: string;
@@ -16,13 +16,13 @@ type Step2Props = {
   onValueChange: (value: string, key: "email" | "password") => void;
 };
 
-const Step2 = ({
+const Step1 = ({
   email,
   password,
   emailError,
   passwordError,
   onValueChange,
-}: Step2Props) => {
+}: Step1Props) => {
   const intl = useIntl();
 
   const textColor = useThemeColor("textColor");
@@ -76,4 +76,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default Step2;
+export default Step1;

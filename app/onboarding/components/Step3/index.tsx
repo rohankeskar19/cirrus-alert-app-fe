@@ -1,69 +1,138 @@
 import React from "react";
+import { FormattedMessage, useIntl } from "react-intl";
+import { StyleSheet, Text, View } from "react-native";
 
-import { StyleSheet, View } from "react-native";
+import BlogsIcon from "@/assets/icons/blogs-icon.svg";
+import NewsArticleIcon from "@/assets/icons/news-article.svg";
+import RedditIcon from "@/assets/icons/reddit.svg";
+import YoutubeIcon from "@/assets/icons/youtube-icon.svg";
 
-import { moderateScale, verticalScale } from "@/utils/metrics";
+import RadioOption from "@/components/RadioOption";
+import { useThemeColor } from "@/hooks/useThemeColor";
+import { horizontalScale, moderateScale, verticalScale } from "@/utils/metrics";
 
-const Step3 = () => {
-  return <View style={styles.stepContainer}></View>;
+type Step3Props = {
+  selectedSources: string[];
+  setSelectedSources: (value: string[]) => void;
+};
+
+const Step3 = ({ selectedSources, setSelectedSources }: Step3Props) => {
+  const textColor = useThemeColor("textColor");
+  const intl = useIntl();
+
+  const radioOptions = [
+    {
+      value: "news",
+      label: intl.formatMessage({ id: "news_article" }),
+      icon: <NewsArticleIcon />,
+    },
+    {
+      value: "reddit",
+      label: intl.formatMessage({ id: "reddit" }),
+      icon: <RedditIcon />,
+    },
+    {
+      value: "blogs",
+      label: intl.formatMessage({ id: "blogs" }),
+      icon: <BlogsIcon />,
+    },
+    {
+      value: "youtube",
+      label: intl.formatMessage({ id: "youtube" }),
+      icon: <YoutubeIcon />,
+    },
+  ];
+
+  const handleSelect = (value: string) => {
+    if (selectedSources.includes(value)) {
+      setSelectedSources(selectedSources.filter((src) => src !== value));
+    } else {
+      setSelectedSources([...selectedSources, value]);
+    }
+  };
+
+  return (
+    <View style={styles.stepContainer}>
+      <Text style={[styles.title, { color: textColor }]}>
+        <FormattedMessage id="step3_title" />
+      </Text>
+
+      <View style={styles.radioGroup}>
+        {radioOptions.map((option) => (
+          <RadioOption
+            key={option.value}
+            label={option.label}
+            icon={option.icon}
+            isSelected={selectedSources.includes(option.value)}
+            onSelect={() => handleSelect(option.value)}
+          />
+        ))}
+      </View>
+    </View>
+  );
 };
 
 const styles = StyleSheet.create({
+  title: {
+    width: "100%",
+    fontSize: moderateScale(35),
+    marginBottom: verticalScale(27),
+    marginTop: verticalScale(20),
+    fontFamily: "SpaceGrotesk-Medium",
+  },
   stepContainer: {
     flex: 1,
     width: "100%",
     display: "flex",
     alignItems: "center",
-    justifyContent: "flex-end",
-    marginTop: verticalScale(20),
-    paddingBottom: verticalScale(40),
+    justifyContent: "center",
   },
-  permissionCard: {
-    borderRadius: moderateScale(16),
-    padding: moderateScale(15),
+  radioGroup: {
     width: "100%",
+    gap: verticalScale(21),
+  },
+  radioContainer: {
     flexDirection: "row",
-    alignItems: "flex-start",
+    alignItems: "center",
+    paddingHorizontal: horizontalScale(20),
+    paddingVertical: verticalScale(16),
+    borderWidth: 2,
+    borderRadius: moderateScale(16),
+    backgroundColor: "#FFFFFF",
   },
   iconContainer: {
-    marginRight: 16,
-    marginTop: 2,
+    marginRight: horizontalScale(16),
+    width: moderateScale(32),
+    height: moderateScale(32),
+    alignItems: "center",
+    justifyContent: "center",
   },
-  shieldIcon: {
-    width: 40,
-    height: 40,
-    backgroundColor: "#00c896",
-    borderRadius: 8,
+  iconText: {
+    fontSize: moderateScale(24),
+  },
+  radioText: {
+    flex: 1,
+    fontSize: moderateScale(18),
+    fontFamily: "SpaceGrotesk-Regular",
+  },
+  checkContainer: {
+    width: moderateScale(28),
+    height: moderateScale(28),
     alignItems: "center",
     justifyContent: "center",
   },
   checkmark: {
-    color: "white",
-    fontSize: 20,
-  },
-  textContainer: {
-    flex: 1,
-  },
-  title: {
-    fontSize: moderateScale(20),
-    fontFamily: "Outfit-SemiBold",
-    marginBottom: verticalScale(8),
-  },
-  subtitle: {
-    fontSize: moderateScale(18),
-    fontFamily: "Outfit-Medium",
-  },
-  grantButton: {
-    backgroundColor: "white",
-    borderRadius: 12,
-    paddingVertical: 16,
-    paddingHorizontal: 24,
-    width: "100%",
+    width: moderateScale(28),
+    height: moderateScale(28),
+    borderRadius: moderateScale(14),
+    backgroundColor: "#B07CFF",
     alignItems: "center",
+    justifyContent: "center",
   },
-  buttonText: {
-    color: "black",
-    fontSize: 16,
+  checkmarkText: {
+    color: "white",
+    fontSize: moderateScale(16),
+    fontWeight: "bold",
   },
 });
 

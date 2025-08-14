@@ -22,7 +22,7 @@ export const ThemeContext = React.createContext(THEMES.LIGHT);
 export default function RootLayout() {
   const [theme, setTheme] = useState(THEMES.LIGHT);
   const [redirectRoute, setRedirectRoute] = useState<
-    "/splash" | "/welcome" | "/home"
+    "/splash" | "/welcome" | "/home" | "/onboarding"
   >("/splash");
   const scheme = useColorScheme();
 
@@ -56,7 +56,11 @@ export default function RootLayout() {
     try {
       const currentUser = await getCurrentUser();
       if (currentUser) {
-        setRedirectRoute("/home");
+        if (currentUser.profile.onboarding_done) {
+          setRedirectRoute("/home");
+        } else {
+          setRedirectRoute("/onboarding");
+        }
       } else {
         setRedirectRoute("/welcome");
       }

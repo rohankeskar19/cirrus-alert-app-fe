@@ -9,7 +9,7 @@
   "login_title": "Welcome back",
   "signup": "Sign up",
   "google_login": "Continue with Google",
-  "email_placeholder": "johndoe@email.com",
+  "email_placeholder": "john@email.com",
   "apple_login": "Continue with Apple",
   "password_placeholder": "******",
   "forgot_password": "Forgot password?",
@@ -183,5 +183,6 @@
   "daily_completions": "Daily completions",
   "weekly_completions": "Weekly completions",
   "cooldown_period": "Cooldown period",
-  "step3_warning_dialog": "But don't worry we can definitely get it down!"
+  "step3_warning_dialog": "But don't worry we can definitely get it down!",
+  "step1_title": "Create account"
 }

@@ -1,79 +1,11 @@
 import React from "react";
 
-import { StyleSheet, Text, View } from "react-native";
+import { StyleSheet, View } from "react-native";
 
-import { FormattedMessage, useIntl } from "react-intl";
-
-import ShieldIcon from "@/assets/icons/shield-icon.svg";
-import PermissionCard from "@/components/PermissionCard";
-import { useAccessibilityPermission } from "@/hooks/useAccessibilityPermission";
-import { useOverlayPermission } from "@/hooks/useOverlayPermission";
-import { useThemeColor } from "@/hooks/useThemeColor";
-import { useUsageStatsPermission } from "@/hooks/useUsageStatsPermission";
 import { moderateScale, verticalScale } from "@/utils/metrics";
 
 const Step3 = () => {
-  const onBackgroundColor = useThemeColor("onBackground");
-  const onQuestStatColor = useThemeColor("questStat");
-
-  const {
-    requestPermission: requestUsageStatsPermission,
-    permissionStatus: usageStatsPermissionStatus,
-  } = useUsageStatsPermission();
-  const {
-    requestPermission: requestOverlayPermission,
-    permissionStatus: overlayPermissionStatus,
-  } = useOverlayPermission();
-  const {
-    requestPermission: requestAccessibilityPermission,
-    permissionStatus: accessibilityPermissionStatus,
-  } = useAccessibilityPermission();
-
-  const intl = useIntl();
-
-  return (
-    <View style={styles.stepContainer}>
-      <View
-        style={[
-          {
-            backgroundColor: onQuestStatColor,
-          },
-          styles.permissionCard,
-        ]}
-      >
-        <View style={styles.iconContainer}>
-          <ShieldIcon />
-        </View>
-
-        <View style={styles.textContainer}>
-          <Text style={[{ color: onBackgroundColor }, styles.title]}>
-            <FormattedMessage id="your_data_yours" />
-          </Text>
-          <Text style={[{ color: onBackgroundColor }, styles.subtitle]}>
-            <FormattedMessage id="data_protection_label" />
-          </Text>
-        </View>
-      </View>
-      <PermissionCard
-        permissionGranted={usageStatsPermissionStatus?.status == "approved"}
-        permissionName={intl.formatMessage({ id: "usage_stats_permission" })}
-        permissionReason={intl.formatMessage({ id: "usage_stats_reason" })}
-        onClick={requestUsageStatsPermission}
-      />
-      <PermissionCard
-        permissionGranted={overlayPermissionStatus?.status == "approved"}
-        permissionName={intl.formatMessage({ id: "overlay_permission" })}
-        permissionReason={intl.formatMessage({ id: "overlay_reason" })}
-        onClick={requestOverlayPermission}
-      />
-      <PermissionCard
-        permissionGranted={accessibilityPermissionStatus?.status == "approved"}
-        permissionName={intl.formatMessage({ id: "accessibility_permission" })}
-        permissionReason={intl.formatMessage({ id: "accessibility_reason" })}
-        onClick={requestAccessibilityPermission}
-      />
-    </View>
-  );
+  return <View style={styles.stepContainer}></View>;
 };
 
 const styles = StyleSheet.create({

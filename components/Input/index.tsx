@@ -55,6 +55,7 @@ const Input: React.FC<InputProps> = ({
   const inputBorder = useThemeColor("inputBorder");
   const placeholderGray = useThemeColor("placeholderGray");
   const accentColor = useThemeColor("accentColor");
+  const textColor = useThemeColor("textColor");
   const onBackground = useThemeColor("onBackground");
 
   const isMounted = useRef(false);
@@ -118,7 +119,7 @@ const Input: React.FC<InputProps> = ({
           ]}
         >
           <TextInput
-            style={[{ color: onBackground }, styles.input, inputStyle]}
+            style={[{ color: textColor }, styles.input, inputStyle]}
             placeholder={placeholder}
             placeholderTextColor={placeholderGray}
             value={value}

@@ -135,8 +135,8 @@ const styles = StyleSheet.create({
   globeContainer: {
     position: "absolute",
     left: 0,
-    right: 0,
-    bottom: 0,
+    right: -150,
+    bottom: -40,
     alignItems: "center",
     justifyContent: "center",
     zIndex: 0,

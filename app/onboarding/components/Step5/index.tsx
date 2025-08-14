@@ -2,17 +2,12 @@ import React from "react";
 
 import { StyleSheet, View } from "react-native";
 
-import DailyLimitSlider from "@/components/DailyLimitSlider";
 import { verticalScale } from "@/utils/metrics";
 
 type Step5Props = {};
 
 const Step5 = () => {
-  return (
-    <View style={styles.stepContainer}>
-      <DailyLimitSlider />
-    </View>
-  );
+  return <View style={styles.stepContainer}></View>;
 };
 
 const styles = StyleSheet.create({

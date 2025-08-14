@@ -8,12 +8,7 @@ import api from "@/lib/api";
 // import { SUPABASE_URL, SUPABASE_ANON_KEY } from "@env";
 
 export type UserProfile = {
-  first_name: string;
-  last_name: string;
-  age: number;
-  interests: string[];
-  learning_goal: string;
-  learning_routine: string;
+  email: string;
 };
 
 const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL || "";
@@ -69,13 +64,12 @@ export const getCurrentUser = async () => {
  * Sign up a new user with email and password
  * @param email - User's email
  * @param password - User's password
- * @param userData - User's profile data
  * @returns The new user object or null if signup failed
  */
 export const signupUser = async (
   email: string,
-  password: string,
-  userData: UserProfile,
+  password: string
+  // userData: UserProfile,
 ) => {
   const {
     data: { user },
@@ -97,11 +91,11 @@ export const signupUser = async (
     {
       id: user.id,
       email: user.email,
-      first_name: userData.first_name,
-      age: userData.age,
-      interests: userData.interests,
-      learning_goal: userData.learning_goal,
-      learning_routine: userData.learning_routine,
+      // first_name: userData.first_name,
+      // age: userData.age,
+      // interests: userData.interests,
+      // learning_goal: userData.learning_goal,
+      // learning_routine: userData.learning_routine,
       created_at: new Date().toISOString(),
     },
   ]);
@@ -112,7 +106,7 @@ export const signupUser = async (
 
   Alert.alert(
     "Account created succesfully",
-    "Your account has been created!\nYou can now login to continue",
+    "Your account has been created!\nYou can now login to continue"
   );
 
   // Return the user data
@@ -175,7 +169,7 @@ export const forgotPassword = async (email: string) => {
 
   Alert.alert(
     "Password Reset Email Sent",
-    "Check your email for a password reset link",
+    "Check your email for a password reset link"
   );
   return true;
 };
@@ -203,7 +197,7 @@ export const signOutUser = async () => {
  */
 export const updateUserProfile = async (
   userId: string,
-  profileData: Partial<UserProfile>,
+  profileData: Partial<UserProfile>
 ) => {
   const { error } = await supabase
     .from("profiles")
@@ -231,7 +225,7 @@ export const generateTopic = async (prompt: string): Promise<string | null> => {
   } catch (error: any) {
     console.error(
       "Error generating topic:",
-      error?.response?.data || error.message,
+      error?.response?.data || error.message
     );
     Alert.alert("Please enter a valid topic");
     return null;
@@ -248,7 +242,7 @@ export const generateTopic = async (prompt: string): Promise<string | null> => {
 export const generateCourse = async (
   prompt: string,
   knowledge: string,
-  reason: string,
+  reason: string
 ) => {
   try {
     await api.post("/course/generate-course", {
@@ -259,7 +253,7 @@ export const generateCourse = async (
   } catch (error: any) {
     console.error(
       "Error generating topic:",
-      error?.response?.data || error.message,
+      error?.response?.data || error.message
     );
     Alert.alert("Please enter a valid topic");
     return null;
@@ -308,7 +302,7 @@ export const fetchCourses = async () => {
         .select("id, chapter_id, progress")
         .in(
           "chapter_id",
-          chapters.map((ch) => ch.id),
+          chapters.map((ch) => ch.id)
         );
 
       if (lessonError || !lessons) {
@@ -319,7 +313,7 @@ export const fetchCourses = async () => {
       // Determine course progress
       const totalLessons = lessons.length;
       const completedLessons = lessons.filter(
-        (l) => l.progress?.completed === true,
+        (l) => l.progress?.completed === true
       ).length;
       const progressPercentage =
         totalLessons > 0
@@ -389,7 +383,7 @@ export const fetchCourseOverview = async (courseId: string) => {
             content
           )
         )
-      `,
+      `
       )
       .eq("id", courseId)
       .order("created_at", { ascending: false });
@@ -403,7 +397,7 @@ export const fetchCourseOverview = async (courseId: string) => {
       .map((chapter: any) => ({
         ...chapter,
         lessons: (chapter.lessons || []).sort(
-          (a: any, b: any) => a.order_index - b.order_index,
+          (a: any, b: any) => a.order_index - b.order_index
         ),
       }));
 
@@ -411,7 +405,7 @@ export const fetchCourseOverview = async (courseId: string) => {
     const allLessons = chapters.flatMap((ch: any) => ch.lessons || []);
     const totalLessons = allLessons.length;
     const completedLessons = allLessons.filter(
-      (lesson: any) => lesson.progress?.completed === true,
+      (lesson: any) => lesson.progress?.completed === true
     ).length;
 
     const progressPercentage =

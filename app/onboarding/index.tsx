@@ -16,120 +16,65 @@ import { useDispatch } from "react-redux";
 
 import ChevronLeft from "@/assets/icons/chevron-left.svg";
 import Button from "@/components/Button";
-import { CharacterStates } from "@/constants/CharacterStates";
-import { useAccessibilityPermission } from "@/hooks/useAccessibilityPermission";
-import { useOverlayPermission } from "@/hooks/useOverlayPermission";
-import { useScreenTimePermission } from "@/hooks/useScreenTimePermission";
 import { useThemeColor } from "@/hooks/useThemeColor";
 import { updateUserProfile } from "@/slices/onboarding";
 import { horizontalScale, moderateScale, verticalScale } from "@/utils/metrics";
 
-import { useScreenTime } from "@/hooks/useScreenTime";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Step1 from "./components/Step1";
 import Step2 from "./components/Step2";
 import Step3 from "./components/Step3";
 import Step4 from "./components/Step4";
 import Step5 from "./components/Step5";
-import Step6 from "./components/Step6";
-import Step7 from "./components/Step7";
-import Step8 from "./components/Step8";
 
 const { width } = Dimensions.get("window");
 
 const OnboardingScreen = () => {
   const intl = useIntl();
 
-  const [characterState, setCharacterState] = useState<
-    (typeof CharacterStates)[keyof typeof CharacterStates]
-  >(CharacterStates.IDLE);
   const [currentStep, setCurrentStep] = useState(0);
   const slideAnim = useRef(new Animated.Value(0)).current;
-  const progressAnim = useRef(new Animated.Value(0)).current;
   const [buttonDisabled, setButtonDisabled] = useState(true);
-  const [customDialogText, setCustomDialogText] = useState<string | null>(null);
+  const [alertText, setAlertText] = useState<string>("");
 
-  const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [selectedQuests, setSelectedQuests] = useState<string[]>([]);
 
   const [shownShockedAnimation, setShownShockAnimation] = useState(false);
 
   const backgroundColor = useThemeColor("background");
   const onBackground = useThemeColor("onBackground");
-  const progressBg = useThemeColor("questStat");
-
-  const { permissionStatus: usageStatsPermissionStatus } =
-    useScreenTimePermission();
-  const { permissionStatus: overlayPermissionStatus } = useOverlayPermission();
-  const { permissionStatus: accessibilityPermissionStatus } =
-    useAccessibilityPermission();
-
-  const { isLoading, screenTimeData } = useScreenTime();
 
   const dispatch = useDispatch();
 
   useEffect(() => {
     dispatch(
       updateUserProfile({
-        first_name: firstName,
-        last_name: lastName,
+        first_name: email,
+        last_name: password,
       })
     );
-  }, [firstName, lastName]);
-
-  useEffect(() => {
-    if (currentStep === 0) {
-      setCharacterState(CharacterStates.NOTEPAD_TALKING);
-    }
-  }, [currentStep]);
-
-  useEffect(() => {
-    setCustomDialogText("");
-    if (!isLoading && currentStep === 3 && !shownShockedAnimation) {
-      const totalMinutes = Math.floor(
-        (screenTimeData?.totalScreenTime || 0) / (1000 * 60)
-      );
-      const hours = Math.floor(totalMinutes / 60);
-
-      if (hours > 3) {
-        setShownShockAnimation(true);
-
-        setTimeout(() => {
-          setCharacterState(CharacterStates.NOTEPAD_SHOCKED);
-        }, 600);
-
-        setTimeout(() => {
-          setCharacterState(CharacterStates.NOTEPAD_WRITING_IDLE);
-        }, 2800);
-
-        setTimeout(() => {
-          setCustomDialogText(
-            intl.formatMessage({ id: "step3_warning_dialog" })
-          );
-        }, 1500);
-      }
-    }
-  }, [isLoading, currentStep]);
+  }, [email, password]);
 
   const steps = [
     {
-      content: <Step1 />,
-    },
-    {
       content: (
-        <Step2
-          firstName={firstName}
-          lastName={lastName}
-          onNameChange={(name, key) => {
-            if (key == "first_name") {
-              setFirstName(name);
+        <Step1
+          email={email}
+          password={password}
+          onValueChange={(value, key) => {
+            if (key == "email") {
+              setEmail(value);
             } else {
-              setLastName(name);
+              setPassword(value);
             }
           }}
         />
       ),
+    },
+    {
+      content: <Step2 />,
     },
     {
       content: <Step3 />,
@@ -139,20 +84,6 @@ const OnboardingScreen = () => {
     },
     {
       content: <Step5 />,
-    },
-    {
-      content: <Step6 />,
-    },
-    {
-      content: (
-        <Step7
-          selectedQuests={selectedQuests}
-          setSelectedQuests={setSelectedQuests}
-        />
-      ),
-    },
-    {
-      content: <Step8 />,
     },
   ];
 
@@ -173,31 +104,13 @@ const OnboardingScreen = () => {
     }).start();
   };
 
-  const animateProgress = () => {
-    Animated.timing(progressAnim, {
-      toValue: (currentStep + 1) / steps.length,
-      duration: 300,
-      useNativeDriver: false,
-    }).start();
-  };
-
   const handleNext = () => {
     if (currentStep < steps.length - 1) {
-      animateSlide("right");
+      if (currentStep == 0) {
+      } else {
+        animateSlide("right");
 
-      setCurrentStep(currentStep + 1);
-
-      if (currentStep > 0) {
-        setCharacterState(CharacterStates.NOTEPAD_WRITING);
-      }
-
-      if (currentStep + 1 != 3 || shownShockedAnimation) {
-        setTimeout(
-          () => {
-            setCharacterState(CharacterStates.NOTEPAD_WRITING_IDLE);
-          },
-          currentStep == 0 ? 0 : 500
-        );
+        setCurrentStep(currentStep + 1);
       }
     }
   };
@@ -211,28 +124,15 @@ const OnboardingScreen = () => {
     }
   };
 
-  useEffect(() => {
-    animateProgress();
-  }, [currentStep]);
-
   const getButtonDisabled = () => {
     if (buttonDisabled) return buttonDisabled;
 
     if (currentStep == 1) {
-      if (firstName.trim() === "" || lastName.trim() === "") return true;
+      if (email.trim() === "" || password.trim() === "") return true;
     }
 
     if (currentStep == 2) {
-      if (
-        !usageStatsPermissionStatus ||
-        usageStatsPermissionStatus.status !== "approved" ||
-        !overlayPermissionStatus ||
-        overlayPermissionStatus.status !== "approved"
-        // ||
-        // !accessibilityPermissionStatus ||
-        // accessibilityPermissionStatus.status !== "approved"
-      )
-        return true;
+      if (alertText.trim().length < 5) return true;
     }
 
     if (currentStep == 4) {
@@ -247,7 +147,9 @@ const OnboardingScreen = () => {
   };
 
   const getButtonText = () => {
-    if (currentStep < 1) {
+    if (currentStep == 0) {
+      return intl.formatMessage({ id: "signup" });
+    } else if (currentStep < 1) {
       return intl.formatMessage({ id: "continue" });
     } else if (currentStep === 7) {
       return intl.formatMessage({ id: "allow_notifications" });

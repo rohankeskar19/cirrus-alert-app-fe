@@ -27,10 +27,14 @@ export default function RootLayout() {
   const scheme = useColorScheme();
 
   const [fontsLoaded] = useFonts({
-    "Outfit-Bold": require("@/assets/fonts/outfit_bold.ttf"),
-    "Outfit-Medium": require("@/assets/fonts/outfit_medium.ttf"),
-    "Outfit-Regular": require("@/assets/fonts/outfit_regular.ttf"),
-    "Outfit-SemiBold": require("@/assets/fonts/outfit_semibold.ttf"),
+    "SpaceGrotesk-Light": require("@/assets/fonts/space_grotesk_light.ttf"),
+    "SpaceGrotesk-Bold": require("@/assets/fonts/space_grotesk_bold.ttf"),
+    "SpaceGrotesk-Medium": require("@/assets/fonts/space_grotesk_medium.ttf"),
+    "SpaceGrotesk-Regular": require("@/assets/fonts/space_grotesk_regular.ttf"),
+    "SpaceGrotesk-SemiBold": require("@/assets/fonts/space_grotesk_semibold.ttf"),
+    "Inter-Regular": require("@/assets/fonts/inter_regular.ttf"),
+    "Inter-SemiBold": require("@/assets/fonts/inter_semibold.ttf"),
+    "Inter-Bold": require("@/assets/fonts/inter_bold.ttf"),
   });
 
   useEffect(() => {

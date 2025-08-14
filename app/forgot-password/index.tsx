@@ -28,7 +28,7 @@ const ForgotPasswordScreen = () => {
   const [loading, setLoading] = useState(false);
 
   const backgroundColor = useThemeColor("background");
-  const onBackground = useThemeColor("onBackground");
+  const textColor = useThemeColor("textColor");
 
   const intl = useIntl();
 
@@ -78,7 +78,7 @@ const ForgotPasswordScreen = () => {
             <ChevronLeft />
           </TouchableOpacity>
           <View style={styles.contentContainer}>
-            <Text style={[{ color: onBackground }, styles.headerText]}>
+            <Text style={[{ color: textColor }, styles.headerText]}>
               <FormattedMessage id="fogot_password_title" />
             </Text>
 
@@ -137,7 +137,7 @@ const styles = StyleSheet.create({
     textAlign: "center",
     marginBottom: verticalScale(32),
     marginTop: "auto",
-    fontFamily: "Outfit-SemiBold",
+    fontFamily: "SpaceGrotesk-Medium",
   },
   buttonsContainer: {
     width: "90%",

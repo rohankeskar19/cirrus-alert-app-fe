@@ -151,7 +151,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     borderWidth: 1,
-    borderRadius: moderateScale(16),
+    borderRadius: moderateScale(100),
     paddingLeft: horizontalScale(20),
     paddingRight: horizontalScale(14),
     height: verticalScale(56),
@@ -162,7 +162,7 @@ const styles = StyleSheet.create({
   input: {
     flex: 1,
     fontSize: moderateScale(16),
-    fontFamily: "Outfit-Regular",
+    fontFamily: "SpaceGrotesk-Regular",
     paddingVertical: verticalScale(10),
   },
   eyeIconContainer: {
@@ -177,7 +177,7 @@ const styles = StyleSheet.create({
     fontSize: moderateScale(14),
     marginTop: verticalScale(4),
     marginLeft: horizontalScale(16),
-    fontFamily: "Outfit-Regular",
+    fontFamily: "SpaceGrotesk-Regular",
   },
 });
 

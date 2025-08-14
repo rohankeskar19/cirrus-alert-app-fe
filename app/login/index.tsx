@@ -32,7 +32,7 @@ const LoginScreen = () => {
   const navigation = useNavigation();
 
   const backgroundColor = useThemeColor("background");
-  const onBackground = useThemeColor("onBackground");
+  const textColor = useThemeColor("textColor");
 
   const intl = useIntl();
 
@@ -105,7 +105,7 @@ const LoginScreen = () => {
             <ChevronLeft />
           </TouchableOpacity>
           <View style={styles.contentContainer}>
-            <Text style={[{ color: onBackground }, styles.headerText]}>
+            <Text style={[{ color: textColor }, styles.headerText]}>
               <FormattedMessage id="login_heading" />
             </Text>
 
@@ -185,7 +185,7 @@ const LoginScreen = () => {
               </Button>
               <View style={styles.forgotPasswordContainer}>
                 <Text
-                  style={styles.linkText}
+                  style={[styles.linkText, { color: textColor }]}
                   onPress={navigateToForgotPassword}
                 >
                   <FormattedMessage id="forgot_password" />
@@ -194,7 +194,10 @@ const LoginScreen = () => {
             </View>
           </View>
           <View style={styles.signupContainer}>
-            <Text style={styles.signupText} onPress={navigateToSignup}>
+            <Text
+              style={[styles.signupText, { color: textColor }]}
+              onPress={navigateToSignup}
+            >
               <FormattedMessage id="dont_have_account" />
               <Text style={styles.linkText}>
                 <FormattedMessage id="signup" />
@@ -228,7 +231,7 @@ const styles = StyleSheet.create({
     textAlign: "center",
     marginBottom: verticalScale(32),
     marginTop: "auto",
-    fontFamily: "Outfit-SemiBold",
+    fontFamily: "SpaceGrotesk-Medium",
   },
   buttonsContainer: {
     width: "90%",
@@ -251,7 +254,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: horizontalScale(10),
     color: "#E5E5E5",
     fontSize: moderateScale(13),
-    fontFamily: "Outfit-Medium",
+    fontFamily: "SpaceGrotesk-Medium",
   },
   signupContainer: {
     marginTop: "auto",
@@ -260,9 +263,8 @@ const styles = StyleSheet.create({
   },
   signupText: {
     fontSize: moderateScale(15),
-    color: "#888888",
     padding: moderateScale(5),
-    fontFamily: "Outfit-Medium",
+    fontFamily: "SpaceGrotesk-Medium",
   },
   backButton: {
     padding: moderateScale(5),
@@ -270,10 +272,9 @@ const styles = StyleSheet.create({
     marginTop: verticalScale(30),
   },
   linkText: {
-    color: "#888888",
     textDecorationLine: "underline",
     fontSize: moderateScale(16),
-    fontFamily: "Outfit-Medium",
+    fontFamily: "SpaceGrotesk-Medium",
   },
   forgotPasswordContainer: {
     alignItems: "center",

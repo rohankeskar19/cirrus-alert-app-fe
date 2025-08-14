@@ -89,7 +89,7 @@ android {
 
     namespace 'com.anonymous.cirrus'
     defaultConfig {
-        applicationId 'com.anonymous.Daisy'
+        applicationId 'com.anonymous.cirrus'
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1

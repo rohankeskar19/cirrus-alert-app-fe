@@ -16,7 +16,6 @@ import { useDispatch } from "react-redux";
 
 import ChevronLeft from "@/assets/icons/chevron-left.svg";
 import Button from "@/components/Button";
-import AnimatedCharacter from "@/components/Character";
 import { CharacterStates } from "@/constants/CharacterStates";
 import { useAccessibilityPermission } from "@/hooks/useAccessibilityPermission";
 import { useOverlayPermission } from "@/hooks/useOverlayPermission";
@@ -270,44 +269,7 @@ const OnboardingScreen = () => {
           >
             <ChevronLeft />
           </TouchableOpacity>
-          <View
-            style={[{ backgroundColor: progressBg }, styles.progressContainer]}
-          >
-            <Animated.View
-              style={[
-                styles.progressBar,
-                {
-                  width: progressAnim.interpolate({
-                    inputRange: [0, 1],
-                    outputRange: ["0%", "90%"],
-                  }),
-                },
-              ]}
-            />
-          </View>
         </View>
-        (
-        <View style={styles.illustrationContainer}>
-          <AnimatedCharacter
-            characterState={characterState}
-            dialogText={
-              customDialogText ||
-              [
-                intl.formatMessage({ id: "step1_dialog" }),
-                intl.formatMessage({ id: "step2_dialog" }),
-                intl.formatMessage({ id: "step3_dialog" }, { name: firstName }),
-                intl.formatMessage({ id: "step4_dialog" }),
-                intl.formatMessage({ id: "step5_dialog" }),
-                intl.formatMessage({ id: "step6_dialog" }),
-                intl.formatMessage({ id: "step7_dialog" }),
-                intl.formatMessage({ id: "step8_dialog" }),
-              ][currentStep]
-            }
-            dialogPosition="right"
-            animationDuration={400}
-          />
-        </View>
-        )
         <ScrollView contentContainerStyle={styles.contentContainer}>
           <Animated.View
             style={[

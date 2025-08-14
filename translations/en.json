@@ -1,6 +1,6 @@
 {
   "welcome_title": "Welcome to \n",
-  "daisy": "Daisy",
+  "cirrus": "Cirrus",
   "welcome_subtitle": "Your journey to the best version of\nyou begins today.",
   "get_started": "Get started",
   "already_have_account": "Already have an account? ",
@@ -102,7 +102,7 @@
   "allow_notifications": "Allow notifications",
   "no_thanks": "No thanks",
   "continue_with_email": "Continue with email",
-  "signup_heading": "You're All Set!\nLet's Start Learning!",
+  "signup_heading": "You're All Set!",
   "or": "OR",
   "continue_with_google": "Continue with Google",
   "continue_with_apple": "Continue with Apple",

@@ -87,7 +87,7 @@ android {
     buildToolsVersion rootProject.ext.buildToolsVersion
     compileSdk rootProject.ext.compileSdkVersion
 
-    namespace 'com.anonymous.Daisy'
+    namespace 'com.anonymous.cirrus'
     defaultConfig {
         applicationId 'com.anonymous.Daisy'
         minSdkVersion rootProject.ext.minSdkVersion

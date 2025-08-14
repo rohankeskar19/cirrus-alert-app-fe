@@ -14,7 +14,6 @@ import { get } from "lodash";
 import { FormattedMessage, useIntl } from "react-intl";
 import validator from "validator";
 
-import AppleLogo from "@/assets/icons/apple-logo.svg";
 import ChevronLeft from "@/assets/icons/chevron-left.svg";
 import GoogleLogo from "@/assets/icons/google-logo.svg";
 import Button from "@/components/Button";
@@ -128,7 +127,7 @@ const LoginScreen = () => {
                 </Text>
               </Button>
 
-              <Button
+              {/* <Button
                 type="oauth"
                 onPress={() => {}}
                 style={{
@@ -142,7 +141,7 @@ const LoginScreen = () => {
                 <Text>
                   <FormattedMessage id="continue_with_apple" />
                 </Text>
-              </Button>
+              </Button> */}
 
               <View style={styles.dividerContainer}>
                 <View style={styles.dividerLine} />

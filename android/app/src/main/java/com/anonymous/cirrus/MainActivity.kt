@@ -1,4 +1,4 @@
-package com.anonymous.Daisy
+package com.anonymous.cirrus
 import expo.modules.splashscreen.SplashScreenManager
 
 import android.os.Build

@@ -1,24 +1,21 @@
-package com.anonymous.Daisy.modules
+package com.anonymous.cirrus.modules
 
 
 import android.app.usage.UsageStats
 import android.app.usage.UsageStatsManager
 import android.content.Context
 import android.content.Intent
-import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import android.util.Base64
-import com.anonymous.Daisy.models.AppUsageData
-import com.anonymous.Daisy.models.DailyUsageData
+import com.anonymous.cirrus.models.AppUsageData
+import com.anonymous.cirrus.models.DailyUsageData
 import com.facebook.react.bridge.*
-import com.facebook.react.modules.core.DeviceEventManagerModule
 import java.io.ByteArrayOutputStream
 import java.util.*
-import kotlin.collections.HashMap
 
 class ScreenTimeModule(reactContext: ReactApplicationContext) :
     ReactContextBaseJavaModule(reactContext) {

@@ -11,7 +11,6 @@ import {
 import { router } from "expo-router";
 import { FormattedMessage } from "react-intl";
 
-import AppleLogo from "@/assets/icons/apple-logo.svg";
 import ChevronLeft from "@/assets/icons/chevron-left.svg";
 import GoogleLogo from "@/assets/icons/google-logo.svg";
 import Button from "@/components/Button";
@@ -67,7 +66,7 @@ const SignupScreen = () => {
                 </Text>
               </Button>
 
-              <Button
+              {/* <Button
                 type="oauth"
                 onPress={() => {}}
                 style={{
@@ -81,7 +80,7 @@ const SignupScreen = () => {
                 <Text>
                   <FormattedMessage id="continue_with_apple" />
                 </Text>
-              </Button>
+              </Button> */}
 
               <View style={styles.dividerContainer}>
                 <View style={styles.dividerLine} />

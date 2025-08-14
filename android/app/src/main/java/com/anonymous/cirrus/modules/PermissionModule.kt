@@ -1,4 +1,4 @@
-package com.anonymous.Daisy.modules
+package com.anonymous.cirrus.modules
 
 import android.app.AppOpsManager
 import android.content.Context

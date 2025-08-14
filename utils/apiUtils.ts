@@ -3,7 +3,8 @@ import { createClient } from "@supabase/supabase-js";
 
 import { Alert } from "react-native";
 
-import api from "@/lib/api";
+export type AlertType = "immediate" | "daily" | "weekly";
+export type AlertVariant = "summary" | "links";
 
 // import { SUPABASE_URL, SUPABASE_ANON_KEY } from "@env";
 
@@ -206,295 +207,46 @@ export const updateUserProfile = async (
   return true;
 };
 
-/**
- * Update user profile information
- * @param prompt - Topic user wants to learn
- * @returns Boolean indicating success or failure
- */
-export const generateTopic = async (prompt: string): Promise<string | null> => {
-  try {
-    const response = await api.post("/course/generate-topic", { prompt });
-
-    return response.data.topic;
-  } catch (error: any) {
-    console.error(
-      "Error generating topic:",
-      error?.response?.data || error.message
-    );
-    Alert.alert("Please enter a valid topic");
-    return null;
-  }
-};
-
-/**
- * Update user profile information
- * @param prompt - Topic user wants to learn
- * @param currentKnowledge - Current knowledge of user about the topic
- * @param reason - Reason to learn the topic
- * @returns Boolean indicating success or failure
- */
-export const generateCourse = async (
-  prompt: string,
-  knowledge: string,
-  reason: string
-) => {
-  try {
-    await api.post("/course/generate-course", {
-      prompt,
-      knowledge,
-      reason,
-    });
-  } catch (error: any) {
-    console.error(
-      "Error generating topic:",
-      error?.response?.data || error.message
-    );
-    Alert.alert("Please enter a valid topic");
-    return null;
-  }
-};
-
-/**
- * Fetches user's courses with current chapter and progress info
- */
-export const fetchCourses = async () => {
+export const createAlert = async (
+  alertText: string,
+  alertSources: string[],
+  alertType: AlertType,
+  alertVariant: AlertVariant
+): Promise<boolean> => {
   try {
     const {
       data: { session },
+      error: sessionError,
     } = await supabase.auth.getSession();
 
-    if (!session) throw new Error("Not logged in");
+    if (sessionError || !session) {
+      console.error("Not logged in:", sessionError?.message);
+      Alert.alert("Error", "You must be logged in to create an alert.");
+      return false;
+    }
 
     const userId = session.user.id;
 
-    // Step 1: Get all user courses
-    const { data: courses, error: courseError } = await supabase
-      .from("courses")
-      .select("*")
-      .eq("user_id", userId)
-      .order("created_at", { ascending: false });
+    const { error: insertError } = await supabase.from("alerts").insert([
+      {
+        user_id: userId,
+        alert_text: alertText,
+        alert_sources: alertSources,
+        alert_type: alertType,
+        alert_variant: alertVariant,
+      },
+    ]);
 
-    if (courseError) throw courseError;
-
-    const enrichedCourses = [];
-
-    // Step 2: For each course, find current/first chapter + progress
-    for (const course of courses) {
-      const { data: chapters, error: chapterError } = await supabase
-        .from("chapters")
-        .select("id, title, description, order_index")
-        .eq("course_id", course.id)
-        .order("order_index", { ascending: true });
-
-      if (chapterError || !chapters) {
-        console.warn("Failed to fetch chapters for course:", course.id);
-        continue;
-      }
-
-      const { data: lessons, error: lessonError } = await supabase
-        .from("lessons")
-        .select("id, chapter_id, progress")
-        .in(
-          "chapter_id",
-          chapters.map((ch) => ch.id)
-        );
-
-      if (lessonError || !lessons) {
-        console.warn("Failed to fetch lessons for course:", course.id);
-        continue;
-      }
-
-      // Determine course progress
-      const totalLessons = lessons.length;
-      const completedLessons = lessons.filter(
-        (l) => l.progress?.completed === true
-      ).length;
-      const progressPercentage =
-        totalLessons > 0
-          ? Math.round((completedLessons / totalLessons) * 100)
-          : 0;
-
-      // Find ongoing chapter
-      const chapterProgressMap = new Map();
-
-      for (const lesson of lessons) {
-        const current = chapterProgressMap.get(lesson.chapter_id) || {
-          total: 0,
-          completed: 0,
-        };
-        current.total += 1;
-        if (lesson.progress?.completed === true) {
-          current.completed += 1;
-        }
-        chapterProgressMap.set(lesson.chapter_id, current);
-      }
-
-      // Sort by: in-progress > not-started > completed
-      let ongoingChapter =
-        chapters.find((ch) => {
-          const prog = chapterProgressMap.get(ch.id);
-          return prog && prog.completed < prog.total && prog.completed > 0;
-        }) ||
-        chapters.find((ch) => {
-          const prog = chapterProgressMap.get(ch.id);
-          return !prog || prog.completed === 0;
-        }) ||
-        chapters[0]; // fallback
-
-      enrichedCourses.push({
-        ...course,
-        currentChapter: ongoingChapter,
-        progress: progressPercentage,
-      });
-    }
-
-    return enrichedCourses;
-  } catch (error: any) {
-    console.error("Error fetching enriched courses:", error.message);
-    return null;
-  }
-};
-
-/**
- * Fetches full course overview including chapters and lessons
- */
-export const fetchCourseOverview = async (courseId: string) => {
-  try {
-    // Fetch course with chapters and lessons
-    const { data: courses, error: courseError } = await supabase
-      .from("courses")
-      .select(
-        `
-        *,
-        chapters (
-          *,
-          lessons (
-            id,
-            title,
-            chapter_id,
-            order_index,
-            progress,
-            content
-          )
-        )
-      `
-      )
-      .eq("id", courseId)
-      .order("created_at", { ascending: false });
-
-    if (courseError) throw courseError;
-    if (!courses || courses.length === 0) return null;
-
-    const course = courses[0];
-    const chapters = (course.chapters || [])
-      .sort((a: any, b: any) => a.order_index - b.order_index)
-      .map((chapter: any) => ({
-        ...chapter,
-        lessons: (chapter.lessons || []).sort(
-          (a: any, b: any) => a.order_index - b.order_index
-        ),
-      }));
-
-    // Flatten all lessons
-    const allLessons = chapters.flatMap((ch: any) => ch.lessons || []);
-    const totalLessons = allLessons.length;
-    const completedLessons = allLessons.filter(
-      (lesson: any) => lesson.progress?.completed === true
-    ).length;
-
-    const progressPercentage =
-      totalLessons > 0
-        ? Math.round((completedLessons / totalLessons) * 100)
-        : 0;
-
-    // Determine the ongoing chapter
-    const chapterProgressMap = new Map();
-
-    for (const lesson of allLessons) {
-      const current = chapterProgressMap.get(lesson.chapter_id) || {
-        total: 0,
-        completed: 0,
-      };
-      current.total += 1;
-      if (lesson.progress?.completed) {
-        current.completed += 1;
-      }
-      chapterProgressMap.set(lesson.chapter_id, current);
-    }
-
-    let ongoingChapter =
-      chapters.find((ch: any) => {
-        const prog = chapterProgressMap.get(ch.id);
-        return prog && prog.completed < prog.total && prog.completed > 0;
-      }) ||
-      chapters.find((ch: any) => {
-        const prog = chapterProgressMap.get(ch.id);
-        return !prog || prog.completed === 0;
-      }) ||
-      chapters[0]; // fallback
-
-    return {
-      ...course,
-      chapters,
-      progress: progressPercentage,
-      currentChapter: ongoingChapter,
-    };
-  } catch (error: any) {
-    console.error("Error fetching course overview:", error.message);
-    return null;
-  }
-};
-
-/**
- * Mark a lesson as complete by its ID
- * @param lessonId - The ID of the lesson to mark as completed
- * @returns Boolean indicating success or failure
- */
-export const markLessonAsComplete = async (lessonId: string) => {
-  try {
-    const { error } = await supabase
-      .from("lessons")
-      .update({
-        progress: {
-          completed: true,
-        },
-      })
-      .eq("id", lessonId);
-
-    if (error) {
-      console.error("Error marking lesson as complete:", error.message);
-      Alert.alert("Error", "Could not mark lesson as complete.");
+    if (insertError) {
+      console.error("Error creating alert:", insertError.message);
+      Alert.alert("Failed to create alert", insertError.message);
       return false;
     }
 
     return true;
   } catch (error: any) {
-    console.error("Unexpected error:", error.message);
+    console.error("Unexpected error creating alert:", error.message);
+    Alert.alert("Something went wrong", error.message);
     return false;
-  }
-};
-
-/**
- * Get lessons for a given chapter by its ID
- * @param chapterId - The ID of the chapter
- * @returns Array of lessons sorted by order_index
- */
-export const getLessonsForChapter = async (chapterId: string) => {
-  try {
-    const { data: lessons, error } = await supabase
-      .from("lessons")
-      .select("id, title, chapter_id, order_index, progress, content")
-      .eq("chapter_id", chapterId)
-      .order("order_index", { ascending: true });
-
-    if (error) {
-      console.error("Error fetching lessons for chapter:", error.message);
-      return null;
-    }
-
-    return lessons;
-  } catch (error: any) {
-    console.error("Unexpected error fetching lessons:", error.message);
-    return null;
   }
 };

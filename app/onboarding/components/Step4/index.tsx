@@ -8,11 +8,12 @@ import WeeklyIcon from "@/assets/icons/weekly.svg";
 
 import RadioOption from "@/components/RadioOption";
 import { useThemeColor } from "@/hooks/useThemeColor";
-import { horizontalScale, moderateScale, verticalScale } from "@/utils/metrics";
+import { AlertType } from "@/utils/apiUtils";
+import { moderateScale, verticalScale } from "@/utils/metrics";
 
 type Step4Props = {
   selectedType: string;
-  setSelectedType: (value: string) => void;
+  setSelectedType: (value: AlertType) => void;
 };
 
 const Step4 = ({ selectedType, setSelectedType }: Step4Props) => {
@@ -21,7 +22,7 @@ const Step4 = ({ selectedType, setSelectedType }: Step4Props) => {
 
   const radioOptions = [
     {
-      value: "immediately",
+      value: "immediate",
       label: intl.formatMessage({ id: "immediately" }),
       icon: <ThunderIcon />,
     },
@@ -50,7 +51,7 @@ const Step4 = ({ selectedType, setSelectedType }: Step4Props) => {
             label={option.label}
             icon={option.icon}
             isSelected={selectedType == option.value}
-            onSelect={() => setSelectedType(option.value)}
+            onSelect={() => setSelectedType(option.value as AlertType)}
           />
         ))}
       </View>
@@ -76,49 +77,6 @@ const styles = StyleSheet.create({
   radioGroup: {
     width: "100%",
     gap: verticalScale(21),
-  },
-  radioContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingHorizontal: horizontalScale(20),
-    paddingVertical: verticalScale(16),
-    borderWidth: 2,
-    borderRadius: moderateScale(16),
-    backgroundColor: "#FFFFFF",
-  },
-  iconContainer: {
-    marginRight: horizontalScale(16),
-    width: moderateScale(32),
-    height: moderateScale(32),
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  iconText: {
-    fontSize: moderateScale(24),
-  },
-  radioText: {
-    flex: 1,
-    fontSize: moderateScale(18),
-    fontFamily: "SpaceGrotesk-Regular",
-  },
-  checkContainer: {
-    width: moderateScale(28),
-    height: moderateScale(28),
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  checkmark: {
-    width: moderateScale(28),
-    height: moderateScale(28),
-    borderRadius: moderateScale(14),
-    backgroundColor: "#B07CFF",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  checkmarkText: {
-    color: "white",
-    fontSize: moderateScale(16),
-    fontWeight: "bold",
   },
 });
 

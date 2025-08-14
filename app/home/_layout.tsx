@@ -4,14 +4,19 @@ import { Platform, StyleSheet, View, useColorScheme } from "react-native";
 
 import { Tabs } from "expo-router";
 
+import AlertsTabIcon from "@/assets/icons/alerts-tab.svg";
 import HomeTabIcon from "@/assets/icons/home-tab.svg";
 import SettingsTabIcon from "@/assets/icons/settings-tab.svg";
 import { HapticTab } from "@/components/HapticTab";
 import { Colors } from "@/constants/Colors";
+import { useThemeColor } from "@/hooks/useThemeColor";
 import { moderateScale, verticalScale } from "@/utils/metrics";
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
+
+  const tabBackground = useThemeColor("tabBackground");
+  const textColor = useThemeColor("textColor");
 
   return (
     <Tabs
@@ -55,10 +60,28 @@ export default function TabLayout() {
             <View
               style={[
                 styles.tabButton,
-                { borderColor: focused ? "#B07CFF" : "transparent" },
+                { backgroundColor: focused ? tabBackground : "transparent" },
               ]}
             >
-              <HomeTabIcon />
+              <HomeTabIcon color={textColor} />
+            </View>
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="alerts"
+        options={{
+          tabBarLabelStyle: {
+            display: "none",
+          },
+          tabBarIcon: ({ focused }) => (
+            <View
+              style={[
+                styles.tabButton,
+                { backgroundColor: focused ? tabBackground : "transparent" },
+              ]}
+            >
+              <AlertsTabIcon color={textColor} />
             </View>
           ),
         }}
@@ -73,10 +96,10 @@ export default function TabLayout() {
             <View
               style={[
                 styles.tabButton,
-                { borderColor: focused ? "#B07CFF" : "transparent" },
+                { backgroundColor: focused ? tabBackground : "transparent" },
               ]}
             >
-              <SettingsTabIcon />
+              <SettingsTabIcon color={textColor} />
             </View>
           ),
         }}
@@ -90,7 +113,7 @@ const styles = StyleSheet.create({
     width: moderateScale(44),
     height: moderateScale(44),
     borderRadius: moderateScale(11),
-    borderWidth: 3,
+
     display: "flex",
     alignItems: "center",
     justifyContent: "center",

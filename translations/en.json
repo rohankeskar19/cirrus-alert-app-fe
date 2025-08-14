@@ -191,5 +191,6 @@
   "immediately": "Immediately",
   "yes": "Yes",
   "no_just_links": "No, just links",
-  "finish": "Finish"
+  "finish": "Finish",
+  "creating_alert_title": "Creating your first alert..."
 }

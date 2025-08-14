@@ -10,7 +10,7 @@ import {
   View,
 } from "react-native";
 
-import { router } from "expo-router";
+import { router, useNavigation } from "expo-router";
 import { useIntl } from "react-intl";
 
 import ChevronLeft from "@/assets/icons/chevron-left.svg";
@@ -18,7 +18,17 @@ import Button from "@/components/Button";
 import { useThemeColor } from "@/hooks/useThemeColor";
 import { horizontalScale, moderateScale, verticalScale } from "@/utils/metrics";
 
-import { getCurrentUser, signupUser } from "@/utils/apiUtils";
+import OnboardingOverlay from "@/components/OnboardingOverlay";
+import {
+  AlertType,
+  AlertVariant,
+  createAlert,
+  getCurrentUser,
+  loginUser,
+  signupUser,
+  updateUserProfile,
+} from "@/utils/apiUtils";
+import { get } from "lodash";
 import { SafeAreaView } from "react-native-safe-area-context";
 import validator from "validator";
 import Step1 from "./components/Step1";
@@ -36,7 +46,12 @@ const OnboardingScreen = () => {
   const slideAnim = useRef(new Animated.Value(0)).current;
   const [buttonDisabled, setButtonDisabled] = useState(true);
 
+  const navigation = useNavigation();
+
+  const [currentUser, setCurrentUser] = useState(null);
+
   const [creatingUser, setCreatingUser] = useState(false);
+  const [creatingAlert, setCreatingAlert] = useState(false);
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -45,12 +60,12 @@ const OnboardingScreen = () => {
   const [emailError, setEmailError] = useState<string>("");
   const [passwordError, setPasswordError] = useState<string>("");
   const [alertTextError, setAlertTextError] = useState<string>("");
-  const [selectedSources, setSelectedSources] = useState<string[]>([]);
-  const [selectedType, setSelectedType] = useState<string>("immediately");
-  const [selectedVariant, setSelectedVariant] = useState<string>("summary");
+  const [selectedSources, setSelectedSources] = useState<string[]>(["news"]);
+  const [selectedType, setSelectedType] = useState<AlertType>("immediate");
+  const [selectedVariant, setSelectedVariant] =
+    useState<AlertVariant>("summary");
 
   const backgroundColor = useThemeColor("background");
-  const onBackground = useThemeColor("onBackground");
 
   useEffect(() => {
     handleStepNavigation();
@@ -58,6 +73,8 @@ const OnboardingScreen = () => {
 
   const handleStepNavigation = async () => {
     const currentUser = await getCurrentUser();
+
+    setCurrentUser(currentUser as any);
 
     if (currentUser) {
       setCurrentStep(1);
@@ -135,41 +152,61 @@ const OnboardingScreen = () => {
 
   const handleNext = async () => {
     try {
-      if (currentStep < steps.length - 1) {
-        if (currentStep == 0) {
-          if (
-            !validator.isEmail(email) ||
-            !validator.isStrongPassword(password)
-          ) {
-            if (!validator.isEmail(email)) {
-              setEmailError(intl.formatMessage({ id: "invalid_email_error" }));
-            }
+      if (currentStep == 0) {
+        if (
+          !validator.isEmail(email) ||
+          !validator.isStrongPassword(password)
+        ) {
+          if (!validator.isEmail(email)) {
+            setEmailError(intl.formatMessage({ id: "invalid_email_error" }));
+          }
 
-            if (!validator.isStrongPassword(password)) {
-              setPasswordError(
-                intl.formatMessage({ id: "invalid_password_error" })
-              );
-            }
-          } else {
-            setCreatingUser(true);
-            await signupUser(email, password);
-            setCreatingUser(false);
-            animateSlide("right");
-            setCurrentStep(currentStep + 1);
-          }
-        } else if (currentStep == 1) {
-          if (!validator.isLength(alertText, { min: 5, max: 150 })) {
-            setAlertTextError(
-              intl.formatMessage({ id: "invalid_alert_error" })
+          if (!validator.isStrongPassword(password)) {
+            setPasswordError(
+              intl.formatMessage({ id: "invalid_password_error" })
             );
-          } else {
-            animateSlide("right");
-            setCurrentStep(currentStep + 1);
           }
+        } else {
+          setCreatingUser(true);
+          await signupUser(email, password);
+          await loginUser(email, password);
+          const currentUser = await getCurrentUser();
+          setCurrentUser(currentUser as any);
+          setCreatingUser(false);
+          animateSlide("right");
+          setCurrentStep(currentStep + 1);
+        }
+      } else if (currentStep == 1) {
+        if (!validator.isLength(alertText, { min: 5, max: 150 })) {
+          setAlertTextError(intl.formatMessage({ id: "invalid_alert_error" }));
         } else {
           animateSlide("right");
           setCurrentStep(currentStep + 1);
         }
+      } else if (currentStep == 4) {
+        console.log("Creating alert...");
+        setCreatingAlert(true);
+        await createAlert(
+          alertText,
+          selectedSources,
+          selectedType,
+          selectedVariant
+        );
+
+        await updateUserProfile(get(currentUser, "id", ""), {
+          onboarding_done: true,
+        });
+
+        setTimeout(() => {
+          setCreatingAlert(false);
+          navigation.reset({
+            index: 0,
+            routes: [{ name: "home" } as any],
+          });
+        }, 1200);
+      } else {
+        animateSlide("right");
+        setCurrentStep(currentStep + 1);
       }
     } catch (err: any) {
       setCreatingUser(false);
@@ -182,10 +219,17 @@ const OnboardingScreen = () => {
     }
   };
 
-  const handleBack = () => {
+  const handleBack = async () => {
     if (currentStep > 0) {
-      animateSlide("left");
-      setCurrentStep(currentStep - 1);
+      if (!currentUser) {
+        animateSlide("left");
+        setCurrentStep(currentStep - 1);
+      } else {
+        if (currentStep > 1) {
+          animateSlide("left");
+          setCurrentStep(currentStep - 1);
+        }
+      }
     } else {
       router.back();
     }
@@ -201,15 +245,6 @@ const OnboardingScreen = () => {
     if (currentStep == 1) {
       if (alertText.trim() == "") return true;
     }
-
-    if (currentStep == 2) {
-    }
-
-    if (currentStep == 3) {
-    }
-
-    if (currentStep == 4) {
-    }
   };
 
   const getButtonText = () => {
@@ -224,19 +259,33 @@ const OnboardingScreen = () => {
     }
   };
 
+  const shouldShowBackButton = () => {
+    if (currentUser) {
+      if (currentStep > 1) {
+        return true;
+      } else {
+        return false;
+      }
+    } else {
+      return true;
+    }
+  };
+
   return (
     <View
       style={[{ backgroundColor: backgroundColor }, styles.screenContainer]}
     >
       <SafeAreaView style={styles.safeArea}>
         <View style={styles.header}>
-          <TouchableOpacity
-            style={styles.backButton}
-            onPress={handleBack}
-            activeOpacity={1}
-          >
-            <ChevronLeft />
-          </TouchableOpacity>
+          {shouldShowBackButton() && (
+            <TouchableOpacity
+              style={styles.backButton}
+              onPress={handleBack}
+              activeOpacity={1}
+            >
+              <ChevronLeft />
+            </TouchableOpacity>
+          )}
         </View>
         <ScrollView contentContainerStyle={styles.contentContainer}>
           <Animated.View
@@ -263,6 +312,7 @@ const OnboardingScreen = () => {
             <Text>{getButtonText()}</Text>
           </Button>
         </View>
+        {creatingAlert && <OnboardingOverlay />}
       </SafeAreaView>
     </View>
   );

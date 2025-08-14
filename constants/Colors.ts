@@ -19,7 +19,7 @@ export const Colors = {
     questStat: "#F1F1F1",
     secondaryText: "#B9B9B9",
     secondaryGray: "#C9C9C9",
-    accentColor: "#42BFE8",
+    accentColor: "#25A1FF",
     greenColor: "#94D900",
     redColor: "#FF6B6B",
     placeholderGray: "#828282",
@@ -36,6 +36,7 @@ export const Colors = {
     sliderTrack: "#eeeeee",
     dropdownBg: "#F2F2F2",
     dropdownBorder: "#C7C7C7",
+    tabBackground: "#E8E8E8",
   },
   dark: {
     background: "#363636",
@@ -52,7 +53,7 @@ export const Colors = {
     questStat: "#4A4A4A",
     secondaryText: "#B9B9B9",
     secondaryGray: "#616161",
-    accentColor: "#42BFE8",
+    accentColor: "#25A1FF",
     greenColor: "#8DD400",
     redColor: "#FF6B6B",
     placeholderGray: "#828282",
@@ -69,5 +70,6 @@ export const Colors = {
     sliderTrack: "#5D5D5D",
     dropdownBg: "#3B3B3B",
     dropdownBorder: "#727272",
+    tabBackground: "#E8E8E8",
   },
 };

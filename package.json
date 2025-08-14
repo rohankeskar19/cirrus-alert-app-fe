@@ -13,6 +13,7 @@
   "dependencies": {
     "@expo/vector-icons": "^14.1.0",
     "@gorhom/bottom-sheet": "^5.1.8",
+    "@lottiefiles/dotlottie-react": "^0.15.0",
     "@react-native-async-storage/async-storage": "^2.2.0",
     "@react-native-community/slider": "^4.5.7",
     "@react-navigation/bottom-tabs": "^7.3.10",
@@ -37,7 +38,7 @@
     "expo-system-ui": "~5.0.10",
     "expo-web-browser": "~14.2.0",
     "lodash": "^4.17.21",
-    "lottie-react-native": "^7.2.4",
+    "lottie-react-native": "^5.1.6",
     "react": "19.0.0",
     "react-dom": "19.0.0",
     "react-intl": "^7.1.11",

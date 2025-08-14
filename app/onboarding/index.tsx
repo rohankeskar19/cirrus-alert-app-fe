@@ -11,7 +11,7 @@ import {
 } from "react-native";
 
 import { router } from "expo-router";
-import { FormattedMessage, useIntl } from "react-intl";
+import { useIntl } from "react-intl";
 import { useDispatch } from "react-redux";
 
 import ChevronLeft from "@/assets/icons/chevron-left.svg";
@@ -20,7 +20,9 @@ import { useThemeColor } from "@/hooks/useThemeColor";
 import { updateUserProfile } from "@/slices/onboarding";
 import { horizontalScale, moderateScale, verticalScale } from "@/utils/metrics";
 
+import { signupUser } from "@/utils/apiUtils";
 import { SafeAreaView } from "react-native-safe-area-context";
+import validator from "validator";
 import Step1 from "./components/Step1";
 import Step2 from "./components/Step2";
 import Step3 from "./components/Step3";
@@ -35,13 +37,15 @@ const OnboardingScreen = () => {
   const [currentStep, setCurrentStep] = useState(0);
   const slideAnim = useRef(new Animated.Value(0)).current;
   const [buttonDisabled, setButtonDisabled] = useState(true);
-  const [alertText, setAlertText] = useState<string>("");
+
+  const [creatingUser, setCreatingUser] = useState(false);
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [selectedQuests, setSelectedQuests] = useState<string[]>([]);
+  const [alertText, setAlertText] = useState<string>("");
 
-  const [shownShockedAnimation, setShownShockAnimation] = useState(false);
+  const [emailError, setEmailError] = useState<string>("");
+  const [passwordError, setPasswordError] = useState<string>("");
 
   const backgroundColor = useThemeColor("background");
   const onBackground = useThemeColor("onBackground");
@@ -63,6 +67,8 @@ const OnboardingScreen = () => {
         <Step1
           email={email}
           password={password}
+          emailError={emailError}
+          passwordError={passwordError}
           onValueChange={(value, key) => {
             if (key == "email") {
               setEmail(value);
@@ -104,14 +110,40 @@ const OnboardingScreen = () => {
     }).start();
   };
 
-  const handleNext = () => {
-    if (currentStep < steps.length - 1) {
-      if (currentStep == 0) {
-      } else {
-        animateSlide("right");
+  const handleNext = async () => {
+    try {
+      if (currentStep < steps.length - 1) {
+        if (currentStep == 0) {
+          if (
+            !validator.isEmail(email) ||
+            !validator.isStrongPassword(password)
+          ) {
+            if (!validator.isEmail(email)) {
+              setEmailError(intl.formatMessage({ id: "invalid_email_error" }));
+            }
 
-        setCurrentStep(currentStep + 1);
+            if (!validator.isStrongPassword(password)) {
+              setPasswordError(
+                intl.formatMessage({ id: "invalid_password_error" })
+              );
+            }
+          } else {
+            // Handle signup
+            setCreatingUser(true);
+            await signupUser(email, password);
+            setCreatingUser(false);
+            animateSlide("right");
+            setCurrentStep(currentStep + 1);
+          }
+        } else {
+          animateSlide("right");
+          setCurrentStep(currentStep + 1);
+        }
       }
+    } catch (err: any) {
+      console.log("Error ", err);
+      setCreatingUser(false);
+      setEmailError(err);
     }
   };
 
@@ -127,7 +159,7 @@ const OnboardingScreen = () => {
   const getButtonDisabled = () => {
     if (buttonDisabled) return buttonDisabled;
 
-    if (currentStep == 1) {
+    if (currentStep == 0) {
       if (email.trim() === "" || password.trim() === "") return true;
     }
 
@@ -139,10 +171,6 @@ const OnboardingScreen = () => {
     }
 
     if (currentStep == 5) {
-    }
-
-    if (currentStep == 6) {
-      if (selectedQuests.length === 0) return true;
     }
   };
 
@@ -192,31 +220,10 @@ const OnboardingScreen = () => {
               marginBottom: verticalScale(16),
             }}
             disabled={getButtonDisabled()}
-            loading={false}
+            loading={creatingUser}
           >
             <Text>{getButtonText()}</Text>
           </Button>
-
-          {currentStep === 7 && (
-            <TouchableOpacity
-              style={{
-                marginTop: verticalScale(5),
-                marginBottom: verticalScale(15),
-              }}
-              activeOpacity={1}
-              onPress={() => router.push("/signup")}
-            >
-              <Text
-                style={{
-                  color: onBackground,
-                  fontFamily: "Outfit-Medium",
-                  fontSize: moderateScale(14),
-                }}
-              >
-                <FormattedMessage id={"no_thanks"} />
-              </Text>
-            </TouchableOpacity>
-          )}
         </View>
       </SafeAreaView>
     </View>

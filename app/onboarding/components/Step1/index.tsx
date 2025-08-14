@@ -11,10 +11,18 @@ import { moderateScale, verticalScale } from "@/utils/metrics";
 type Step2Props = {
   email: string;
   password: string;
+  emailError: string;
+  passwordError: string;
   onValueChange: (value: string, key: "email" | "password") => void;
 };
 
-const Step2 = ({ email, password, onValueChange }: Step2Props) => {
+const Step2 = ({
+  email,
+  password,
+  emailError,
+  passwordError,
+  onValueChange,
+}: Step2Props) => {
   const intl = useIntl();
 
   const textColor = useThemeColor("textColor");
@@ -32,6 +40,8 @@ const Step2 = ({ email, password, onValueChange }: Step2Props) => {
           width: "100%",
           marginBottom: verticalScale(16),
         }}
+        error={emailError}
+        showError={emailError != ""}
       />
       <Input
         type="password"
@@ -42,6 +52,8 @@ const Step2 = ({ email, password, onValueChange }: Step2Props) => {
           width: "100%",
           marginBottom: verticalScale(130),
         }}
+        error={passwordError}
+        showError={passwordError != ""}
       />
     </View>
   );

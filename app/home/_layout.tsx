@@ -16,6 +16,7 @@ export default function TabLayout() {
   const colorScheme = useColorScheme();
 
   const tabBackground = useThemeColor("tabBackground");
+  const background = useThemeColor("background");
   const textColor = useThemeColor("textColor");
 
   return (
@@ -28,7 +29,7 @@ export default function TabLayout() {
           ios: {
             height: verticalScale(75),
             position: "absolute",
-            backgroundColor: "#ffffff",
+            backgroundColor: background,
             paddingTop: verticalScale(13),
             display: "flex",
             flexDirection: "row",
@@ -39,7 +40,7 @@ export default function TabLayout() {
           default: {
             height: verticalScale(75),
             position: "absolute",
-            backgroundColor: "#ffffff",
+            backgroundColor: background,
             paddingTop: verticalScale(13),
             display: "flex",
             flexDirection: "row",

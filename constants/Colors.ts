@@ -70,6 +70,6 @@ export const Colors = {
     sliderTrack: "#5D5D5D",
     dropdownBg: "#3B3B3B",
     dropdownBorder: "#727272",
-    tabBackground: "#E8E8E8",
+    tabBackground: "#575656",
   },
 };

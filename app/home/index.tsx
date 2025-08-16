@@ -1,21 +1,9 @@
 import React from "react";
 
-import { Image, StyleSheet } from "react-native";
-
-import ParallaxScrollView from "@/components/ParallaxScrollView";
+import { ScrollView, StyleSheet } from "react-native";
 
 export default function HomeTab() {
-  return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: "#A1CEDC", dark: "#1D3D47" }}
-      headerImage={
-        <Image
-          source={require("@/assets/images/partial-react-logo.png")}
-          style={styles.reactLogo}
-        />
-      }
-    ></ParallaxScrollView>
-  );
+  return <ScrollView></ScrollView>;
 }
 
 const styles = StyleSheet.create({

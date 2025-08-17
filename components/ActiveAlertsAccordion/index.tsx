@@ -123,7 +123,7 @@ const ActiveAlertsAccordion = ({
                     styles.alertItem,
                     {
                       backgroundColor,
-                      borderColor: borderColor,
+
                       marginBottom:
                         index === alerts.length - 1 ? 0 : verticalScale(8),
                     },
@@ -197,17 +197,6 @@ const ActiveAlertsAccordion = ({
                 </TouchableOpacity>
               ))}
             </View>
-          )}
-
-          {alerts.length > 0 && (
-            <TouchableOpacity
-              style={[styles.manageButton, { borderColor }]}
-              activeOpacity={1}
-            >
-              <Text style={[styles.manageButtonText, { color: accentColor }]}>
-                <FormattedMessage id="manage_alerts" />
-              </Text>
-            </TouchableOpacity>
           )}
         </View>
       )}
@@ -300,8 +289,6 @@ const styles = StyleSheet.create({
   },
   alertItem: {
     borderRadius: moderateScale(12),
-    borderWidth: 1,
-    padding: horizontalScale(16),
   },
   alertContent: {
     flex: 1,

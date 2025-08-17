@@ -172,7 +172,6 @@ const OnboardingScreen = () => {
           setCurrentStep(currentStep + 1);
         }
       } else if (currentStep == 3) {
-        console.log("Creating alert...");
         setCreatingAlert(true);
         await createAlert(alertText, selectedSources, selectedType);
 

@@ -175,7 +175,7 @@ const HomeTab = () => {
         <View style={styles.headerActions}>
           <TouchableOpacity
             style={styles.viewAllButton}
-            activeOpacity={0.7}
+            activeOpacity={1}
             onPress={openViewAll}
           >
             <Text style={[styles.viewAllText, { color: accentColor }]}>

@@ -15,9 +15,11 @@ import relativeTime from "dayjs/plugin/relativeTime";
 import React, { useCallback, useEffect, useState } from "react";
 import {
   ActivityIndicator,
+  Animated,
   FlatList,
   ListRenderItem,
   Modal,
+  Pressable,
   RefreshControl,
   Alert as RNAlert,
   ScrollView,
@@ -25,7 +27,6 @@ import {
   Switch,
   Text,
   TextInput,
-  TouchableOpacity,
   View,
 } from "react-native";
 
@@ -36,6 +37,7 @@ import EditIcon from "@/assets/icons/edit-pen.svg";
 import PlusIcon from "@/assets/icons/plus.svg";
 import SearchIcon from "@/assets/icons/search.svg";
 import SaveIcon from "@/assets/icons/tick.svg";
+import { FormattedMessage } from "react-intl";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 dayjs.extend(relativeTime);
@@ -47,6 +49,120 @@ type AlertFormData = {
   similarity_threshold: number;
 };
 
+// Shimmer Alert Card Component
+const ShimmerAlertCard = () => {
+  const backgroundColor = useThemeColor("background");
+  const borderColor = useThemeColor("inputBorder");
+  const placeholderGray = useThemeColor("placeholderGray");
+
+  const shimmerValue = new Animated.Value(0);
+
+  React.useEffect(() => {
+    const shimmerAnimation = Animated.loop(
+      Animated.sequence([
+        Animated.timing(shimmerValue, {
+          toValue: 1,
+          duration: 1000,
+          useNativeDriver: false,
+        }),
+        Animated.timing(shimmerValue, {
+          toValue: 0,
+          duration: 1000,
+          useNativeDriver: false,
+        }),
+      ])
+    );
+    shimmerAnimation.start();
+    return () => shimmerAnimation.stop();
+  }, []);
+
+  const shimmerStyle = {
+    opacity: shimmerValue.interpolate({
+      inputRange: [0, 1],
+      outputRange: [0.3, 0.7],
+    }),
+  };
+
+  return (
+    <View style={[styles.shimmerCard, { backgroundColor, borderColor }]}>
+      <View style={styles.shimmerHeader}>
+        <Animated.View
+          style={[
+            styles.shimmerTitle,
+            shimmerStyle,
+            { backgroundColor: placeholderGray + "40" },
+          ]}
+        />
+        <Animated.View
+          style={[
+            styles.shimmerSwitch,
+            shimmerStyle,
+            { backgroundColor: placeholderGray + "30" },
+          ]}
+        />
+      </View>
+
+      <View style={styles.shimmerMeta}>
+        <Animated.View
+          style={[
+            styles.shimmerBadge,
+            shimmerStyle,
+            { backgroundColor: placeholderGray + "50" },
+          ]}
+        />
+        <Animated.View
+          style={[
+            styles.shimmerDate,
+            shimmerStyle,
+            { backgroundColor: placeholderGray + "30" },
+          ]}
+        />
+      </View>
+
+      <View style={styles.shimmerSources}>
+        <Animated.View
+          style={[
+            styles.shimmerSourceTag,
+            shimmerStyle,
+            { backgroundColor: placeholderGray + "30" },
+          ]}
+        />
+        <Animated.View
+          style={[
+            styles.shimmerSourceTag,
+            shimmerStyle,
+            { backgroundColor: placeholderGray + "30" },
+          ]}
+        />
+        <Animated.View
+          style={[
+            styles.shimmerSourceTag,
+            shimmerStyle,
+            { backgroundColor: placeholderGray + "30" },
+          ]}
+        />
+      </View>
+
+      <View style={styles.shimmerActions}>
+        <Animated.View
+          style={[
+            styles.shimmerButton,
+            shimmerStyle,
+            { backgroundColor: placeholderGray + "30" },
+          ]}
+        />
+        <Animated.View
+          style={[
+            styles.shimmerButton,
+            shimmerStyle,
+            { backgroundColor: placeholderGray + "30" },
+          ]}
+        />
+      </View>
+    </View>
+  );
+};
+
 const AlertsTab = () => {
   const textColor = useThemeColor("textColor");
   const backgroundColor = useThemeColor("background");
@@ -54,7 +170,6 @@ const AlertsTab = () => {
   const borderColor = useThemeColor("inputBorder");
   const placeholderGray = useThemeColor("placeholderGray");
 
-  // State management
   const [alerts, setAlerts] = useState<Alert[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -66,7 +181,6 @@ const AlertsTab = () => {
     "all"
   );
 
-  // Form state
   const [formData, setFormData] = useState<AlertFormData>({
     alert_text: "",
     alert_sources: ["news", "blogs"],
@@ -78,7 +192,6 @@ const AlertsTab = () => {
   useEffect(() => {
     loadAlerts();
 
-    // Subscribe to real-time changes
     const channel = supabase
       .channel("alerts_changes")
       .on(
@@ -272,8 +385,29 @@ const AlertsTab = () => {
     }
   };
 
+  const getAlertTypeColor = (alertType: AlertType) => {
+    switch (alertType) {
+      case "immediate":
+        return accentColor;
+      case "daily":
+        return "#10B981";
+      case "weekly":
+        return "#F59E0B";
+      default:
+        return accentColor;
+    }
+  };
+
   const renderAlertItem: ListRenderItem<Alert> = ({ item }) => (
-    <View style={[styles.alertCard, { backgroundColor, borderColor }]}>
+    <View
+      style={[
+        styles.alertCard,
+        {
+          backgroundColor,
+          borderColor,
+        },
+      ]}
+    >
       <View style={styles.alertHeader}>
         <View style={styles.alertInfo}>
           <View style={styles.alertTitleRow}>
@@ -286,22 +420,43 @@ const AlertsTab = () => {
             <Switch
               value={item.is_active}
               onValueChange={() => handleToggleStatus(item.id, item.is_active)}
-              trackColor={{ false: borderColor, true: `#A7F55450` }}
-              thumbColor={item.is_active ? "#A7F554" : placeholderGray}
+              trackColor={{
+                false: borderColor + "80",
+                true: accentColor + "40",
+              }}
+              thumbColor={item.is_active ? accentColor : placeholderGray}
+              ios_backgroundColor={borderColor}
             />
           </View>
 
           <View style={styles.alertMetadata}>
             <View
-              style={[styles.alertTypeBadge, { backgroundColor: accentColor }]}
+              style={[
+                styles.alertTypeBadge,
+                {
+                  backgroundColor: getAlertTypeColor(item.alert_type) + "20",
+                  borderColor: getAlertTypeColor(item.alert_type) + "40",
+                },
+              ]}
             >
-              <Text style={[styles.alertTypeText, { color: "#ffffff" }]}>
+              <View
+                style={[
+                  styles.statusDot,
+                  { backgroundColor: getAlertTypeColor(item.alert_type) },
+                ]}
+              />
+              <Text
+                style={[
+                  styles.alertTypeText,
+                  { color: getAlertTypeColor(item.alert_type) },
+                ]}
+              >
                 {getAlertTypeLabel(item.alert_type)}
               </Text>
             </View>
 
             <Text style={[styles.alertDate, { color: placeholderGray }]}>
-              Created {dayjs(item.created_at).fromNow()}
+              {dayjs(item.created_at).format("MMM D, YYYY")}
             </Text>
           </View>
 
@@ -311,59 +466,94 @@ const AlertsTab = () => {
             >
               Sources:
             </Text>
-            {item.alert_sources.map((source, index) => (
+            {item.alert_sources.slice(0, 3).map((source, index) => (
               <View
                 key={source}
                 style={[
                   styles.sourceTag,
                   {
-                    backgroundColor: `${accentColor}10`,
-                    borderColor: `${accentColor}30`,
+                    backgroundColor: borderColor + "40",
                   },
                 ]}
               >
-                <Text style={[styles.sourceTagText, { color: accentColor }]}>
+                <Text style={[styles.sourceTagText, { color: textColor }]}>
                   {source}
                 </Text>
               </View>
             ))}
+            {item.alert_sources.length > 3 && (
+              <View
+                style={[
+                  styles.sourceTag,
+                  { backgroundColor: borderColor + "60" },
+                ]}
+              >
+                <Text style={[styles.sourceTagText, { color: textColor }]}>
+                  +{item.alert_sources.length - 3}
+                </Text>
+              </View>
+            )}
           </View>
         </View>
       </View>
 
       <View style={styles.alertActions}>
-        <TouchableOpacity
-          style={[styles.actionButton, styles.editButton, { borderColor }]}
+        <Pressable
+          style={({ pressed }) => [
+            styles.actionButton,
+            styles.editButton,
+            {
+              borderColor,
+              backgroundColor: pressed ? borderColor + "30" : "transparent",
+            },
+          ]}
           onPress={() => openEditModal(item)}
         >
           <EditIcon width={16} height={16} color={textColor} />
           <Text style={[styles.actionButtonText, { color: textColor }]}>
-            Edit
+            <FormattedMessage id="edit" />
           </Text>
-        </TouchableOpacity>
+        </Pressable>
 
-        <TouchableOpacity
-          style={[styles.actionButton, styles.deleteButton]}
+        <Pressable
+          style={({ pressed }) => [
+            styles.actionButton,
+            styles.deleteButton,
+            {
+              backgroundColor: pressed ? "#EF4444" + "20" : "#EF4444" + "10",
+              borderColor: "#EF4444" + "30",
+            },
+          ]}
           onPress={() => handleDeleteAlert(item)}
         >
           <DeleteIcon width={16} height={16} color="#EF4444" />
           <Text style={[styles.actionButtonText, { color: "#EF4444" }]}>
-            Delete
+            <FormattedMessage id="delete" />
           </Text>
-        </TouchableOpacity>
+        </Pressable>
       </View>
     </View>
   );
 
   const renderForm = () => (
-    <ScrollView style={styles.formContainer}>
+    <ScrollView
+      style={styles.formContainer}
+      showsVerticalScrollIndicator={false}
+    >
       {/* Alert Text */}
       <View style={styles.formSection}>
         <Text style={[styles.formLabel, { color: textColor }]}>
-          Alert Text *
+          <FormattedMessage id="alert_text_label" />
         </Text>
         <TextInput
-          style={[styles.formInput, { color: textColor, borderColor }]}
+          style={[
+            styles.formInput,
+            {
+              color: textColor,
+              borderColor,
+              backgroundColor: backgroundColor,
+            },
+          ]}
           value={formData.alert_text}
           onChangeText={(text) =>
             setFormData((prev) => ({ ...prev, alert_text: text }))
@@ -379,39 +569,62 @@ const AlertsTab = () => {
       {/* Alert Type */}
       <View style={styles.formSection}>
         <Text style={[styles.formLabel, { color: textColor }]}>
-          Alert Frequency
+          <FormattedMessage id="alert_frequency_label" />
         </Text>
         <View style={styles.radioGroup}>
           {(["immediate", "daily", "weekly"] as AlertType[]).map((type) => (
-            <TouchableOpacity
+            <Pressable
               key={type}
-              style={[
+              style={({ pressed }) => [
                 styles.radioOption,
                 {
                   backgroundColor:
                     formData.alert_type === type
-                      ? `${accentColor}20`
+                      ? getAlertTypeColor(type) + "20"
+                      : pressed
+                      ? borderColor + "30"
                       : backgroundColor,
                   borderColor:
-                    formData.alert_type === type ? accentColor : borderColor,
+                    formData.alert_type === type
+                      ? getAlertTypeColor(type)
+                      : borderColor,
                 },
               ]}
               onPress={() =>
                 setFormData((prev) => ({ ...prev, alert_type: type }))
               }
             >
-              <Text
-                style={[
-                  styles.radioOptionText,
-                  {
-                    color:
-                      formData.alert_type === type ? accentColor : textColor,
-                  },
-                ]}
-              >
-                {getAlertTypeLabel(type)}
-              </Text>
-            </TouchableOpacity>
+              <View style={[styles.radioOptionContent]}>
+                <View
+                  style={[
+                    styles.radioIndicator,
+                    {
+                      backgroundColor:
+                        formData.alert_type === type
+                          ? getAlertTypeColor(type)
+                          : "transparent",
+                      borderColor:
+                        formData.alert_type === type
+                          ? getAlertTypeColor(type)
+                          : borderColor,
+                    },
+                  ]}
+                />
+                <Text
+                  style={[
+                    styles.radioOptionText,
+                    {
+                      color:
+                        formData.alert_type === type
+                          ? getAlertTypeColor(type)
+                          : textColor,
+                    },
+                  ]}
+                >
+                  {getAlertTypeLabel(type)}
+                </Text>
+              </View>
+            </Pressable>
           ))}
         </View>
       </View>
@@ -419,17 +632,19 @@ const AlertsTab = () => {
       {/* Alert Sources */}
       <View style={styles.formSection}>
         <Text style={[styles.formLabel, { color: textColor }]}>
-          Sources to Monitor
+          <FormattedMessage id="sources_to_monitor" />
         </Text>
         <View style={styles.sourcesGrid}>
           {["news", "blogs", "youtube", "reddit"].map((source) => (
-            <TouchableOpacity
+            <Pressable
               key={source}
-              style={[
+              style={({ pressed }) => [
                 styles.sourceOption,
                 {
                   backgroundColor: formData.alert_sources.includes(source)
-                    ? `${accentColor}20`
+                    ? accentColor + "20"
+                    : pressed
+                    ? borderColor + "30"
                     : backgroundColor,
                   borderColor: formData.alert_sources.includes(source)
                     ? accentColor
@@ -445,19 +660,38 @@ const AlertsTab = () => {
                 }));
               }}
             >
-              <Text
-                style={[
-                  styles.sourceOptionText,
-                  {
-                    color: formData.alert_sources.includes(source)
-                      ? accentColor
-                      : textColor,
-                  },
-                ]}
-              >
-                {source.charAt(0).toUpperCase() + source.slice(1)}
-              </Text>
-            </TouchableOpacity>
+              <View style={styles.sourceOptionContent}>
+                <View
+                  style={[
+                    styles.checkboxIndicator,
+                    {
+                      backgroundColor: formData.alert_sources.includes(source)
+                        ? accentColor
+                        : "transparent",
+                      borderColor: formData.alert_sources.includes(source)
+                        ? accentColor
+                        : borderColor,
+                    },
+                  ]}
+                >
+                  {formData.alert_sources.includes(source) && (
+                    <SaveIcon width={12} height={12} color="#ffffff" />
+                  )}
+                </View>
+                <Text
+                  style={[
+                    styles.sourceOptionText,
+                    {
+                      color: formData.alert_sources.includes(source)
+                        ? accentColor
+                        : textColor,
+                    },
+                  ]}
+                >
+                  {source.charAt(0).toUpperCase() + source.slice(1)}
+                </Text>
+              </View>
+            </Pressable>
           ))}
         </View>
       </View>
@@ -466,20 +700,39 @@ const AlertsTab = () => {
 
   const renderHeader = () => (
     <View style={styles.headerContainer}>
-      {/* Title and Create Button */}
+      {/* Title Section */}
       <View style={styles.titleSection}>
         <View style={styles.titleLeft}>
+          <View
+            style={[styles.titleIcon, { backgroundColor: accentColor + "15" }]}
+          >
+            <BellIcon width={24} height={24} color={accentColor} />
+          </View>
           <View>
-            <Text style={[styles.title, { color: textColor }]}>Alerts</Text>
+            <Text style={[styles.title, { color: textColor }]}>
+              <FormattedMessage id="alerts" />
+            </Text>
             <Text style={[styles.subtitle, { color: placeholderGray }]}>
-              Manage your monitoring alerts
+              {alerts.length === 0
+                ? "No alerts configured"
+                : `${alerts.length} alert${
+                    alerts.length !== 1 ? "s" : ""
+                  } active`}
             </Text>
           </View>
         </View>
       </View>
 
-      {/* Search and Filter */}
-      <View style={[styles.searchContainer, { backgroundColor, borderColor }]}>
+      {/* Search Container */}
+      <View
+        style={[
+          styles.searchContainer,
+          {
+            backgroundColor,
+            borderColor,
+          },
+        ]}
+      >
         <SearchIcon width={20} height={20} color={placeholderGray} />
         <TextInput
           style={[styles.searchInput, { color: textColor }]}
@@ -489,6 +742,14 @@ const AlertsTab = () => {
           onChangeText={setSearchQuery}
           selectionColor={accentColor}
         />
+        {searchQuery.length > 0 && (
+          <Pressable
+            style={({ pressed }) => [{ opacity: pressed ? 0.6 : 1 }]}
+            onPress={() => setSearchQuery("")}
+          >
+            <CloseIcon width={20} height={20} color={placeholderGray} />
+          </Pressable>
+        )}
       </View>
 
       {/* Filter Tabs */}
@@ -506,13 +767,17 @@ const AlertsTab = () => {
             count: alerts.filter((a) => !a.is_active).length,
           },
         ].map((tab) => (
-          <TouchableOpacity
+          <Pressable
             key={tab.key}
-            style={[
+            style={({ pressed }) => [
               styles.filterTab,
               {
                 backgroundColor:
-                  filterType === tab.key ? accentColor : backgroundColor,
+                  filterType === tab.key
+                    ? accentColor
+                    : pressed
+                    ? borderColor + "30"
+                    : backgroundColor,
                 borderColor: filterType === tab.key ? accentColor : borderColor,
               },
             ]}
@@ -524,99 +789,154 @@ const AlertsTab = () => {
                 { color: filterType === tab.key ? "#ffffff" : textColor },
               ]}
             >
-              {tab.label} ({tab.count})
+              {tab.label}
             </Text>
-          </TouchableOpacity>
+            <View
+              style={[
+                styles.filterTabBadge,
+                {
+                  backgroundColor:
+                    filterType === tab.key ? "#ffffff30" : borderColor + "60",
+                },
+              ]}
+            >
+              <Text
+                style={[
+                  styles.filterTabBadgeText,
+                  { color: filterType === tab.key ? "#ffffff" : textColor },
+                ]}
+              >
+                {tab.count}
+              </Text>
+            </View>
+          </Pressable>
         ))}
       </View>
     </View>
   );
 
-  const renderEmptyState = () => (
-    <View style={styles.emptyState}>
-      <BellIcon width={48} height={48} color={placeholderGray} />
-      <Text style={[styles.emptyStateTitle, { color: textColor }]}>
-        No Alerts Yet
-      </Text>
-      <Text style={[styles.emptyStateSubtitle, { color: placeholderGray }]}>
-        Create your first alert to start monitoring news and topics
-      </Text>
+  const renderShimmerContent = () => (
+    <View style={styles.shimmerContainer}>
+      <ShimmerAlertCard />
+      <ShimmerAlertCard />
+      <ShimmerAlertCard />
     </View>
   );
 
-  if (loading) {
-    return (
-      <View style={[styles.loadingContainer, { backgroundColor }]}>
-        <ActivityIndicator size="large" color={accentColor} />
-        <Text style={[styles.loadingText, { color: placeholderGray }]}>
-          Loading alerts...
-        </Text>
+  const renderEmptyState = () => (
+    <View style={styles.emptyState}>
+      <View
+        style={[
+          styles.emptyIconContainer,
+          { backgroundColor: placeholderGray + "20" },
+        ]}
+      >
+        <BellIcon width={32} height={32} color={placeholderGray} />
       </View>
-    );
-  }
+      <Text style={[styles.emptyStateTitle, { color: textColor }]}>
+        <FormattedMessage id="no_alerts_yet" />
+      </Text>
+      <Text style={[styles.emptyStateSubtitle, { color: placeholderGray }]}>
+        <FormattedMessage id="create_first_alert" />
+      </Text>
+      <Pressable
+        style={({ pressed }) => [
+          styles.emptyStateButton,
+          {
+            backgroundColor: accentColor,
+            opacity: pressed ? 0.9 : 1,
+          },
+        ]}
+        onPress={() => setShowCreateModal(true)}
+      >
+        <PlusIcon width={16} height={16} color="#ffffff" />
+        <Text style={[styles.emptyStateButtonText, { color: "#ffffff" }]}>
+          <FormattedMessage id="create" />
+        </Text>
+      </Pressable>
+    </View>
+  );
 
   return (
     <View style={[styles.container, { backgroundColor }]}>
       <SafeAreaView style={styles.safeArea}>
-        <FlatList
-          data={filteredAlerts}
-          renderItem={renderAlertItem}
-          keyExtractor={(item) => item.id}
-          ListHeaderComponent={renderHeader}
-          ListEmptyComponent={
-            filteredAlerts.length === 0 ? renderEmptyState : null
-          }
-          contentContainerStyle={[
-            styles.contentContainer,
-            filteredAlerts.length === 0 && styles.emptyContentContainer,
-          ]}
-          showsVerticalScrollIndicator={false}
-          refreshControl={
-            <RefreshControl
-              refreshing={refreshing}
-              onRefresh={onRefresh}
-              colors={[accentColor]}
-              tintColor={accentColor}
-            />
-          }
-        />
+        {loading ? (
+          <>
+            {renderHeader()}
+            {renderShimmerContent()}
+          </>
+        ) : (
+          <FlatList
+            data={filteredAlerts}
+            renderItem={renderAlertItem}
+            keyExtractor={(item) => item.id}
+            ListHeaderComponent={renderHeader}
+            ListEmptyComponent={
+              filteredAlerts.length === 0 ? renderEmptyState : null
+            }
+            contentContainerStyle={[
+              styles.contentContainer,
+              filteredAlerts.length === 0 && styles.emptyContentContainer,
+            ]}
+            showsVerticalScrollIndicator={false}
+            refreshControl={
+              <RefreshControl
+                refreshing={refreshing}
+                onRefresh={onRefresh}
+                colors={[accentColor]}
+                tintColor={accentColor}
+              />
+            }
+          />
+        )}
       </SafeAreaView>
 
-      {/* Create Alert Modal */}
+      {/* Create Modal */}
       <Modal
         visible={showCreateModal}
         animationType="slide"
         presentationStyle="pageSheet"
       >
         <SafeAreaView style={[styles.modalContainer, { backgroundColor }]}>
-          <View
-            style={[styles.modalHeader, { borderBottomColor: borderColor }]}
-          >
+          <View style={[styles.modalHeader]}>
             <Text style={[styles.modalTitle, { color: textColor }]}>
-              Create Alert
+              <FormattedMessage id="create" />
             </Text>
-            <TouchableOpacity onPress={closeCreateModal}>
+            <Pressable
+              style={({ pressed }) => [{ opacity: pressed ? 0.6 : 1 }]}
+              onPress={closeCreateModal}
+            >
               <CloseIcon width={24} height={24} color={textColor} />
-            </TouchableOpacity>
+            </Pressable>
           </View>
 
           {renderForm()}
 
           <View style={styles.modalFooter}>
-            <TouchableOpacity
-              style={[styles.cancelButton, { borderColor }]}
+            <Pressable
+              style={({ pressed }) => [
+                styles.cancelButton,
+                {
+                  borderColor,
+                  backgroundColor: pressed ? borderColor + "20" : "transparent",
+                },
+              ]}
               onPress={closeCreateModal}
             >
               <Text style={[styles.cancelButtonText, { color: textColor }]}>
-                Cancel
+                <FormattedMessage id="cancel" />
               </Text>
-            </TouchableOpacity>
+            </Pressable>
 
-            <TouchableOpacity
-              style={[
+            <Pressable
+              style={({ pressed }) => [
                 styles.saveButton,
                 {
-                  backgroundColor: formLoading ? placeholderGray : accentColor,
+                  backgroundColor: formLoading
+                    ? placeholderGray
+                    : pressed
+                    ? accentColor + "CC"
+                    : accentColor,
                 },
               ]}
               onPress={handleCreateAlert}
@@ -628,13 +948,14 @@ const AlertsTab = () => {
                 <SaveIcon width={16} height={16} color="#ffffff" />
               )}
               <Text style={[styles.saveButtonText, { color: "#ffffff" }]}>
-                {formLoading ? "Creating..." : "Create"}
+                {formLoading ? "Creating..." : "Create Alert"}
               </Text>
-            </TouchableOpacity>
+            </Pressable>
           </View>
         </SafeAreaView>
       </Modal>
 
+      {/* Edit Modal */}
       <Modal
         visible={showEditModal}
         animationType="slide"
@@ -643,30 +964,43 @@ const AlertsTab = () => {
         <SafeAreaView style={[styles.modalContainer, { backgroundColor }]}>
           <View style={[styles.modalHeader]}>
             <Text style={[styles.modalTitle, { color: textColor }]}>
-              Edit Alert
+              <FormattedMessage id="edit_alert" />
             </Text>
-            <TouchableOpacity onPress={closeEditModal}>
+            <Pressable
+              style={({ pressed }) => [{ opacity: pressed ? 0.6 : 1 }]}
+              onPress={closeEditModal}
+            >
               <CloseIcon width={24} height={24} color={textColor} />
-            </TouchableOpacity>
+            </Pressable>
           </View>
 
           {renderForm()}
 
           <View style={styles.modalFooter}>
-            <TouchableOpacity
-              style={[styles.cancelButton, { borderColor }]}
+            <Pressable
+              style={({ pressed }) => [
+                styles.cancelButton,
+                {
+                  borderColor,
+                  backgroundColor: pressed ? borderColor + "20" : "transparent",
+                },
+              ]}
               onPress={closeEditModal}
             >
               <Text style={[styles.cancelButtonText, { color: textColor }]}>
-                Cancel
+                <FormattedMessage id="cancel" />
               </Text>
-            </TouchableOpacity>
+            </Pressable>
 
-            <TouchableOpacity
-              style={[
+            <Pressable
+              style={({ pressed }) => [
                 styles.saveButton,
                 {
-                  backgroundColor: formLoading ? placeholderGray : accentColor,
+                  backgroundColor: formLoading
+                    ? placeholderGray
+                    : pressed
+                    ? accentColor + "CC"
+                    : accentColor,
                 },
               ]}
               onPress={handleEditAlert}
@@ -678,19 +1012,26 @@ const AlertsTab = () => {
                 <SaveIcon width={16} height={16} color="#ffffff" />
               )}
               <Text style={[styles.saveButtonText, { color: "#ffffff" }]}>
-                {formLoading ? "Updating..." : "Update"}
+                <FormattedMessage id={formLoading ? "updating" : "update"} />
               </Text>
-            </TouchableOpacity>
+            </Pressable>
           </View>
         </SafeAreaView>
       </Modal>
 
-      <TouchableOpacity
-        style={[styles.createButton, { backgroundColor: accentColor }]}
+      {/* Floating Create Button */}
+      <Pressable
+        style={({ pressed }) => [
+          styles.createButton,
+          {
+            backgroundColor: accentColor,
+            transform: [{ scale: pressed ? 0.95 : 1 }],
+          },
+        ]}
         onPress={() => setShowCreateModal(true)}
       >
-        <PlusIcon width={20} height={20} color="#ffffff" />
-      </TouchableOpacity>
+        <PlusIcon width={24} height={24} color="#ffffff" />
+      </Pressable>
     </View>
   );
 };
@@ -704,21 +1045,21 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   contentContainer: {
-    paddingBottom: verticalScale(20),
+    paddingBottom: verticalScale(120),
   },
   emptyContentContainer: {
     flexGrow: 1,
   },
   headerContainer: {
-    paddingHorizontal: horizontalScale(16),
+    paddingHorizontal: horizontalScale(20),
     paddingTop: verticalScale(20),
-    paddingBottom: verticalScale(16),
+    paddingBottom: verticalScale(20),
   },
   titleSection: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: verticalScale(20),
+    marginBottom: verticalScale(24),
   },
   titleLeft: {
     flexDirection: "row",
@@ -726,81 +1067,89 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   titleIcon: {
-    width: moderateScale(48),
-    height: moderateScale(48),
-    borderRadius: moderateScale(24),
+    width: moderateScale(52),
+    height: moderateScale(52),
+    borderRadius: moderateScale(26),
     alignItems: "center",
     justifyContent: "center",
-    marginRight: horizontalScale(12),
+    marginRight: horizontalScale(16),
   },
   title: {
-    fontSize: moderateScale(28),
+    fontSize: moderateScale(32),
     fontFamily: "Inter-Bold",
-    lineHeight: moderateScale(34),
-    marginBottom: verticalScale(4),
+    lineHeight: moderateScale(38),
+    letterSpacing: -0.5,
   },
   subtitle: {
-    fontSize: moderateScale(14),
-    fontFamily: "Inter-Regular",
-    lineHeight: moderateScale(18),
-    marginTop: verticalScale(2),
+    fontSize: moderateScale(16),
+    fontFamily: "Inter-Medium",
+    lineHeight: moderateScale(20),
+    marginTop: verticalScale(4),
+    opacity: 0.8,
   },
   createButton: {
-    flexDirection: "row",
+    width: moderateScale(60),
+    height: moderateScale(60),
+    borderRadius: moderateScale(30),
     alignItems: "center",
     justifyContent: "center",
-    width: moderateScale(50),
-    height: moderateScale(50),
-    borderRadius: moderateScale(100),
     position: "absolute",
-    bottom: verticalScale(120),
+    bottom: verticalScale(100),
     right: horizontalScale(20),
-  },
-  createButtonText: {
-    fontSize: moderateScale(14),
-    fontFamily: "Inter-SemiBold",
   },
   searchContainer: {
     flexDirection: "row",
     alignItems: "center",
-    paddingHorizontal: horizontalScale(16),
-    paddingVertical: verticalScale(5),
+    paddingHorizontal: horizontalScale(20),
+    paddingVertical: verticalScale(14),
     borderRadius: moderateScale(100),
     borderWidth: 1,
-    marginBottom: verticalScale(12),
+    marginBottom: verticalScale(20),
   },
   searchInput: {
     flex: 1,
     fontSize: moderateScale(16),
     fontFamily: "Inter-Regular",
-    marginLeft: horizontalScale(8),
+    marginLeft: horizontalScale(12),
   },
   filterTabs: {
     flexDirection: "row",
-    gap: horizontalScale(8),
+    gap: horizontalScale(5),
     marginBottom: verticalScale(8),
   },
   filterTab: {
     flex: 1,
-    paddingVertical: verticalScale(8),
-    paddingHorizontal: horizontalScale(12),
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: verticalScale(12),
+    paddingHorizontal: horizontalScale(24),
     borderRadius: moderateScale(100),
     borderWidth: 1,
-    alignItems: "center",
+    gap: horizontalScale(8),
   },
   filterTabText: {
-    fontSize: moderateScale(13),
+    fontSize: moderateScale(14),
     fontFamily: "Inter-SemiBold",
   },
+  filterTabBadge: {
+    paddingHorizontal: horizontalScale(8),
+    paddingVertical: verticalScale(2),
+    borderRadius: moderateScale(100),
+  },
+  filterTabBadgeText: {
+    fontSize: moderateScale(12),
+    fontFamily: "Inter-Bold",
+  },
   alertCard: {
-    marginHorizontal: horizontalScale(16),
-    marginBottom: verticalScale(12),
-    borderRadius: moderateScale(16),
+    marginHorizontal: horizontalScale(20),
+    marginBottom: verticalScale(16),
+    borderRadius: moderateScale(20),
     borderWidth: 1,
-    padding: horizontalScale(16),
+    padding: moderateScale(20),
   },
   alertHeader: {
-    marginBottom: verticalScale(12),
+    marginBottom: verticalScale(16),
   },
   alertInfo: {
     flex: 1,
@@ -809,53 +1158,62 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "flex-start",
-    marginBottom: verticalScale(8),
+    marginBottom: verticalScale(16),
   },
   alertTitle: {
-    fontSize: moderateScale(16),
-    fontFamily: "Inter-SemiBold",
-    lineHeight: moderateScale(20),
+    fontSize: moderateScale(18),
+    fontFamily: "Inter-Bold",
+    lineHeight: moderateScale(24),
     flex: 1,
-    marginRight: horizontalScale(12),
+    marginRight: horizontalScale(16),
+    letterSpacing: -0.2,
   },
   alertMetadata: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    marginBottom: verticalScale(8),
-    gap: horizontalScale(8),
+    marginBottom: verticalScale(16),
   },
   alertTypeBadge: {
-    paddingHorizontal: horizontalScale(8),
-    paddingVertical: verticalScale(2),
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: horizontalScale(12),
+    paddingVertical: verticalScale(6),
+    borderRadius: moderateScale(16),
+    borderWidth: 1,
+    gap: horizontalScale(6),
+  },
+  statusDot: {
+    width: moderateScale(8),
+    height: moderateScale(8),
     borderRadius: moderateScale(4),
   },
   alertTypeText: {
-    fontSize: moderateScale(11),
-    fontFamily: "Inter-SemiBold",
-    textTransform: "uppercase",
+    fontSize: moderateScale(12),
+    fontFamily: "Inter-Medium",
     letterSpacing: 0.5,
   },
   alertDate: {
-    fontSize: moderateScale(12),
+    fontSize: moderateScale(13),
     fontFamily: "Inter-Medium",
+    opacity: 0.8,
   },
   alertSources: {
     flexDirection: "row",
     alignItems: "center",
     flexWrap: "wrap",
-    gap: horizontalScale(6),
-    marginTop: verticalScale(13),
+    gap: horizontalScale(8),
+    marginTop: verticalScale(4),
   },
   alertSourcesLabel: {
-    fontSize: moderateScale(12),
+    fontSize: moderateScale(13),
     fontFamily: "Inter-Medium",
+    opacity: 0.8,
   },
   sourceTag: {
-    paddingHorizontal: horizontalScale(6),
-    paddingVertical: verticalScale(2),
-    borderRadius: moderateScale(100),
-    borderWidth: 1,
+    paddingHorizontal: horizontalScale(10),
+    paddingVertical: verticalScale(4),
+    borderRadius: moderateScale(12),
   },
   sourceTagText: {
     fontSize: moderateScale(12),
@@ -864,68 +1222,132 @@ const styles = StyleSheet.create({
   },
   alertActions: {
     flexDirection: "row",
-    gap: horizontalScale(8),
-    marginTop: verticalScale(16),
+    gap: horizontalScale(12),
   },
   actionButton: {
     flex: 1,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    paddingVertical: verticalScale(8),
+    paddingVertical: verticalScale(12),
     borderRadius: moderateScale(100),
-    gap: horizontalScale(4),
+    gap: horizontalScale(6),
   },
   editButton: {
     borderWidth: 1,
   },
   deleteButton: {
-    backgroundColor: "rgba(239, 68, 68, 0.1)",
+    borderWidth: 1,
   },
   actionButtonText: {
-    fontSize: moderateScale(12),
+    fontSize: moderateScale(14),
     fontFamily: "Inter-SemiBold",
   },
+
+  // Shimmer styles
+  shimmerContainer: {
+    paddingHorizontal: horizontalScale(20),
+  },
+  shimmerCard: {
+    borderRadius: moderateScale(20),
+    borderWidth: 1,
+    padding: moderateScale(20),
+    marginBottom: verticalScale(16),
+  },
+  shimmerHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "flex-start",
+    marginBottom: verticalScale(16),
+  },
+  shimmerTitle: {
+    height: moderateScale(20),
+    borderRadius: moderateScale(4),
+    flex: 1,
+    marginRight: horizontalScale(16),
+  },
+  shimmerSwitch: {
+    width: moderateScale(44),
+    height: moderateScale(24),
+    borderRadius: moderateScale(12),
+  },
+  shimmerMeta: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: verticalScale(16),
+  },
+  shimmerBadge: {
+    width: moderateScale(60),
+    height: moderateScale(24),
+    borderRadius: moderateScale(12),
+  },
+  shimmerDate: {
+    width: moderateScale(80),
+    height: moderateScale(16),
+    borderRadius: moderateScale(8),
+  },
+  shimmerSources: {
+    flexDirection: "row",
+    gap: horizontalScale(8),
+    marginBottom: verticalScale(16),
+  },
+  shimmerSourceTag: {
+    width: moderateScale(50),
+    height: moderateScale(20),
+    borderRadius: moderateScale(10),
+  },
+  shimmerActions: {
+    flexDirection: "row",
+    gap: horizontalScale(12),
+  },
+  shimmerButton: {
+    flex: 1,
+    height: moderateScale(36),
+    borderRadius: moderateScale(16),
+  },
+
+  // Empty state
   emptyState: {
-    flex: 0.8,
+    flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    paddingHorizontal: horizontalScale(32),
+    paddingHorizontal: horizontalScale(40),
+    paddingVertical: verticalScale(60),
+  },
+  emptyIconContainer: {
+    width: moderateScale(80),
+    height: moderateScale(80),
+    borderRadius: moderateScale(40),
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: verticalScale(24),
   },
   emptyStateTitle: {
-    fontSize: moderateScale(20),
+    fontSize: moderateScale(24),
     fontFamily: "Inter-Bold",
-    marginTop: verticalScale(16),
-    marginBottom: verticalScale(8),
+    marginBottom: verticalScale(12),
+    textAlign: "center",
+    letterSpacing: -0.3,
   },
   emptyStateSubtitle: {
-    fontSize: moderateScale(15),
-    fontFamily: "Inter-Regular",
+    fontSize: moderateScale(16),
+    fontFamily: "Inter-Medium",
     textAlign: "center",
-    lineHeight: moderateScale(20),
-    marginBottom: verticalScale(24),
+    lineHeight: moderateScale(22),
+    marginBottom: verticalScale(32),
+    opacity: 0.8,
   },
   emptyStateButton: {
     flexDirection: "row",
     alignItems: "center",
-    paddingHorizontal: horizontalScale(20),
-    paddingVertical: verticalScale(12),
-    borderRadius: moderateScale(100),
-    gap: horizontalScale(6),
+    paddingHorizontal: horizontalScale(24),
+    paddingVertical: verticalScale(14),
+    borderRadius: moderateScale(24),
+    gap: horizontalScale(8),
   },
   emptyStateButtonText: {
-    fontSize: moderateScale(14),
-    fontFamily: "Inter-SemiBold",
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  loadingText: {
-    fontSize: moderateScale(14),
-    fontFamily: "Inter-Medium",
-    marginTop: verticalScale(12),
+    fontSize: moderateScale(16),
+    fontFamily: "Inter-Bold",
   },
   modalContainer: {
     flex: 1,
@@ -934,80 +1356,104 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    paddingHorizontal: horizontalScale(16),
-    paddingVertical: verticalScale(16),
+    paddingHorizontal: horizontalScale(20),
+    paddingVertical: verticalScale(10),
+    borderBottomWidth: 1,
+    borderBottomColor: "transparent",
   },
   modalTitle: {
-    fontSize: moderateScale(18),
-    fontFamily: "Inter-SemiBold",
+    fontSize: moderateScale(22),
+    fontFamily: "Inter-Bold",
+    letterSpacing: -0.3,
   },
   formContainer: {
     flex: 1,
-    paddingHorizontal: horizontalScale(16),
+    paddingHorizontal: horizontalScale(20),
   },
   formSection: {
-    marginVertical: verticalScale(16),
+    marginVertical: verticalScale(10),
   },
   formLabel: {
-    fontSize: moderateScale(16),
-    fontFamily: "Inter-SemiBold",
-    marginBottom: verticalScale(8),
+    fontSize: moderateScale(18),
+    fontFamily: "Inter-Bold",
+    marginBottom: verticalScale(12),
+    letterSpacing: -0.2,
   },
   formInput: {
     borderWidth: 1,
-    borderRadius: moderateScale(100),
-    paddingHorizontal: horizontalScale(16),
+    borderRadius: moderateScale(16),
+    paddingHorizontal: horizontalScale(20),
     paddingVertical: verticalScale(16),
     fontSize: moderateScale(16),
     fontFamily: "Inter-Regular",
     textAlignVertical: "top",
+    minHeight: verticalScale(80),
   },
   radioGroup: {
-    gap: verticalScale(8),
+    gap: verticalScale(12),
   },
   radioOption: {
-    paddingHorizontal: horizontalScale(16),
-    paddingVertical: verticalScale(12),
-    borderRadius: moderateScale(8),
+    paddingHorizontal: horizontalScale(20),
+    paddingVertical: verticalScale(16),
+    borderRadius: moderateScale(16),
     borderWidth: 1,
+  },
+  radioOptionContent: {
+    flexDirection: "row",
     alignItems: "center",
+    gap: horizontalScale(12),
+  },
+  radioIndicator: {
+    width: moderateScale(20),
+    height: moderateScale(20),
+    borderRadius: moderateScale(10),
+    borderWidth: 2,
   },
   radioOptionText: {
-    fontSize: moderateScale(14),
+    fontSize: moderateScale(16),
     fontFamily: "Inter-SemiBold",
   },
   sourcesGrid: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: horizontalScale(8),
+    gap: verticalScale(12),
   },
   sourceOption: {
-    paddingHorizontal: horizontalScale(12),
-    paddingVertical: verticalScale(8),
-    borderRadius: moderateScale(6),
+    paddingHorizontal: horizontalScale(20),
+    paddingVertical: verticalScale(16),
+    borderRadius: moderateScale(16),
     borderWidth: 1,
-    minWidth: horizontalScale(80),
+  },
+  sourceOptionContent: {
+    flexDirection: "row",
     alignItems: "center",
+    gap: horizontalScale(12),
+  },
+  checkboxIndicator: {
+    width: moderateScale(20),
+    height: moderateScale(20),
+    borderRadius: moderateScale(4),
+    borderWidth: 2,
+    alignItems: "center",
+    justifyContent: "center",
   },
   sourceOptionText: {
-    fontSize: moderateScale(12),
+    fontSize: moderateScale(16),
     fontFamily: "Inter-SemiBold",
   },
   modalFooter: {
     flexDirection: "row",
-    paddingHorizontal: horizontalScale(16),
-    paddingVertical: verticalScale(16),
-    gap: horizontalScale(12),
+    paddingHorizontal: horizontalScale(20),
+    paddingVertical: verticalScale(20),
+    gap: horizontalScale(16),
   },
   cancelButton: {
     flex: 1,
-    paddingVertical: verticalScale(12),
+    paddingVertical: verticalScale(16),
     borderRadius: moderateScale(100),
     borderWidth: 1,
     alignItems: "center",
   },
   cancelButtonText: {
-    fontSize: moderateScale(14),
+    fontSize: moderateScale(16),
     fontFamily: "Inter-SemiBold",
   },
   saveButton: {
@@ -1015,12 +1461,12 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    paddingVertical: verticalScale(12),
+    paddingVertical: verticalScale(16),
     borderRadius: moderateScale(100),
-    gap: horizontalScale(6),
+    gap: horizontalScale(8),
   },
   saveButtonText: {
-    fontSize: moderateScale(14),
+    fontSize: moderateScale(16),
     fontFamily: "Inter-SemiBold",
   },
 });

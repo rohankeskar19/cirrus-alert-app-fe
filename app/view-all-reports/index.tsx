@@ -17,11 +17,11 @@ import {
   FlatList,
   ListRenderItem,
   Modal,
+  Pressable,
   RefreshControl,
   StyleSheet,
   Text,
   TextInput,
-  TouchableOpacity,
   View,
 } from "react-native";
 
@@ -31,6 +31,7 @@ import FilterIcon from "@/assets/icons/filter.svg";
 import SearchIcon from "@/assets/icons/search.svg";
 import SelectAllIcon from "@/assets/icons/select-all.svg";
 import CheckIcon from "@/assets/icons/tick.svg";
+import ShimmerAlertReportCard from "@/components/ShimmerAlertReportCard";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 type FilterType = "all" | "unread" | "read";
@@ -189,22 +190,23 @@ const ViewAllReportsScreen = () => {
   const renderReportItem: ListRenderItem<AlertReport> = ({ item, index }) => (
     <View style={styles.reportItemContainer}>
       {selectionMode && (
-        <TouchableOpacity
-          style={[
+        <Pressable
+          style={({ pressed }) => [
             styles.selectionButton,
             {
               backgroundColor: selectedReports.includes(item.id)
                 ? accentColor
                 : backgroundColor,
               borderColor: accentColor,
+              transform: [{ scale: pressed ? 0.95 : 1 }],
             },
           ]}
           onPress={() => toggleReportSelection(item.id)}
         >
           {selectedReports.includes(item.id) && (
-            <CheckIcon width={10} height={10} color="#ffffff" />
+            <CheckIcon width={12} height={12} color="#ffffff" />
           )}
-        </TouchableOpacity>
+        </Pressable>
       )}
       <View style={styles.reportCardContainer}>
         <AlertReportCard
@@ -217,32 +219,47 @@ const ViewAllReportsScreen = () => {
 
   const renderHeader = () => (
     <View style={styles.headerContainer}>
-      <View style={[styles.headerBar]}>
-        <TouchableOpacity
+      <View style={styles.headerBar}>
+        <Pressable
+          style={({ pressed }) => [
+            styles.backButton,
+            { opacity: pressed ? 0.6 : 1 },
+          ]}
           onPress={() => router.back()}
-          style={styles.backButton}
         >
           <BackIcon width={24} height={24} color={textColor} />
-        </TouchableOpacity>
+        </Pressable>
 
         <Text style={[styles.headerTitle, { color: textColor }]}>
-          <FormattedMessage id="all_reports" />
+          <FormattedMessage id="all_matches" />
         </Text>
 
         <View style={styles.headerActions}>
-          <TouchableOpacity
-            style={[styles.headerActionButton]}
+          <Pressable
+            style={({ pressed }) => [
+              styles.headerActionButton,
+              {
+                backgroundColor: pressed ? borderColor + "40" : "transparent",
+                transform: [{ scale: pressed ? 0.95 : 1 }],
+              },
+            ]}
             onPress={() => setSelectionMode(!selectionMode)}
           >
             <SelectAllIcon width={20} height={20} color={textColor} />
-          </TouchableOpacity>
+          </Pressable>
 
-          <TouchableOpacity
-            style={[styles.headerActionButton]}
+          <Pressable
+            style={({ pressed }) => [
+              styles.headerActionButton,
+              {
+                backgroundColor: pressed ? borderColor + "40" : "transparent",
+                transform: [{ scale: pressed ? 0.95 : 1 }],
+              },
+            ]}
             onPress={() => setShowFilters(true)}
           >
             <FilterIcon width={20} height={20} color={textColor} />
-          </TouchableOpacity>
+          </Pressable>
         </View>
       </View>
 
@@ -257,9 +274,12 @@ const ViewAllReportsScreen = () => {
           selectionColor={accentColor}
         />
         {searchQuery.length > 0 && (
-          <TouchableOpacity onPress={() => setSearchQuery("")}>
+          <Pressable
+            style={({ pressed }) => [{ opacity: pressed ? 0.6 : 1 }]}
+            onPress={() => setSearchQuery("")}
+          >
             <CloseIcon width={20} height={20} color={placeholderGray} />
-          </TouchableOpacity>
+          </Pressable>
         )}
       </View>
 
@@ -268,12 +288,19 @@ const ViewAllReportsScreen = () => {
           <FormattedMessage id="reports_found" values={{ count: totalCount }} />
         </Text>
         <View style={styles.statsRight}>
-          <Text style={[styles.statsText, { color: placeholderGray }]}>
-            <FormattedMessage
-              id="count_unread"
-              values={{ count: stats.unread }}
-            />
-          </Text>
+          <View
+            style={[
+              styles.unreadBadge,
+              { backgroundColor: accentColor + "20" },
+            ]}
+          >
+            <Text style={[styles.unreadBadgeText, { color: accentColor }]}>
+              <FormattedMessage
+                id="count_unread"
+                values={{ count: stats.unread }}
+              />
+            </Text>
+          </View>
         </View>
       </View>
 
@@ -281,27 +308,36 @@ const ViewAllReportsScreen = () => {
         <View
           style={[
             styles.selectionBar,
-            { backgroundColor: `${accentColor}10`, borderColor },
+            {
+              backgroundColor: `${accentColor}15`,
+              borderColor: accentColor + "30",
+            },
           ]}
         >
-          <TouchableOpacity
+          <Pressable
+            style={({ pressed }) => [
+              styles.selectAllButton,
+              { opacity: pressed ? 0.7 : 1 },
+            ]}
             onPress={selectAllReports}
-            style={styles.selectAllButton}
           >
             <Text style={[styles.selectAllText, { color: accentColor }]}>
               {selectedReports.length === reports.length
                 ? "Deselect All"
                 : "Select All"}
             </Text>
-          </TouchableOpacity>
+          </Pressable>
 
           {selectedReports.length > 0 && (
-            <TouchableOpacity
-              onPress={markSelectedAsRead}
-              style={[
+            <Pressable
+              style={({ pressed }) => [
                 styles.bulkActionButton,
-                { backgroundColor: accentColor },
+                {
+                  backgroundColor: accentColor,
+                  transform: [{ scale: pressed ? 0.95 : 1 }],
+                },
               ]}
+              onPress={markSelectedAsRead}
             >
               <Text style={[styles.bulkActionText, { color: "#ffffff" }]}>
                 <FormattedMessage
@@ -309,7 +345,7 @@ const ViewAllReportsScreen = () => {
                   values={{ count: selectedReports.length }}
                 />
               </Text>
-            </TouchableOpacity>
+            </Pressable>
           )}
         </View>
       )}
@@ -323,13 +359,16 @@ const ViewAllReportsScreen = () => {
       presentationStyle="pageSheet"
     >
       <SafeAreaView style={[styles.modalContainer, { backgroundColor }]}>
-        <View style={[styles.modalHeader]}>
+        <View style={styles.modalHeader}>
           <Text style={[styles.modalTitle, { color: textColor }]}>
             <FormattedMessage id="filters" />
           </Text>
-          <TouchableOpacity onPress={() => setShowFilters(false)}>
+          <Pressable
+            style={({ pressed }) => [{ opacity: pressed ? 0.6 : 1 }]}
+            onPress={() => setShowFilters(false)}
+          >
             <CloseIcon width={24} height={24} color={textColor} />
-          </TouchableOpacity>
+          </Pressable>
         </View>
 
         <View style={styles.modalContent}>
@@ -340,7 +379,7 @@ const ViewAllReportsScreen = () => {
             {[
               {
                 key: "all",
-                label: intl.formatMessage({ id: "all_reports" }),
+                label: intl.formatMessage({ id: "all_matches" }),
                 count: stats.total,
               },
               {
@@ -354,69 +393,78 @@ const ViewAllReportsScreen = () => {
                 count: stats.read,
               },
             ].map((option) => (
-              <TouchableOpacity
+              <Pressable
                 key={option.key}
-                style={[
+                style={({ pressed }) => [
                   styles.filterOption,
                   {
                     backgroundColor:
                       filterType === option.key
                         ? `${accentColor}20`
+                        : pressed
+                        ? borderColor + "40"
                         : backgroundColor,
                     borderColor:
-                      filterType === option.key
-                        ? `${accentColor}20`
-                        : borderColor,
+                      filterType === option.key ? accentColor : borderColor,
                   },
                 ]}
-                activeOpacity={1}
                 onPress={() => setFilterType(option.key as FilterType)}
               >
                 <Text style={[styles.filterOptionText, { color: textColor }]}>
                   {option.label}
                 </Text>
-                <Text
-                  style={[styles.filterOptionCount, { color: placeholderGray }]}
+                <View
+                  style={[
+                    styles.filterCountBadge,
+                    { backgroundColor: borderColor + "60" },
+                  ]}
                 >
-                  {option.count}
-                </Text>
-              </TouchableOpacity>
+                  <Text
+                    style={[styles.filterOptionCount, { color: textColor }]}
+                  >
+                    {option.count}
+                  </Text>
+                </View>
+              </Pressable>
             ))}
           </View>
+
           <View style={styles.filterSection}>
             <Text style={[styles.filterSectionTitle, { color: textColor }]}>
               <FormattedMessage id="filter_by_alert" />
             </Text>
-            <TouchableOpacity
-              style={[
+            <Pressable
+              style={({ pressed }) => [
                 styles.filterOption,
                 {
                   backgroundColor: !selectedAlertId
                     ? `${accentColor}20`
+                    : pressed
+                    ? borderColor + "40"
                     : backgroundColor,
-                  borderColor: !selectedAlertId
-                    ? `${accentColor}20`
-                    : borderColor,
+                  borderColor: !selectedAlertId ? accentColor : borderColor,
                 },
               ]}
-              activeOpacity={1}
               onPress={() => setSelectedAlertId("")}
             >
               <Text style={[styles.filterOptionText, { color: textColor }]}>
                 <FormattedMessage id="all_alerts" />
               </Text>
-            </TouchableOpacity>
+            </Pressable>
             {alerts.map((alert) => (
-              <TouchableOpacity
+              <Pressable
                 key={alert.id}
-                style={[
+                style={({ pressed }) => [
                   styles.filterOption,
                   {
                     backgroundColor:
                       selectedAlertId === alert.id
                         ? `${accentColor}20`
+                        : pressed
+                        ? borderColor + "40"
                         : backgroundColor,
-                    borderColor,
+                    borderColor:
+                      selectedAlertId === alert.id ? accentColor : borderColor,
                   },
                 ]}
                 onPress={() => setSelectedAlertId(alert.id)}
@@ -427,32 +475,51 @@ const ViewAllReportsScreen = () => {
                 >
                   {alert.alert_text}
                 </Text>
-              </TouchableOpacity>
+              </Pressable>
             ))}
           </View>
         </View>
 
         <View style={styles.modalFooter}>
-          <TouchableOpacity
-            style={[styles.clearButton, { borderColor }]}
+          <Pressable
+            style={({ pressed }) => [
+              styles.clearButton,
+              {
+                borderColor,
+                backgroundColor: pressed ? borderColor + "20" : "transparent",
+              },
+            ]}
             onPress={clearFilters}
           >
             <Text style={[styles.clearButtonText, { color: textColor }]}>
               <FormattedMessage id="clear_filters" />
             </Text>
-          </TouchableOpacity>
+          </Pressable>
 
-          <TouchableOpacity
-            style={[styles.applyButton, { backgroundColor: accentColor }]}
+          <Pressable
+            style={({ pressed }) => [
+              styles.applyButton,
+              {
+                backgroundColor: accentColor,
+                opacity: pressed ? 0.9 : 1,
+              },
+            ]}
             onPress={() => setShowFilters(false)}
           >
             <Text style={[styles.applyButtonText, { color: "#ffffff" }]}>
               <FormattedMessage id="apply_filters" />
             </Text>
-          </TouchableOpacity>
+          </Pressable>
         </View>
       </SafeAreaView>
     </Modal>
+  );
+
+  const renderShimmerContent = () => (
+    <View style={styles.shimmerContainer}>
+      <ShimmerAlertReportCard />
+      <ShimmerAlertReportCard />
+    </View>
   );
 
   const renderFooter = () => {
@@ -468,39 +535,32 @@ const ViewAllReportsScreen = () => {
     );
   };
 
-  if (loading) {
-    return (
-      <View style={[styles.loadingContainer, { backgroundColor }]}>
-        <ActivityIndicator size="large" color={accentColor} />
-        <Text style={[styles.loadingText, { color: placeholderGray }]}>
-          <FormattedMessage id="loading_reports" />
-        </Text>
-      </View>
-    );
-  }
-
   return (
     <View style={[styles.container, { backgroundColor }]}>
       <SafeAreaView style={styles.safeArea}>
-        <FlatList
-          data={reports}
-          renderItem={renderReportItem}
-          keyExtractor={(item) => item.id}
-          ListHeaderComponent={renderHeader}
-          ListFooterComponent={renderFooter}
-          contentContainerStyle={styles.contentContainer}
-          showsVerticalScrollIndicator={false}
-          refreshControl={
-            <RefreshControl
-              refreshing={refreshing}
-              onRefresh={onRefresh}
-              colors={[accentColor]}
-              tintColor={accentColor}
-            />
-          }
-          onEndReached={loadMore}
-          onEndReachedThreshold={0.5}
-        />
+        {renderHeader()}
+        {loading ? (
+          renderShimmerContent()
+        ) : (
+          <FlatList
+            data={reports}
+            renderItem={renderReportItem}
+            keyExtractor={(item) => item.id}
+            ListFooterComponent={renderFooter}
+            contentContainerStyle={styles.contentContainer}
+            showsVerticalScrollIndicator={false}
+            refreshControl={
+              <RefreshControl
+                refreshing={refreshing}
+                onRefresh={onRefresh}
+                colors={[accentColor]}
+                tintColor={accentColor}
+              />
+            }
+            onEndReached={loadMore}
+            onEndReachedThreshold={0.5}
+          />
+        )}
       </SafeAreaView>
 
       {renderFilterModal()}
@@ -515,43 +575,45 @@ const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
   },
-  headerContainer: {
-    paddingBottom: verticalScale(8),
-  },
+  headerContainer: {},
   headerBar: {
     flexDirection: "row",
     alignItems: "center",
-    paddingHorizontal: horizontalScale(13),
-    paddingVertical: verticalScale(12),
+    paddingHorizontal: horizontalScale(14),
+    paddingVertical: verticalScale(16),
   },
   backButton: {
-    padding: moderateScale(8),
+    width: moderateScale(40),
+    height: moderateScale(40),
+    borderRadius: moderateScale(20),
+    alignItems: "center",
+    justifyContent: "center",
   },
   headerTitle: {
-    fontSize: moderateScale(18),
-    fontFamily: "Inter-SemiBold",
+    fontSize: moderateScale(20),
+    fontFamily: "Inter-Bold",
     flex: 1,
     textAlign: "center",
-    marginRight: -horizontalScale(16),
+    letterSpacing: -0.3,
   },
   headerActions: {
     flexDirection: "row",
     gap: horizontalScale(8),
   },
   headerActionButton: {
-    width: moderateScale(36),
-    height: moderateScale(36),
-    borderRadius: moderateScale(18),
+    width: moderateScale(40),
+    height: moderateScale(40),
+    borderRadius: moderateScale(20),
     alignItems: "center",
     justifyContent: "center",
   },
   searchContainer: {
     flexDirection: "row",
     alignItems: "center",
-    marginHorizontal: horizontalScale(16),
-    marginVertical: verticalScale(12),
-    paddingHorizontal: horizontalScale(16),
-    paddingVertical: verticalScale(5),
+    marginHorizontal: horizontalScale(20),
+    marginBottom: verticalScale(8),
+    paddingHorizontal: horizontalScale(22),
+    paddingVertical: verticalScale(12),
     borderRadius: moderateScale(100),
     borderWidth: 1,
   },
@@ -559,14 +621,14 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: moderateScale(16),
     fontFamily: "Inter-Regular",
-    marginHorizontal: horizontalScale(8),
+    marginHorizontal: horizontalScale(12),
   },
   statsBar: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    paddingHorizontal: horizontalScale(16),
-    paddingVertical: verticalScale(8),
+    paddingHorizontal: horizontalScale(20),
+    paddingVertical: verticalScale(12),
   },
   statsText: {
     fontSize: moderateScale(14),
@@ -574,30 +636,40 @@ const styles = StyleSheet.create({
   },
   statsRight: {
     flexDirection: "row",
-    gap: horizontalScale(16),
+    alignItems: "center",
+  },
+  unreadBadge: {
+    paddingHorizontal: moderateScale(12),
+    paddingVertical: moderateScale(4),
+    borderRadius: moderateScale(12),
+  },
+  unreadBadgeText: {
+    fontSize: moderateScale(12),
+    fontFamily: "Inter-SemiBold",
   },
   selectionBar: {
-    height: verticalScale(60),
+    height: verticalScale(64),
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    paddingHorizontal: horizontalScale(12),
-    paddingVertical: verticalScale(12),
+    paddingHorizontal: horizontalScale(20),
+    marginHorizontal: horizontalScale(20),
     marginVertical: verticalScale(12),
-    borderTopWidth: 1,
-    borderBottomWidth: 1,
+    borderRadius: moderateScale(16),
+    borderWidth: 1,
   },
   selectAllButton: {
-    padding: moderateScale(4),
+    paddingHorizontal: moderateScale(12),
+    paddingVertical: moderateScale(8),
   },
   selectAllText: {
     fontSize: moderateScale(14),
     fontFamily: "Inter-SemiBold",
   },
   bulkActionButton: {
-    paddingHorizontal: horizontalScale(16),
-    paddingVertical: verticalScale(8),
-    borderRadius: moderateScale(100),
+    paddingHorizontal: horizontalScale(20),
+    paddingVertical: verticalScale(10),
+    borderRadius: moderateScale(20),
   },
   bulkActionText: {
     fontSize: moderateScale(14),
@@ -609,39 +681,106 @@ const styles = StyleSheet.create({
   reportItemContainer: {
     flexDirection: "row",
     alignItems: "center",
-    paddingHorizontal: horizontalScale(16),
-    marginBottom: verticalScale(8),
+    paddingHorizontal: horizontalScale(20),
   },
   selectionButton: {
-    width: moderateScale(24),
-    height: moderateScale(24),
-    borderRadius: moderateScale(12),
+    width: moderateScale(28),
+    height: moderateScale(28),
+    borderRadius: moderateScale(14),
     borderWidth: 2,
     alignItems: "center",
     justifyContent: "center",
-    marginRight: horizontalScale(12),
+    marginRight: horizontalScale(16),
   },
   reportCardContainer: {
     flex: 1,
   },
   footerLoader: {
     alignItems: "center",
-    paddingVertical: verticalScale(16),
+    paddingVertical: verticalScale(20),
+    gap: verticalScale(8),
   },
   footerLoaderText: {
     fontSize: moderateScale(14),
     fontFamily: "Inter-Medium",
-    marginTop: verticalScale(8),
   },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: "center",
+  shimmerContainer: {
+    paddingHorizontal: horizontalScale(20),
+    paddingTop: verticalScale(8),
+  },
+  shimmerCard: {
+    borderRadius: moderateScale(20),
+    overflow: "hidden",
+    marginBottom: verticalScale(20),
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.08,
+    shadowRadius: 12,
+    elevation: 8,
+  },
+  shimmerImageContainer: {
+    position: "relative",
+    width: "100%",
+    height: verticalScale(180),
+  },
+  shimmerImage: {
+    width: "100%",
+    height: "100%",
+  },
+  shimmerAlertTag: {
+    position: "absolute",
+    top: moderateScale(16),
+    left: moderateScale(16),
+    width: moderateScale(60),
+    height: moderateScale(24),
+    borderRadius: moderateScale(12),
+  },
+  shimmerContent: {
+    padding: moderateScale(20),
+  },
+  shimmerTitle: {
+    height: moderateScale(24),
+    borderRadius: moderateScale(4),
+    marginBottom: verticalScale(8),
+  },
+  shimmerTitleSecond: {
+    height: moderateScale(24),
+    borderRadius: moderateScale(4),
+    width: "70%",
+    marginBottom: verticalScale(16),
+  },
+  shimmerMetadata: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: verticalScale(20),
+  },
+  shimmerTime: {
+    width: moderateScale(80),
+    height: moderateScale(16),
+    borderRadius: moderateScale(8),
+  },
+  shimmerStats: {
+    width: moderateScale(120),
+    height: moderateScale(16),
+    borderRadius: moderateScale(8),
+  },
+  shimmerFooter: {
+    flexDirection: "row",
+    justifyContent: "space-between",
     alignItems: "center",
   },
-  loadingText: {
-    fontSize: moderateScale(14),
-    fontFamily: "Inter-Medium",
-    marginTop: verticalScale(12),
+  shimmerSources: {
+    flexDirection: "row",
+    gap: horizontalScale(8),
+  },
+  shimmerSourceIcon: {
+    width: moderateScale(28),
+    height: moderateScale(28),
+    borderRadius: moderateScale(14),
+  },
+  shimmerButton: {
+    width: moderateScale(100),
+    height: moderateScale(32),
+    borderRadius: moderateScale(16),
   },
   modalContainer: {
     flex: 1,
@@ -650,69 +789,76 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    paddingHorizontal: horizontalScale(16),
-    paddingVertical: verticalScale(16),
+    paddingHorizontal: horizontalScale(20),
+    paddingVertical: verticalScale(20),
   },
   modalTitle: {
-    fontSize: moderateScale(18),
-    fontFamily: "Inter-SemiBold",
+    fontSize: moderateScale(20),
+    fontFamily: "Inter-Bold",
+    letterSpacing: -0.3,
   },
   modalContent: {
     flex: 1,
-    paddingHorizontal: horizontalScale(16),
+    paddingHorizontal: horizontalScale(20),
   },
   filterSection: {
-    marginVertical: verticalScale(16),
+    marginVertical: verticalScale(20),
   },
   filterSectionTitle: {
-    fontSize: moderateScale(16),
-    fontFamily: "Inter-SemiBold",
-    marginBottom: verticalScale(12),
+    fontSize: moderateScale(18),
+    fontFamily: "Inter-Bold",
+    marginBottom: verticalScale(16),
+    letterSpacing: -0.2,
   },
   filterOption: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    paddingHorizontal: horizontalScale(16),
-    paddingVertical: verticalScale(12),
-    borderRadius: moderateScale(13),
+    paddingHorizontal: horizontalScale(20),
+    paddingVertical: verticalScale(16),
+    borderRadius: moderateScale(16),
     borderWidth: 1,
-    marginBottom: verticalScale(8),
+    marginBottom: verticalScale(12),
   },
   filterOptionText: {
-    fontSize: moderateScale(15),
-    fontFamily: "Inter-Regular",
+    fontSize: moderateScale(16),
+    fontFamily: "Inter-Medium",
     flex: 1,
   },
+  filterCountBadge: {
+    paddingHorizontal: moderateScale(8),
+    paddingVertical: moderateScale(4),
+    borderRadius: moderateScale(8),
+  },
   filterOptionCount: {
-    fontSize: moderateScale(13),
-    fontFamily: "Inter-Medium",
+    fontSize: moderateScale(12),
+    fontFamily: "Inter-SemiBold",
   },
   modalFooter: {
     flexDirection: "row",
-    paddingHorizontal: horizontalScale(16),
-    paddingVertical: verticalScale(16),
-    gap: horizontalScale(12),
+    paddingHorizontal: horizontalScale(20),
+    paddingVertical: verticalScale(20),
+    gap: horizontalScale(16),
   },
   clearButton: {
     flex: 1,
-    paddingVertical: verticalScale(12),
+    paddingVertical: verticalScale(16),
     borderRadius: moderateScale(100),
     borderWidth: 1,
     alignItems: "center",
   },
   clearButtonText: {
-    fontSize: moderateScale(14),
+    fontSize: moderateScale(16),
     fontFamily: "Inter-SemiBold",
   },
   applyButton: {
     flex: 1,
-    paddingVertical: verticalScale(12),
+    paddingVertical: verticalScale(16),
     borderRadius: moderateScale(100),
     alignItems: "center",
   },
   applyButtonText: {
-    fontSize: moderateScale(14),
+    fontSize: moderateScale(16),
     fontFamily: "Inter-SemiBold",
   },
 });

@@ -35,9 +35,12 @@ const ViewReportScreen = () => {
   const placeholderGray = useThemeColor("placeholderGray");
 
   const matches = alertReport.matches_data ?? ([] as any);
+  const featuredMatch = matches.find((m: any) => m.images?.featured) || null;
+
   const featuredImage =
-    matches[0]?.images?.featured ?? "https://via.placeholder.com/400x200";
-  const featuredSource = matches[0];
+    featuredMatch?.images?.featured ?? "https://via.placeholder.com/400x200";
+
+  const featuredSource = featuredMatch || matches[0];
 
   const handleBack = () => {
     router.back();

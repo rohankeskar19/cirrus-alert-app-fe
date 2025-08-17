@@ -122,6 +122,7 @@ const SummaryContentRenderer: React.FC<SummaryContentRendererProps> = ({
   const getSourceTitle = (sourceId: number): string => {
     const source = sourceMap[sourceId];
     const match = matchesMap[sourceId];
+
     return source?.title || match?.title || `Source ${sourceId}`;
   };
 
@@ -158,55 +159,12 @@ const SummaryContentRenderer: React.FC<SummaryContentRendererProps> = ({
     );
   };
 
-  const renderParagraphWithCitations = (
-    text: string,
-    citations?: Citation[]
-  ) => {
-    if (!citations || citations.length === 0) {
-      return (
-        <Text style={[styles.paragraphText, { color: textColor }]}>{text}</Text>
-      );
-    }
+  // Helper function to extract all unique source IDs from citations
+  const extractSourceIds = (citations?: Citation[]): number[] => {
+    if (!citations || citations.length === 0) return [];
 
-    // Sort citations by position to handle them in order
-    const sortedCitations = [...citations].sort(
-      (a, b) => a.position - b.position
-    );
-
-    let lastPosition = 0;
-    const textParts: any = [];
-
-    sortedCitations.forEach((citation, index) => {
-      // Add text before citation
-      if (citation.position > lastPosition) {
-        textParts.push(
-          <Text
-            key={`text-${index}`}
-            style={[styles.paragraphText, { color: textColor }]}
-          >
-            {text.slice(lastPosition, citation.position)}
-          </Text>
-        );
-      }
-
-      // Add citation
-      textParts.push(renderCitation(citation.source_ids, index));
-      lastPosition = citation.position;
-    });
-
-    // Add remaining text
-    if (lastPosition < text.length) {
-      textParts.push(
-        <Text
-          key="text-end"
-          style={[styles.paragraphText, { color: textColor }]}
-        >
-          {text.slice(lastPosition)}
-        </Text>
-      );
-    }
-
-    return <View style={styles.paragraphWithCitations}>{textParts}</View>;
+    const allSourceIds = citations.flatMap((citation) => citation.source_ids);
+    return [...new Set(allSourceIds)]; // Remove duplicates
   };
 
   const renderHeading = (block: HeadingBlock, index: number) => {
@@ -229,9 +187,14 @@ const SummaryContentRenderer: React.FC<SummaryContentRendererProps> = ({
   };
 
   const renderParagraph = (block: ParagraphBlock, index: number) => {
+    const sourceIds = extractSourceIds(block.citations);
+
     return (
       <View key={`paragraph-${index}`} style={styles.blockContainer}>
-        {renderParagraphWithCitations(block.text, block.citations)}
+        <Text style={[styles.paragraphText, { color: textColor }]}>
+          {block.text}
+        </Text>
+        {sourceIds.length > 0 && renderCitation(sourceIds, index)}
       </View>
     );
   };
@@ -248,7 +211,9 @@ const SummaryContentRenderer: React.FC<SummaryContentRendererProps> = ({
               <Text style={[styles.listItemText, { color: textColor }]}>
                 {item.text}
               </Text>
-              {item.citations && renderCitation(item.citations, itemIndex)}
+              {item.citations &&
+                item.citations.length > 0 &&
+                renderCitation(item.citations, itemIndex)}
             </View>
           </View>
         ))}
@@ -294,7 +259,9 @@ const SummaryContentRenderer: React.FC<SummaryContentRendererProps> = ({
                   <Text style={[styles.tableCellText, { color: textColor }]}>
                     {cell.text}
                   </Text>
-                  {cell.citations && renderCitation(cell.citations, cellIndex)}
+                  {cell.citations &&
+                    cell.citations.length > 0 &&
+                    renderCitation(cell.citations, cellIndex)}
                 </View>
               ))}
             </View>
@@ -338,7 +305,9 @@ const styles = StyleSheet.create({
     lineHeight: moderateScale(32),
     marginBottom: verticalScale(20),
   },
-  blockContainer: {},
+  blockContainer: {
+    marginBottom: verticalScale(16),
+  },
   heading: {
     fontFamily: "Inter-SemiBold",
     marginBottom: verticalScale(8),
@@ -371,11 +340,7 @@ const styles = StyleSheet.create({
     fontSize: moderateScale(16),
     fontFamily: "Inter-Regular",
     lineHeight: moderateScale(24),
-  },
-  paragraphWithCitations: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    alignItems: "center",
+    marginBottom: verticalScale(8),
   },
   listItem: {
     flexDirection: "row",
@@ -390,14 +355,12 @@ const styles = StyleSheet.create({
   },
   listItemContent: {
     flex: 1,
-    flexDirection: "row",
-    flexWrap: "wrap",
-    alignItems: "center",
   },
   listItemText: {
     fontSize: moderateScale(16),
     fontFamily: "Inter-Regular",
     lineHeight: moderateScale(24),
+    marginBottom: verticalScale(4),
   },
   table: {
     borderWidth: 1,
@@ -433,11 +396,12 @@ const styles = StyleSheet.create({
     fontSize: moderateScale(14),
     fontFamily: "Inter-Regular",
     lineHeight: moderateScale(20),
+    marginBottom: verticalScale(4),
   },
   citationContainer: {
     flexDirection: "row",
     flexWrap: "wrap",
-    marginLeft: horizontalScale(4),
+    marginTop: verticalScale(8),
   },
   citationItem: {
     flexDirection: "row",
@@ -448,7 +412,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: horizontalScale(8),
     paddingVertical: verticalScale(4),
     marginRight: horizontalScale(4),
-    marginVertical: verticalScale(2),
+    marginBottom: verticalScale(4),
     maxWidth: horizontalScale(120),
   },
   citationFavicon: {
@@ -460,7 +424,7 @@ const styles = StyleSheet.create({
   citationText: {
     fontSize: moderateScale(10),
     fontFamily: "Inter-Regular",
-    flex: 1,
+    maxWidth: horizontalScale(50),
   },
 });
 

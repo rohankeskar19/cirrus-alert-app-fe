@@ -21,7 +21,6 @@ import { horizontalScale, moderateScale, verticalScale } from "@/utils/metrics";
 import OnboardingOverlay from "@/components/OnboardingOverlay";
 import {
   AlertType,
-  AlertVariant,
   createAlert,
   getCurrentUser,
   loginUser,
@@ -35,7 +34,6 @@ import Step1 from "./components/Step1";
 import Step2 from "./components/Step2";
 import Step3 from "./components/Step3";
 import Step4 from "./components/Step4";
-import Step5 from "./components/Step5";
 
 const { width } = Dimensions.get("window");
 
@@ -62,8 +60,6 @@ const OnboardingScreen = () => {
   const [alertTextError, setAlertTextError] = useState<string>("");
   const [selectedSources, setSelectedSources] = useState<string[]>(["news"]);
   const [selectedType, setSelectedType] = useState<AlertType>("immediate");
-  const [selectedVariant, setSelectedVariant] =
-    useState<AlertVariant>("summary");
 
   const backgroundColor = useThemeColor("background");
 
@@ -123,14 +119,6 @@ const OnboardingScreen = () => {
         <Step4 selectedType={selectedType} setSelectedType={setSelectedType} />
       ),
     },
-    {
-      content: (
-        <Step5
-          selectedVariant={selectedVariant}
-          setSelectedVariant={setSelectedVariant}
-        />
-      ),
-    },
   ];
 
   useEffect(() => {
@@ -183,15 +171,10 @@ const OnboardingScreen = () => {
           animateSlide("right");
           setCurrentStep(currentStep + 1);
         }
-      } else if (currentStep == 4) {
+      } else if (currentStep == 3) {
         console.log("Creating alert...");
         setCreatingAlert(true);
-        await createAlert(
-          alertText,
-          selectedSources,
-          selectedType,
-          selectedVariant
-        );
+        await createAlert(alertText, selectedSources, selectedType);
 
         await updateUserProfile(get(currentUser, "id", ""), {
           onboarding_done: true,
@@ -252,7 +235,7 @@ const OnboardingScreen = () => {
       return intl.formatMessage({ id: "signup" });
     } else if (currentStep < 1) {
       return intl.formatMessage({ id: "continue" });
-    } else if (currentStep === 4) {
+    } else if (currentStep === 3) {
       return intl.formatMessage({ id: "finish" });
     } else {
       return intl.formatMessage({ id: "next" });

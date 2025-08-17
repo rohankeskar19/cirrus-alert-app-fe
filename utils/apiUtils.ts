@@ -4,7 +4,6 @@ import { createClient } from "@supabase/supabase-js";
 import { Alert } from "react-native";
 
 export type AlertType = "immediate" | "daily" | "weekly";
-export type AlertVariant = "summary" | "links";
 
 // import { SUPABASE_URL, SUPABASE_ANON_KEY } from "@env";
 
@@ -49,7 +48,7 @@ export const getCurrentUser = async () => {
     .from("profiles")
     .select("*")
     .eq("id", session.user.id)
-    .single();
+    .maybeSingle();
 
   if (profileError) {
     console.error("Error fetching user profile:", profileError.message);
@@ -135,7 +134,7 @@ export const loginUser = async (email: string, password: string) => {
     .from("profiles")
     .select("*")
     .eq("id", session.user.id)
-    .single();
+    .maybeSingle();
 
   if (profileError) {
     console.error("Error fetching user profile:", profileError.message);
@@ -210,8 +209,7 @@ export const updateUserProfile = async (
 export const createAlert = async (
   alertText: string,
   alertSources: string[],
-  alertType: AlertType,
-  alertVariant: AlertVariant
+  alertType: AlertType
 ): Promise<boolean> => {
   try {
     const {
@@ -233,7 +231,6 @@ export const createAlert = async (
         alert_text: alertText,
         alert_sources: alertSources,
         alert_type: alertType,
-        alert_variant: alertVariant,
       },
     ]);
 

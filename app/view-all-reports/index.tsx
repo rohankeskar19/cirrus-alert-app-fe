@@ -613,7 +613,7 @@ const styles = StyleSheet.create({
     marginHorizontal: horizontalScale(20),
     marginBottom: verticalScale(8),
     paddingHorizontal: horizontalScale(22),
-    paddingVertical: verticalScale(12),
+    paddingVertical: verticalScale(8),
     borderRadius: moderateScale(100),
     borderWidth: 1,
   },

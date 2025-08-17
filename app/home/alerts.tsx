@@ -1098,7 +1098,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     paddingHorizontal: horizontalScale(20),
-    paddingVertical: verticalScale(14),
+    paddingVertical: verticalScale(8),
     borderRadius: moderateScale(100),
     borderWidth: 1,
     marginBottom: verticalScale(20),

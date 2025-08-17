@@ -1,21 +1,45 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { createClient } from "@supabase/supabase-js";
 
-import { Alert } from "react-native";
+import { Alert as UiAlert } from "react-native";
 
 export type AlertType = "immediate" | "daily" | "weekly";
-
-// import { SUPABASE_URL, SUPABASE_ANON_KEY } from "@env";
 
 export type UserProfile = {
   email: string;
   onboarding_done: boolean;
 };
 
+export interface Alert {
+  id: string;
+  user_id: string;
+  alert_text: string;
+  alert_sources: string[];
+  alert_type: AlertType;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+  last_processed_at?: string | null;
+  similarity_threshold: number;
+}
+
+export interface AlertReport {
+  id: string;
+  alert_id: string;
+  title: string;
+  summary_content: Record<string, any> | null;
+  match_count: number;
+  is_read: boolean;
+  matches_data: Record<string, any> | null;
+  generated_at: string;
+  processing_duration_ms: number | null;
+  alerts?: Alert;
+}
+
 const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL || "";
 const supabaseAnonKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY || "";
 
-const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   auth: {
     storage: AsyncStorage,
     autoRefreshToken: true,
@@ -157,11 +181,11 @@ export const forgotPassword = async (email: string) => {
   });
 
   if (error) {
-    Alert.alert("Password Reset Error", error.message);
+    UiAlert.alert("Password Reset Error", error.message);
     return false;
   }
 
-  Alert.alert(
+  UiAlert.alert(
     "Password Reset Email Sent",
     "Check your email for a password reset link"
   );
@@ -219,7 +243,7 @@ export const createAlert = async (
 
     if (sessionError || !session) {
       console.error("Not logged in:", sessionError?.message);
-      Alert.alert("Error", "You must be logged in to create an alert.");
+      UiAlert.alert("Error", "You must be logged in to create an alert.");
       return false;
     }
 
@@ -236,14 +260,95 @@ export const createAlert = async (
 
     if (insertError) {
       console.error("Error creating alert:", insertError.message);
-      Alert.alert("Failed to create alert", insertError.message);
+      UiAlert.alert("Failed to create alert", insertError.message);
       return false;
     }
 
     return true;
   } catch (error: any) {
     console.error("Unexpected error creating alert:", error.message);
-    Alert.alert("Something went wrong", error.message);
+    UiAlert.alert("Something went wrong", error.message);
     return false;
   }
+};
+
+export const fetchAllAlertReports = async (): Promise<AlertReport[]> => {
+  const {
+    data: { session },
+    error: sessionError,
+  } = await supabase.auth.getSession();
+  if (sessionError || !session) return [];
+
+  const { data, error } = await supabase
+    .from("alert_reports")
+    .select("*, alerts(*)")
+    .eq("alerts.user_id", session.user.id)
+    .order("generated_at", { ascending: false });
+
+  if (error) {
+    console.error("Error fetching alert reports:", error.message);
+    return [];
+  }
+
+  return data as AlertReport[];
+};
+
+export const fetchUnreadAlertReports = async (): Promise<AlertReport[]> => {
+  const {
+    data: { session },
+    error: sessionError,
+  } = await supabase.auth.getSession();
+  if (sessionError || !session) return [];
+
+  const { data, error } = await supabase
+    .from("alert_reports")
+    .select("*, alerts(*)")
+    .eq("is_read", false)
+    .eq("alerts.user_id", session.user.id)
+    .order("generated_at", { ascending: false });
+
+  if (error) {
+    console.error("Error fetching unread alert reports:", error.message);
+    return [];
+  }
+
+  return data as AlertReport[];
+};
+
+export const markAlertReportAsRead = async (
+  reportId: string
+): Promise<boolean> => {
+  const { error } = await supabase
+    .from("alert_reports")
+    .update({ is_read: true })
+    .eq("id", reportId);
+
+  if (error) {
+    console.error("Error marking alert report as read:", error.message);
+    return false;
+  }
+
+  return true;
+};
+
+export const fetchActiveAlerts = async (): Promise<Alert[]> => {
+  const {
+    data: { session },
+    error: sessionError,
+  } = await supabase.auth.getSession();
+  if (sessionError || !session) return [];
+
+  const { data, error } = await supabase
+    .from("alerts")
+    .select("*")
+    .eq("user_id", session.user.id)
+    .eq("is_active", true)
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    console.error("Error fetching active alerts:", error.message);
+    return [];
+  }
+
+  return data as Alert[];
 };

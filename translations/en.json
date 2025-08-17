@@ -192,5 +192,10 @@
   "yes": "Yes",
   "no_just_links": "No, just links",
   "finish": "Finish",
-  "creating_alert_title": "Creating your first alert..."
+  "creating_alert_title": "Creating your first alert...",
+  "mark_as_read": "Mark as read",
+  "new_matches": "New matches",
+  "active_alerts": "Active alerts",
+  "alerts_count": "{count} active",
+  "viewed": "Viewed"
 }

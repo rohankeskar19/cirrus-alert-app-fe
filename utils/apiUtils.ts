@@ -468,3 +468,98 @@ export const getReportsStats = async (): Promise<{
     read: readResult.count || 0,
   };
 };
+
+/**
+ * Toggle alert active status
+ * @param alertId - Alert ID to toggle
+ * @param isActive - New active status
+ * @returns Boolean indicating success
+ */
+export const toggleAlertStatus = async (
+  alertId: string,
+  isActive: boolean
+): Promise<boolean> => {
+  const { error } = await supabase
+    .from("alerts")
+    .update({ is_active: isActive, updated_at: new Date().toISOString() })
+    .eq("id", alertId);
+
+  if (error) {
+    console.error("Error toggling alert status:", error.message);
+    return false;
+  }
+
+  return true;
+};
+
+/**
+ * Delete an alert
+ * @param alertId - Alert ID to delete
+ * @returns Boolean indicating success
+ */
+export const deleteAlert = async (alertId: string): Promise<boolean> => {
+  const { error } = await supabase.from("alerts").delete().eq("id", alertId);
+
+  if (error) {
+    console.error("Error deleting alert:", error.message);
+    return false;
+  }
+
+  return true;
+};
+
+/**
+ * Update an existing alert
+ * @param alertId - Alert ID to update
+ * @param alertData - Updated alert data
+ * @returns Boolean indicating success
+ */
+export const updateAlert = async (
+  alertId: string,
+  alertData: {
+    alert_text?: string;
+    alert_sources?: string[];
+    alert_type?: AlertType;
+    similarity_threshold?: number;
+  }
+): Promise<boolean> => {
+  const { error } = await supabase
+    .from("alerts")
+    .update({
+      ...alertData,
+      updated_at: new Date().toISOString(),
+    })
+    .eq("id", alertId);
+
+  if (error) {
+    console.error("Error updating alert:", error.message);
+    return false;
+  }
+
+  return true;
+};
+
+/**
+ * Get all alerts for the current user (both active and inactive)
+ * @returns Array of all user alerts
+ */
+export const fetchAllUserAlerts = async (): Promise<Alert[]> => {
+  const {
+    data: { session },
+    error: sessionError,
+  } = await supabase.auth.getSession();
+  if (sessionError || !session) return [];
+
+  const { data, error } = await supabase
+    .from("alerts")
+    .select("*")
+    .eq("user_id", session.user.id)
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    console.error("Error fetching all user alerts:", error.message);
+    return [];
+  }
+
+  return data as Alert[];
+};

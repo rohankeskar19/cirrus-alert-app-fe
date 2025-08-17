@@ -196,13 +196,13 @@ const ViewAllReportsScreen = () => {
               backgroundColor: selectedReports.includes(item.id)
                 ? accentColor
                 : backgroundColor,
-              borderColor,
+              borderColor: accentColor,
             },
           ]}
           onPress={() => toggleReportSelection(item.id)}
         >
           {selectedReports.includes(item.id) && (
-            <CheckIcon width={16} height={16} color="#ffffff" />
+            <CheckIcon width={10} height={10} color="#ffffff" />
           )}
         </TouchableOpacity>
       )}
@@ -254,6 +254,7 @@ const ViewAllReportsScreen = () => {
           placeholderTextColor={placeholderGray}
           value={searchQuery}
           onChangeText={setSearchQuery}
+          selectionColor={accentColor}
         />
         {searchQuery.length > 0 && (
           <TouchableOpacity onPress={() => setSearchQuery("")}>
@@ -368,6 +369,7 @@ const ViewAllReportsScreen = () => {
                         : borderColor,
                   },
                 ]}
+                activeOpacity={1}
                 onPress={() => setFilterType(option.key as FilterType)}
               >
                 <Text style={[styles.filterOptionText, { color: textColor }]}>
@@ -397,6 +399,7 @@ const ViewAllReportsScreen = () => {
                     : borderColor,
                 },
               ]}
+              activeOpacity={1}
               onPress={() => setSelectedAlertId("")}
             >
               <Text style={[styles.filterOptionText, { color: textColor }]}>
@@ -518,18 +521,18 @@ const styles = StyleSheet.create({
   headerBar: {
     flexDirection: "row",
     alignItems: "center",
-    paddingHorizontal: horizontalScale(16),
+    paddingHorizontal: horizontalScale(13),
     paddingVertical: verticalScale(12),
   },
   backButton: {
     padding: moderateScale(8),
-    marginLeft: -moderateScale(8),
   },
   headerTitle: {
     fontSize: moderateScale(18),
     fontFamily: "Inter-SemiBold",
     flex: 1,
     textAlign: "center",
+    marginRight: -horizontalScale(16),
   },
   headerActions: {
     flexDirection: "row",
@@ -574,6 +577,7 @@ const styles = StyleSheet.create({
     gap: horizontalScale(16),
   },
   selectionBar: {
+    height: verticalScale(60),
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
@@ -671,7 +675,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingHorizontal: horizontalScale(16),
     paddingVertical: verticalScale(12),
-    borderRadius: moderateScale(8),
+    borderRadius: moderateScale(13),
     borderWidth: 1,
     marginBottom: verticalScale(8),
   },

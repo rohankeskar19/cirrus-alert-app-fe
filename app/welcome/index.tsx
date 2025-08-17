@@ -6,12 +6,11 @@ import { moderateScale, verticalScale } from "@/utils/metrics";
 import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
 import React, { useEffect, useState } from "react";
-import { FormattedMessage, useIntl } from "react-intl";
+import { FormattedMessage } from "react-intl";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 const WelcomeScreen = () => {
-  const intl = useIntl();
   const [currentDialogIndex, setCurrentDialogIndex] = useState(0);
 
   const backgroundColor = useThemeColor("background");

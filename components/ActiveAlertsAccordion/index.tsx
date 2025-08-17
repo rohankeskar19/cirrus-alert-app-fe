@@ -83,11 +83,6 @@ const ActiveAlertsAccordion = ({
             <Text style={[styles.accordionTitle, { color: textColor }]}>
               <FormattedMessage id="active_alerts" />
             </Text>
-            <Text
-              style={[styles.accordionSubtitle, { color: placeholderGray }]}
-            >
-              Monitor your keywords and topics
-            </Text>
           </View>
         </View>
 
@@ -111,12 +106,12 @@ const ActiveAlertsAccordion = ({
             <View style={styles.emptyState}>
               <BellIcon width={32} height={32} color={placeholderGray} />
               <Text style={[styles.emptyStateTitle, { color: textColor }]}>
-                No Active Alerts
+                <FormattedMessage id="no_active_alerts" />
               </Text>
               <Text
                 style={[styles.emptyStateSubtitle, { color: placeholderGray }]}
               >
-                Create your first alert to start monitoring topics
+                <FormattedMessage id="create_first_alert" />
               </Text>
             </View>
           ) : (
@@ -177,7 +172,10 @@ const ActiveAlertsAccordion = ({
                           { color: placeholderGray },
                         ]}
                       >
-                        {alert.alert_sources?.length || 0} sources
+                        <FormattedMessage
+                          id="sources_count"
+                          values={{ count: alert.alert_sources?.length }}
+                        />
                       </Text>
                       <Text
                         style={[
@@ -185,8 +183,14 @@ const ActiveAlertsAccordion = ({
                           { color: placeholderGray },
                         ]}
                       >
-                        Created{" "}
-                        {new Date(alert.created_at).toLocaleDateString()}
+                        <FormattedMessage
+                          id="created"
+                          values={{
+                            created_at: new Date(
+                              alert.created_at
+                            ).toLocaleDateString(),
+                          }}
+                        />
                       </Text>
                     </View>
                   </View>
@@ -201,10 +205,7 @@ const ActiveAlertsAccordion = ({
               activeOpacity={1}
             >
               <Text style={[styles.manageButtonText, { color: accentColor }]}>
-                <FormattedMessage
-                  id="manage_alerts"
-                  defaultMessage="Manage Alerts"
-                />
+                <FormattedMessage id="manage_alerts" />
               </Text>
             </TouchableOpacity>
           )}

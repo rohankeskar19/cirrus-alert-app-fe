@@ -352,3 +352,119 @@ export const fetchActiveAlerts = async (): Promise<Alert[]> => {
 
   return data as Alert[];
 };
+
+/**
+ * Fetch all alert reports with optional filtering and search
+ * @param searchQuery - Search query for report titles
+ * @param alertId - Filter by specific alert ID
+ * @param isRead - Filter by read status (true, false, or null for all)
+ * @param limit - Number of reports to fetch
+ * @param offset - Offset for pagination
+ * @returns Filtered alert reports
+ */
+export const fetchFilteredAlertReports = async (
+  searchQuery?: string,
+  alertId?: string,
+  isRead?: boolean | null,
+  limit: number = 50,
+  offset: number = 0
+): Promise<{ data: AlertReport[]; count: number }> => {
+  const {
+    data: { session },
+    error: sessionError,
+  } = await supabase.auth.getSession();
+  if (sessionError || !session) return { data: [], count: 0 };
+
+  let query = supabase
+    .from("alert_reports")
+    .select("*, alerts(*)", { count: "exact" })
+    .eq("alerts.user_id", session.user.id)
+    .order("generated_at", { ascending: false })
+    .range(offset, offset + limit - 1);
+
+  // Apply search filter
+  if (searchQuery && searchQuery.trim()) {
+    query = query.ilike("title", `%${searchQuery.trim()}%`);
+  }
+
+  // Apply alert filter
+  if (alertId) {
+    query = query.eq("alert_id", alertId);
+  }
+
+  // Apply read status filter
+  if (isRead !== null && isRead !== undefined) {
+    query = query.eq("is_read", isRead);
+  }
+
+  const { data, error, count } = await query;
+
+  if (error) {
+    console.error("Error fetching filtered alert reports:", error.message);
+    return { data: [], count: 0 };
+  }
+
+  return { data: (data as AlertReport[]) || [], count: count || 0 };
+};
+
+/**
+ * Mark multiple alert reports as read
+ * @param reportIds - Array of report IDs to mark as read
+ * @returns Boolean indicating success
+ */
+export const markMultipleReportsAsRead = async (
+  reportIds: string[]
+): Promise<boolean> => {
+  if (reportIds.length === 0) return true;
+
+  const { error } = await supabase
+    .from("alert_reports")
+    .update({ is_read: true })
+    .in("id", reportIds);
+
+  if (error) {
+    console.error("Error marking multiple reports as read:", error.message);
+    return false;
+  }
+
+  return true;
+};
+
+/**
+ * Get reports count by status
+ * @returns Object with counts for different statuses
+ */
+export const getReportsStats = async (): Promise<{
+  total: number;
+  unread: number;
+  read: number;
+}> => {
+  const {
+    data: { session },
+    error: sessionError,
+  } = await supabase.auth.getSession();
+  if (sessionError || !session) return { total: 0, unread: 0, read: 0 };
+
+  const [totalResult, unreadResult, readResult] = await Promise.all([
+    supabase
+      .from("alert_reports")
+      .select("*", { count: "exact", head: true })
+      .eq("alerts.user_id", session.user.id),
+    supabase
+      .from("alert_reports")
+      .select("*", { count: "exact", head: true })
+      .eq("is_read", false)
+      .eq("alerts.user_id", session.user.id),
+    supabase
+      .from("alert_reports")
+      .select("*", { count: "exact", head: true })
+      .eq("is_read", true)
+      .eq("alerts.user_id", session.user.id),
+  ]);
+
+  return {
+    total: totalResult.count || 0,
+    unread: unreadResult.count || 0,
+    read: readResult.count || 0,
+  };
+};

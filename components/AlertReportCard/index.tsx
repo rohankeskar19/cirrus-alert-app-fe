@@ -72,11 +72,9 @@ const AlertReportCard = ({
       activeOpacity={0.95}
       onPress={handleCardPress}
     >
-      {/* Featured Image */}
       <View style={styles.imageContainer}>
         <Image source={{ uri: featuredImage }} style={styles.featuredImage} />
 
-        {/* Image Credit */}
         {featuredSource && (
           <View
             style={[
@@ -102,16 +100,13 @@ const AlertReportCard = ({
         )}
       </View>
 
-      {/* Content Container */}
       <View style={styles.cardContent}>
-        {/* Alert Tag */}
         <View style={[styles.alertTag, { backgroundColor: accentColor }]}>
           <Text style={[styles.alertTagText, { color: "#ffffff" }]}>
             {alertText}
           </Text>
         </View>
 
-        {/* Title */}
         <Text
           style={[styles.newsTitle, { color: textColor }]}
           numberOfLines={3}
@@ -120,7 +115,6 @@ const AlertReportCard = ({
           {alertReport.title}
         </Text>
 
-        {/* Metadata Row */}
         <View style={styles.metadataContainer}>
           <View style={styles.timeContainer}>
             <ClockIcon width={14} height={14} color={placeholderGray} />
@@ -131,20 +125,21 @@ const AlertReportCard = ({
 
           <View style={styles.statsContainer}>
             <Text style={[styles.statsText, { color: placeholderGray }]}>
-              {readingTime} min read
+              <FormattedMessage id="read_time" values={{ time: readingTime }} />
             </Text>
             <Text style={[styles.statsDivider, { color: placeholderGray }]}>
               •
             </Text>
             <Text style={[styles.statsText, { color: placeholderGray }]}>
-              {alertReport.match_count} sources
+              <FormattedMessage
+                id="sources_count"
+                values={{ count: alertReport.match_count }}
+              />
             </Text>
           </View>
         </View>
 
-        {/* Footer */}
         <View style={styles.cardFooter}>
-          {/* Source Icons */}
           <View style={styles.sourcesContainer}>
             <View style={styles.sourceIcons}>
               {sourceIcons.map((icon: any, index: number) => (
@@ -171,23 +166,24 @@ const AlertReportCard = ({
 
             {sourceIcons.length > 0 && (
               <Text style={[styles.sourcesLabel, { color: placeholderGray }]}>
-                Sources
+                <FormattedMessage id="sources" />
               </Text>
             )}
           </View>
 
-          {/* Action Buttons */}
           <View style={styles.actionsContainer}>
-            <TouchableOpacity
-              style={[styles.actionButton, { borderColor }]}
-              onPress={markAsRead}
-              activeOpacity={0.7}
-            >
-              <TickIcon width={16} height={16} color={textColor} />
-              <Text style={[styles.actionText, { color: textColor }]}>
-                <FormattedMessage id="mark_as_read" />
-              </Text>
-            </TouchableOpacity>
+            {!alertReport.is_read && (
+              <TouchableOpacity
+                style={[styles.actionButton, { borderColor }]}
+                onPress={markAsRead}
+                activeOpacity={0.7}
+              >
+                <TickIcon width={16} height={16} color={textColor} />
+                <Text style={[styles.actionText, { color: textColor }]}>
+                  <FormattedMessage id="mark_as_read" />
+                </Text>
+              </TouchableOpacity>
+            )}
           </View>
         </View>
       </View>

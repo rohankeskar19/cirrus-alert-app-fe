@@ -255,16 +255,19 @@ const styles = StyleSheet.create({
     paddingBottom: verticalScale(24),
   },
   greeting: {
-    fontSize: moderateScale(28),
+    fontSize: moderateScale(32),
     fontFamily: "Inter-Bold",
-    lineHeight: moderateScale(34),
-    marginBottom: verticalScale(4),
+    lineHeight: moderateScale(38),
+    letterSpacing: -0.5,
   },
   subGreeting: {
-    fontSize: moderateScale(15),
-    fontFamily: "Inter-Regular",
+    fontSize: moderateScale(16),
+    fontFamily: "Inter-Medium",
     lineHeight: moderateScale(20),
+    marginTop: verticalScale(4),
+    opacity: 0.8,
   },
+
   quickActionsContainer: {
     marginBottom: verticalScale(24),
   },

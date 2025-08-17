@@ -703,11 +703,6 @@ const AlertsTab = () => {
       {/* Title Section */}
       <View style={styles.titleSection}>
         <View style={styles.titleLeft}>
-          <View
-            style={[styles.titleIcon, { backgroundColor: accentColor + "15" }]}
-          >
-            <BellIcon width={24} height={24} color={accentColor} />
-          </View>
           <View>
             <Text style={[styles.title, { color: textColor }]}>
               <FormattedMessage id="alerts" />
@@ -866,28 +861,30 @@ const AlertsTab = () => {
             {renderShimmerContent()}
           </>
         ) : (
-          <FlatList
-            data={filteredAlerts}
-            renderItem={renderAlertItem}
-            keyExtractor={(item) => item.id}
-            ListHeaderComponent={renderHeader}
-            ListEmptyComponent={
-              filteredAlerts.length === 0 ? renderEmptyState : null
-            }
-            contentContainerStyle={[
-              styles.contentContainer,
-              filteredAlerts.length === 0 && styles.emptyContentContainer,
-            ]}
-            showsVerticalScrollIndicator={false}
-            refreshControl={
-              <RefreshControl
-                refreshing={refreshing}
-                onRefresh={onRefresh}
-                colors={[accentColor]}
-                tintColor={accentColor}
-              />
-            }
-          />
+          <>
+            {renderHeader()}
+            <FlatList
+              data={filteredAlerts}
+              renderItem={renderAlertItem}
+              keyExtractor={(item) => item.id}
+              ListEmptyComponent={
+                filteredAlerts.length === 0 ? renderEmptyState : null
+              }
+              contentContainerStyle={[
+                styles.contentContainer,
+                filteredAlerts.length === 0 && styles.emptyContentContainer,
+              ]}
+              showsVerticalScrollIndicator={false}
+              refreshControl={
+                <RefreshControl
+                  refreshing={refreshing}
+                  onRefresh={onRefresh}
+                  colors={[accentColor]}
+                  tintColor={accentColor}
+                />
+              }
+            />
+          </>
         )}
       </SafeAreaView>
 

@@ -3,118 +3,360 @@ import { Alert } from "@/utils/apiUtils";
 import { horizontalScale, moderateScale, verticalScale } from "@/utils/metrics";
 import React from "react";
 import { FormattedMessage } from "react-intl";
-import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import {
+  Animated,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
+
+import BellIcon from "@/assets/icons/alerts-tab.svg";
+import ChevronDownIcon from "@/assets/icons/chevron-down.svg";
+import SearchIcon from "@/assets/icons/search.svg";
 
 type ActiveAlertsAccordionProps = {
   alerts: Alert[];
   isExpanded: boolean;
   onToggle: () => void;
+  onAlertPress?: (alert: Alert) => void;
 };
 
 const ActiveAlertsAccordion = ({
   alerts,
   isExpanded,
   onToggle,
+  onAlertPress,
 }: ActiveAlertsAccordionProps) => {
   const textColor = useThemeColor("textColor");
   const backgroundColor = useThemeColor("background");
   const borderColor = useThemeColor("inputBorder");
+  const accentColor = useThemeColor("accentColor");
+  const placeholderGray = useThemeColor("placeholderGray");
+
+  const rotateValue = new Animated.Value(isExpanded ? 1 : 0);
+
+  React.useEffect(() => {
+    Animated.timing(rotateValue, {
+      toValue: isExpanded ? 1 : 0,
+      duration: 200,
+      useNativeDriver: true,
+    }).start();
+  }, [isExpanded]);
+
+  const rotate = rotateValue.interpolate({
+    inputRange: [0, 1],
+    outputRange: ["0deg", "180deg"],
+  });
+
+  const getAlertTypeIcon = (alertType?: string) => {
+    switch (alertType) {
+      case "immediate":
+        return <BellIcon width={14} height={14} color={accentColor} />;
+      case "search":
+        return <SearchIcon width={14} height={14} color={placeholderGray} />;
+      default:
+        return <BellIcon width={14} height={14} color={accentColor} />;
+    }
+  };
+
+  const getAlertTypeColor = (alertType?: string) => {
+    switch (alertType) {
+      case "immediate":
+        return accentColor;
+      case "search":
+        return placeholderGray;
+      default:
+        return accentColor;
+    }
+  };
 
   return (
-    <TouchableOpacity
-      style={[
-        styles.activeAlertsContainer,
-        {
-          borderBottomColor: borderColor,
-          borderTopColor: borderColor,
-          borderRightColor: borderColor,
-          borderLeftColor: borderColor,
-        },
-      ]}
-      activeOpacity={1}
-      onPress={onToggle}
-    >
-      <View style={[styles.activeAlertsHeader]}>
-        <Text style={[styles.activeAlertsTitle, { color: textColor }]}>
-          <FormattedMessage id="active_alerts" />
-        </Text>
-        <View style={styles.headerRight}>
-          <Text style={styles.activeAlertsCount}>
-            <FormattedMessage
-              id="alerts_count"
-              values={{ count: alerts.length }}
-            />
-          </Text>
+    <View style={[styles.accordionContainer, { backgroundColor, borderColor }]}>
+      <TouchableOpacity
+        style={styles.accordionHeader}
+        activeOpacity={1}
+        onPress={onToggle}
+      >
+        <View style={styles.headerLeft}>
+          <View style={styles.headerText}>
+            <Text style={[styles.accordionTitle, { color: textColor }]}>
+              <FormattedMessage id="active_alerts" />
+            </Text>
+            <Text
+              style={[styles.accordionSubtitle, { color: placeholderGray }]}
+            >
+              Monitor your keywords and topics
+            </Text>
+          </View>
         </View>
-      </View>
+
+        <View style={styles.headerRight}>
+          <View style={[styles.countBadge, { backgroundColor: accentColor }]}>
+            <Text style={[styles.countText, { color: "#ffffff" }]}>
+              {alerts.length}
+            </Text>
+          </View>
+          <Animated.View
+            style={[styles.chevronContainer, { transform: [{ rotate }] }]}
+          >
+            <ChevronDownIcon width={20} height={20} color={placeholderGray} />
+          </Animated.View>
+        </View>
+      </TouchableOpacity>
 
       {isExpanded && (
-        <View style={styles.alertsContent}>
-          {alerts.map((alert) => (
-            <View
-              key={alert.id}
-              style={[styles.alertItem, { backgroundColor, borderColor }]}
-            >
-              <View style={styles.alertContent}>
-                <Text
-                  style={[styles.alertText, { color: textColor }]}
-                  numberOfLines={1}
-                >
-                  {alert.alert_text}
-                </Text>
-              </View>
+        <View style={styles.accordionContent}>
+          {alerts.length === 0 ? (
+            <View style={styles.emptyState}>
+              <BellIcon width={32} height={32} color={placeholderGray} />
+              <Text style={[styles.emptyStateTitle, { color: textColor }]}>
+                No Active Alerts
+              </Text>
+              <Text
+                style={[styles.emptyStateSubtitle, { color: placeholderGray }]}
+              >
+                Create your first alert to start monitoring topics
+              </Text>
             </View>
-          ))}
+          ) : (
+            <View style={styles.alertsList}>
+              {alerts.map((alert, index) => (
+                <TouchableOpacity
+                  key={alert.id}
+                  style={[
+                    styles.alertItem,
+                    {
+                      backgroundColor,
+                      borderColor: borderColor,
+                      marginBottom:
+                        index === alerts.length - 1 ? 0 : verticalScale(8),
+                    },
+                  ]}
+                  activeOpacity={0.7}
+                  onPress={() => onAlertPress?.(alert)}
+                >
+                  <View style={styles.alertContent}>
+                    <View style={styles.alertHeader}>
+                      <View style={styles.alertTypeContainer}>
+                        {getAlertTypeIcon(alert.alert_type)}
+                        <View
+                          style={[
+                            styles.alertTypeBadge,
+                            {
+                              backgroundColor: `${getAlertTypeColor(
+                                alert.alert_type
+                              )}20`,
+                            },
+                          ]}
+                        >
+                          <Text
+                            style={[
+                              styles.alertTypeText,
+                              { color: getAlertTypeColor(alert.alert_type) },
+                            ]}
+                          >
+                            {alert.alert_type || "immediate"}
+                          </Text>
+                        </View>
+                      </View>
+                    </View>
+
+                    <Text
+                      style={[styles.alertText, { color: textColor }]}
+                      numberOfLines={2}
+                      ellipsizeMode="tail"
+                    >
+                      {alert.alert_text}
+                    </Text>
+
+                    <View style={styles.alertMeta}>
+                      <Text
+                        style={[
+                          styles.alertMetaText,
+                          { color: placeholderGray },
+                        ]}
+                      >
+                        {alert.alert_sources?.length || 0} sources
+                      </Text>
+                      <Text
+                        style={[
+                          styles.alertMetaText,
+                          { color: placeholderGray },
+                        ]}
+                      >
+                        Created{" "}
+                        {new Date(alert.created_at).toLocaleDateString()}
+                      </Text>
+                    </View>
+                  </View>
+                </TouchableOpacity>
+              ))}
+            </View>
+          )}
+
+          {alerts.length > 0 && (
+            <TouchableOpacity
+              style={[styles.manageButton, { borderColor }]}
+              activeOpacity={1}
+            >
+              <Text style={[styles.manageButtonText, { color: accentColor }]}>
+                <FormattedMessage
+                  id="manage_alerts"
+                  defaultMessage="Manage Alerts"
+                />
+              </Text>
+            </TouchableOpacity>
+          )}
         </View>
       )}
-    </TouchableOpacity>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
-  activeAlertsContainer: {
-    borderRadius: moderateScale(17),
+  accordionContainer: {
+    borderRadius: moderateScale(16),
     borderWidth: 1,
-    borderStyle: "solid",
-    padding: moderateScale(16),
+    overflow: "hidden",
+    marginBottom: verticalScale(16),
   },
-  activeAlertsHeader: {
+  accordionHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
+    padding: horizontalScale(16),
   },
-  activeAlertsTitle: {
-    fontSize: moderateScale(15),
-    fontFamily: "SpaceGrotesk-Medium",
+  headerLeft: {
+    flexDirection: "row",
+    alignItems: "center",
+    flex: 1,
+  },
+  iconContainer: {
+    width: moderateScale(40),
+    height: moderateScale(40),
+    borderRadius: moderateScale(20),
+    alignItems: "center",
+    justifyContent: "center",
+    marginRight: horizontalScale(12),
+  },
+  headerText: {
+    flex: 1,
+  },
+  accordionTitle: {
+    fontSize: moderateScale(16),
+    fontFamily: "Inter-SemiBold",
+    lineHeight: moderateScale(20),
+  },
+  accordionSubtitle: {
+    fontSize: moderateScale(13),
+    fontFamily: "Inter-Regular",
+    lineHeight: moderateScale(16),
+    marginTop: verticalScale(2),
   },
   headerRight: {
     flexDirection: "row",
     alignItems: "center",
+    gap: horizontalScale(8),
   },
-  activeAlertsCount: {
+  countBadge: {
+    minWidth: moderateScale(24),
+    height: moderateScale(24),
+    borderRadius: moderateScale(12),
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: horizontalScale(8),
+  },
+  countText: {
+    fontSize: moderateScale(12),
+    fontFamily: "Inter-SemiBold",
+  },
+  chevronContainer: {
+    padding: moderateScale(4),
+  },
+  accordionContent: {
+    paddingHorizontal: horizontalScale(16),
+    paddingBottom: verticalScale(16),
+  },
+  emptyState: {
+    alignItems: "center",
+    paddingVertical: verticalScale(32),
+  },
+  emptyStateTitle: {
+    fontSize: moderateScale(16),
+    fontFamily: "Inter-SemiBold",
+    marginTop: verticalScale(12),
+    marginBottom: verticalScale(4),
+  },
+  emptyStateSubtitle: {
     fontSize: moderateScale(14),
-    color: "#2196F3",
-    fontFamily: "SpaceGrotesk-Regular",
-    marginRight: moderateScale(8),
+    fontFamily: "Inter-Regular",
+    textAlign: "center",
+    lineHeight: moderateScale(18),
   },
-  alertsContent: {
-    paddingTop: verticalScale(15),
+  alertsList: {
+    gap: verticalScale(8),
   },
   alertItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingVertical: verticalScale(7),
-    paddingHorizontal: horizontalScale(13),
-    marginBottom: verticalScale(8),
-    borderRadius: moderateScale(100),
-    borderWidth: 1.5,
+    borderRadius: moderateScale(12),
+    borderWidth: 1,
+    padding: horizontalScale(16),
   },
   alertContent: {
     flex: 1,
   },
+  alertHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: verticalScale(8),
+  },
+  alertTypeContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: horizontalScale(6),
+  },
+  alertTypeBadge: {
+    paddingHorizontal: horizontalScale(8),
+    paddingVertical: verticalScale(2),
+    borderRadius: moderateScale(4),
+  },
+  alertTypeText: {
+    fontSize: moderateScale(10),
+    fontFamily: "Inter-SemiBold",
+    textTransform: "uppercase",
+    letterSpacing: 0.5,
+  },
+  statusIndicator: {
+    width: moderateScale(8),
+    height: moderateScale(8),
+    borderRadius: moderateScale(4),
+  },
   alertText: {
-    fontSize: moderateScale(13),
-    fontFamily: "SpaceGrotesk-Medium",
+    fontSize: moderateScale(15),
+    fontFamily: "Inter-SemiBold",
+    lineHeight: moderateScale(20),
+    marginBottom: verticalScale(8),
+  },
+  alertMeta: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  alertMetaText: {
+    fontSize: moderateScale(12),
+    fontFamily: "Inter-Medium",
+  },
+  manageButton: {
+    marginTop: verticalScale(16),
+    borderWidth: 1,
+    borderRadius: moderateScale(100),
+    paddingVertical: verticalScale(12),
+    alignItems: "center",
+  },
+  manageButtonText: {
+    fontSize: moderateScale(14),
+    fontFamily: "Inter-SemiBold",
   },
 });
 

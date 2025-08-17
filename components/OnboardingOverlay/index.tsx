@@ -69,14 +69,14 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: moderateScale(24),
-    fontFamily: "SpaceGrotesk-Medium",
+    fontFamily: "Inter-Medium",
     textAlign: "center",
     marginBottom: verticalScale(12),
     lineHeight: moderateScale(30),
   },
   subtitle: {
     fontSize: moderateScale(16),
-    fontFamily: "SpaceGrotesk-Regular",
+    fontFamily: "Inter-Regular",
     textAlign: "center",
     marginBottom: verticalScale(24),
     lineHeight: moderateScale(22),
@@ -96,7 +96,7 @@ const styles = StyleSheet.create({
   continueButtonText: {
     color: "white",
     fontSize: moderateScale(16),
-    fontFamily: "SpaceGrotesk-Medium",
+    fontFamily: "Inter-Medium",
   },
   skipButton: {
     width: "100%",
@@ -106,7 +106,7 @@ const styles = StyleSheet.create({
   },
   skipButtonText: {
     fontSize: moderateScale(14),
-    fontFamily: "SpaceGrotesk-Regular",
+    fontFamily: "Inter-Regular",
     opacity: 0.7,
   },
 });

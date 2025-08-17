@@ -126,11 +126,11 @@ const styles = StyleSheet.create({
   title: {
     fontSize: moderateScale(35),
     marginBottom: verticalScale(18),
-    fontFamily: "SpaceGrotesk-Medium",
+    fontFamily: "Inter-Medium",
   },
   subtitle: {
     fontSize: moderateScale(18),
-    fontFamily: "SpaceGrotesk-Medium",
+    fontFamily: "Inter-Medium",
   },
   globeContainer: {
     position: "absolute",
@@ -169,7 +169,7 @@ const styles = StyleSheet.create({
   loginText: {
     fontSize: moderateScale(15),
     padding: moderateScale(5),
-    fontFamily: "SpaceGrotesk-Medium",
+    fontFamily: "Inter-Medium",
   },
   linkText: {
     textDecorationLine: "underline",

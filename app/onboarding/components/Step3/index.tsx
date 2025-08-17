@@ -78,7 +78,7 @@ const styles = StyleSheet.create({
     fontSize: moderateScale(35),
     marginBottom: verticalScale(27),
     marginTop: verticalScale(20),
-    fontFamily: "SpaceGrotesk-Medium",
+    fontFamily: "Inter-Medium",
   },
   stepContainer: {
     flex: 1,

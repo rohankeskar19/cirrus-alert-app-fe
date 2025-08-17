@@ -9,7 +9,6 @@ import React from "react";
 import {
   Image,
   Linking,
-  SafeAreaView,
   ScrollView,
   StyleSheet,
   Text,
@@ -20,6 +19,7 @@ import {
 import BackIcon from "@/assets/icons/chevron-left.svg";
 import ClockIcon from "@/assets/icons/clock.svg";
 import ExternalLinkIcon from "@/assets/icons/external-link.svg";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 dayjs.extend(relativeTime);
 
@@ -52,10 +52,13 @@ const ViewReportScreen = () => {
   return (
     <SafeAreaView style={[styles.container, { backgroundColor }]}>
       <View style={[styles.header, { borderBottomColor: borderColor }]}>
-        <TouchableOpacity onPress={handleBack} style={styles.backButton}>
+        <TouchableOpacity
+          onPress={handleBack}
+          style={styles.backButton}
+          activeOpacity={1}
+        >
           <BackIcon width={24} height={24} color={textColor} />
         </TouchableOpacity>
-        <View style={styles.headerSpacer} />
       </View>
       <ScrollView
         style={styles.scrollContainer}
@@ -99,21 +102,15 @@ const ViewReportScreen = () => {
           )}
         </View>
 
-        {/* Content Container */}
         <View style={styles.contentContainer}>
-          {/* Title */}
           <Text style={[styles.reportTitle, { color: textColor }]}>
             {alertReport.title}
           </Text>
-
-          {/* Alert Tag */}
           <View style={[styles.alertTag, { backgroundColor: accentColor }]}>
             <Text style={[styles.alertTagText, { color: "#ffffff" }]}>
-              {alertReport.alerts?.alert_text ?? "Alert"}
+              {alertReport.alerts?.alert_text.toUpperCase() ?? "Alert"}
             </Text>
           </View>
-
-          {/* Metadata */}
           <View style={styles.metadataContainer}>
             <View style={styles.timeContainer}>
               <ClockIcon width={16} height={16} color={placeholderGray} />
@@ -136,16 +133,12 @@ const ViewReportScreen = () => {
               </Text>
             </View>
           </View>
-
-          {/* Summary Content */}
           {alertReport.summary_content && (
             <SummaryContentRenderer
               summaryContent={alertReport.summary_content as any}
               matchesData={alertReport.matches_data || ([] as any)}
             />
           )}
-
-          {/* Sources Section */}
           <View style={styles.sourcesSection}>
             <Text style={[styles.sourcesTitle, { color: textColor }]}>
               Sources ({alertReport.match_count})
@@ -201,26 +194,28 @@ const ViewReportScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    alignItems: "flex-start",
+    justifyContent: "flex-start",
   },
   header: {
+    width: "100%",
+    height: verticalScale(60),
     flexDirection: "row",
     alignItems: "center",
-    paddingHorizontal: horizontalScale(16),
-    paddingVertical: verticalScale(12),
-    borderBottomWidth: 1,
+    paddingHorizontal: horizontalScale(8),
   },
   backButton: {
     padding: moderateScale(8),
-    marginLeft: -moderateScale(8),
+    height: "100%",
+    marginVertical: "auto",
+    alignItems: "center",
+    justifyContent: "center",
   },
   headerTitle: {
     fontSize: moderateScale(18),
     fontFamily: "Inter-SemiBold",
     flex: 1,
     textAlign: "center",
-  },
-  headerSpacer: {
-    width: moderateScale(40),
   },
   scrollContainer: {
     flex: 1,
@@ -267,8 +262,8 @@ const styles = StyleSheet.create({
   alertTag: {
     alignSelf: "flex-start",
     borderRadius: moderateScale(20),
-    paddingHorizontal: moderateScale(12),
-    paddingVertical: verticalScale(6),
+    paddingHorizontal: moderateScale(8),
+    paddingVertical: verticalScale(4),
     marginBottom: verticalScale(16),
   },
   alertTagText: {

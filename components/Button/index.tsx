@@ -135,7 +135,7 @@ const styles = StyleSheet.create({
   },
   text: {
     fontSize: 16,
-    fontFamily: "SpaceGrotesk-SemiBold",
+    fontFamily: "Inter-SemiBold",
   },
 });
 

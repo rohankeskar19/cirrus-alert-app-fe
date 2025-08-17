@@ -71,7 +71,7 @@ const styles = StyleSheet.create({
   text: {
     flex: 1,
     fontSize: moderateScale(18),
-    fontFamily: "SpaceGrotesk-Medium",
+    fontFamily: "Inter-Medium",
   },
   checkContainer: {
     width: moderateScale(24),

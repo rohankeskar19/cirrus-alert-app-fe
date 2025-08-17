@@ -15,9 +15,13 @@ dayjs.extend(relativeTime);
 
 type AlertReportCardProps = {
   alertReport: AlertReport;
+  onMarkAsRead?: () => void;
 };
 
-const AlertReportCard = ({ alertReport }: AlertReportCardProps) => {
+const AlertReportCard = ({
+  alertReport,
+  onMarkAsRead,
+}: AlertReportCardProps) => {
   const router = useRouter();
   const textColor = useThemeColor("textColor");
   const backgroundColor = useThemeColor("background");
@@ -27,24 +31,29 @@ const AlertReportCard = ({ alertReport }: AlertReportCardProps) => {
 
   const matches = alertReport.matches_data ?? ([] as any);
   const featuredImage =
-    matches[0]?.images?.featured ?? "https://via.placeholder.com/120";
+    matches[0]?.images?.featured ?? "https://via.placeholder.com/400x200";
+  const featuredSource = matches[0];
 
-  const sourceIcons = matches.slice(0, 3).map((match: any, index: number) => ({
+  const sourceIcons = matches.slice(0, 4).map((match: any, index: number) => ({
     key: `favicon-${index}`,
     favicon:
       match.favicon ||
       `https://www.google.com/s2/favicons?sz=64&domain_url=${match.domain}`,
+    domain: match.domain,
   }));
 
-  const extraSourceCount = matches.length > 3 ? matches.length - 3 : 0;
+  const extraSourceCount = matches.length > 4 ? matches.length - 4 : 0;
   const alertText = alertReport.alerts?.alert_text ?? "Alert";
+  const readingTime =
+    alertReport.summary_content?.metadata?.reading_time_minutes || 2;
 
   const markAsRead = async (event: any) => {
-    event.stopPropagation(); // Prevent card navigation
+    event.stopPropagation();
     try {
       await markAlertReportAsRead(alertReport.id);
+      onMarkAsRead?.();
     } catch (err) {
-      // throw error
+      console.error("Failed to mark as read:", err);
     }
   };
 
@@ -60,78 +69,125 @@ const AlertReportCard = ({ alertReport }: AlertReportCardProps) => {
   return (
     <TouchableOpacity
       style={[styles.newsCard, { backgroundColor, borderColor }]}
-      activeOpacity={0.8}
+      activeOpacity={0.95}
       onPress={handleCardPress}
     >
-      <View style={styles.cardContent}>
-        <Image source={{ uri: featuredImage }} style={styles.newsImage} />
-        <View style={styles.newsTextContainer}>
-          <Text
-            style={[styles.newsTitle, { color: textColor }]}
-            numberOfLines={3}
-            ellipsizeMode="tail"
-          >
-            {alertReport.title}
-          </Text>
+      {/* Featured Image */}
+      <View style={styles.imageContainer}>
+        <Image source={{ uri: featuredImage }} style={styles.featuredImage} />
 
-          <View style={[styles.newsTag, { backgroundColor: accentColor }]}>
+        {/* Image Credit */}
+        {featuredSource && (
+          <View
+            style={[
+              styles.imageCreditOverlay,
+              { backgroundColor: `${backgroundColor}F0` },
+            ]}
+          >
+            <Image
+              source={{
+                uri:
+                  featuredSource.favicon ||
+                  `https://www.google.com/s2/favicons?sz=64&domain_url=${featuredSource.domain}`,
+              }}
+              style={styles.creditFavicon}
+            />
             <Text
+              style={[styles.creditText, { color: textColor }]}
               numberOfLines={1}
-              ellipsizeMode="tail"
-              style={[styles.newsTagText, { color: "#ffffff" }]}
             >
-              {alertText}
+              {featuredSource.domain}
             </Text>
           </View>
+        )}
+      </View>
 
+      {/* Content Container */}
+      <View style={styles.cardContent}>
+        {/* Alert Tag */}
+        <View style={[styles.alertTag, { backgroundColor: accentColor }]}>
+          <Text style={[styles.alertTagText, { color: "#ffffff" }]}>
+            {alertText}
+          </Text>
+        </View>
+
+        {/* Title */}
+        <Text
+          style={[styles.newsTitle, { color: textColor }]}
+          numberOfLines={3}
+          ellipsizeMode="tail"
+        >
+          {alertReport.title}
+        </Text>
+
+        {/* Metadata Row */}
+        <View style={styles.metadataContainer}>
           <View style={styles.timeContainer}>
-            <ClockIcon width={17} height={17} color={placeholderGray} />
-            <Text
-              style={[styles.timeText, { color: placeholderGray }]}
-              numberOfLines={1}
-              ellipsizeMode="tail"
-            >
+            <ClockIcon width={14} height={14} color={placeholderGray} />
+            <Text style={[styles.timeText, { color: placeholderGray }]}>
               {dayjs(alertReport.generated_at).fromNow()}
             </Text>
           </View>
 
-          <View style={styles.newsFooter}>
-            <View style={styles.newsIcons}>
-              {sourceIcons.map((icon: any) => (
-                <Image
-                  key={icon.key}
-                  source={{ uri: icon.favicon }}
-                  style={[styles.sourceFavicon, { backgroundColor }]}
-                />
+          <View style={styles.statsContainer}>
+            <Text style={[styles.statsText, { color: placeholderGray }]}>
+              {readingTime} min read
+            </Text>
+            <Text style={[styles.statsDivider, { color: placeholderGray }]}>
+              •
+            </Text>
+            <Text style={[styles.statsText, { color: placeholderGray }]}>
+              {alertReport.match_count} sources
+            </Text>
+          </View>
+        </View>
+
+        {/* Footer */}
+        <View style={styles.cardFooter}>
+          {/* Source Icons */}
+          <View style={styles.sourcesContainer}>
+            <View style={styles.sourceIcons}>
+              {sourceIcons.map((icon: any, index: number) => (
+                <View key={icon.key} style={styles.sourceIconWrapper}>
+                  <Image
+                    source={{ uri: icon.favicon }}
+                    style={[styles.sourceFavicon, { backgroundColor }]}
+                  />
+                </View>
               ))}
               {extraSourceCount > 0 && (
                 <View
-                  style={[styles.sourceIcon, { backgroundColor: textColor }]}
+                  style={[
+                    styles.extraSourceIcon,
+                    { backgroundColor: borderColor },
+                  ]}
                 >
-                  <Text
-                    style={[styles.sourceIconText, { color: backgroundColor }]}
-                  >
+                  <Text style={[styles.extraSourceText, { color: textColor }]}>
                     +{extraSourceCount}
                   </Text>
                 </View>
               )}
             </View>
 
-            <View style={styles.markAsReadButton}>
-              <TouchableOpacity
-                style={styles.markAsReadTouchable}
-                onPress={markAsRead}
-              >
-                <TickIcon color={textColor} />
-                <Text
-                  style={[styles.markAsReadText, { color: textColor }]}
-                  numberOfLines={1}
-                  ellipsizeMode="tail"
-                >
-                  <FormattedMessage id="mark_as_read" />
-                </Text>
-              </TouchableOpacity>
-            </View>
+            {sourceIcons.length > 0 && (
+              <Text style={[styles.sourcesLabel, { color: placeholderGray }]}>
+                Sources
+              </Text>
+            )}
+          </View>
+
+          {/* Action Buttons */}
+          <View style={styles.actionsContainer}>
+            <TouchableOpacity
+              style={[styles.actionButton, { borderColor }]}
+              onPress={markAsRead}
+              activeOpacity={0.7}
+            >
+              <TickIcon width={16} height={16} color={textColor} />
+              <Text style={[styles.actionText, { color: textColor }]}>
+                <FormattedMessage id="mark_as_read" />
+              </Text>
+            </TouchableOpacity>
           </View>
         </View>
       </View>
@@ -139,103 +195,163 @@ const AlertReportCard = ({ alertReport }: AlertReportCardProps) => {
   );
 };
 
-// (styles remain the same as in your original component)
 const styles = StyleSheet.create({
   newsCard: {
     width: "100%",
-    borderRadius: moderateScale(14),
+    borderRadius: moderateScale(16),
     borderWidth: 1,
+    overflow: "hidden",
+    marginBottom: verticalScale(16),
+  },
+  imageContainer: {
+    position: "relative",
+    width: "100%",
+    height: verticalScale(160),
+  },
+  featuredImage: {
+    width: "100%",
+    height: "100%",
+    resizeMode: "cover",
+  },
+  imageCreditOverlay: {
+    position: "absolute",
+    bottom: moderateScale(8),
+    right: moderateScale(8),
+    flexDirection: "row",
+    alignItems: "center",
+    borderRadius: moderateScale(6),
+    paddingHorizontal: moderateScale(6),
+    paddingVertical: moderateScale(4),
+  },
+  creditFavicon: {
+    width: moderateScale(12),
+    height: moderateScale(12),
+    borderRadius: moderateScale(6),
+    marginRight: horizontalScale(4),
+  },
+  creditText: {
+    fontSize: moderateScale(10),
+    fontFamily: "Inter-Medium",
   },
   cardContent: {
-    flexDirection: "row",
-    flex: 1,
+    padding: horizontalScale(16),
   },
-  newsImage: {
-    width: horizontalScale(105),
-    height: "100%",
-    borderTopLeftRadius: moderateScale(14),
-    borderBottomLeftRadius: moderateScale(14),
-    marginRight: moderateScale(12),
+  alertTag: {
+    alignSelf: "flex-start",
+    borderRadius: moderateScale(100),
+    paddingHorizontal: moderateScale(8),
+    paddingVertical: verticalScale(4),
+    marginBottom: verticalScale(12),
   },
-  newsTextContainer: {
-    flex: 1,
-    paddingRight: horizontalScale(14),
-    paddingTop: verticalScale(13),
-    paddingBottom: verticalScale(16),
-    justifyContent: "space-between",
+  alertTagText: {
+    fontSize: moderateScale(11),
+    fontFamily: "Inter-SemiBold",
+    textTransform: "uppercase",
+    letterSpacing: 0.5,
   },
   newsTitle: {
     fontSize: moderateScale(18),
-    fontFamily: "SpaceGrotesk-SemiBold",
-    lineHeight: moderateScale(22),
-    marginBottom: verticalScale(15),
+    fontFamily: "Inter-Bold",
+    lineHeight: moderateScale(24),
+    marginBottom: verticalScale(12),
   },
-  newsTag: {
-    borderRadius: moderateScale(100),
-    paddingHorizontal: moderateScale(15),
-    paddingVertical: moderateScale(8),
-    alignSelf: "flex-start",
-    marginBottom: verticalScale(13),
-    maxWidth: "100%",
-  },
-  newsTagText: {
-    fontSize: moderateScale(13),
-    fontFamily: "SpaceGrotesk-Medium",
-  },
-  newsFooter: {
+  metadataContainer: {
     flexDirection: "row",
-    alignItems: "center",
     justifyContent: "space-between",
-    marginTop: verticalScale(10),
-  },
-  timeText: {
-    fontSize: moderateScale(15),
-    fontFamily: "SpaceGrotesk-Medium",
-    marginLeft: horizontalScale(8),
-    flex: 1,
-  },
-  newsIcons: {
-    flexDirection: "row",
     alignItems: "center",
-    flex: 1,
-  },
-  sourceIcon: {
-    width: moderateScale(28),
-    height: moderateScale(28),
-    borderRadius: moderateScale(100),
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  sourceIconText: {
-    color: "white",
-    fontSize: moderateScale(12),
-    fontFamily: "SpaceGrotesk-Medium",
-  },
-  markAsReadButton: {
-    flex: 1,
-    alignItems: "flex-end",
-  },
-  markAsReadTouchable: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: moderateScale(11),
-    padding: moderateScale(5),
-  },
-  markAsReadText: {
-    fontSize: moderateScale(15),
-    fontFamily: "SpaceGrotesk-SemiBold",
-    maxWidth: horizontalScale(100),
-  },
-  sourceFavicon: {
-    width: moderateScale(28),
-    height: moderateScale(28),
-    borderRadius: moderateScale(100),
-    marginRight: -moderateScale(10),
+    marginBottom: verticalScale(16),
   },
   timeContainer: {
     flexDirection: "row",
     alignItems: "center",
-    marginBottom: verticalScale(10),
+  },
+  timeText: {
+    fontSize: moderateScale(13),
+    fontFamily: "Inter-Medium",
+    marginLeft: horizontalScale(4),
+  },
+  statsContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  statsText: {
+    fontSize: moderateScale(13),
+    fontFamily: "Inter-Medium",
+  },
+  statsDivider: {
+    fontSize: moderateScale(13),
+    marginHorizontal: horizontalScale(6),
+  },
+  cardFooter: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "flex-end",
+  },
+  sourcesContainer: {
+    flex: 1,
+    marginRight: horizontalScale(12),
+  },
+  sourceIcons: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: verticalScale(4),
+  },
+  sourceIconWrapper: {
+    marginRight: -horizontalScale(6),
+  },
+  sourceFavicon: {
+    width: moderateScale(24),
+    height: moderateScale(24),
+    borderRadius: moderateScale(12),
+    borderWidth: 2,
+    borderColor: "#ffffff",
+  },
+  extraSourceIcon: {
+    width: moderateScale(24),
+    height: moderateScale(24),
+    borderRadius: moderateScale(12),
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 2,
+    borderColor: "#ffffff",
+  },
+  extraSourceText: {
+    fontSize: moderateScale(9),
+    fontFamily: "Inter-SemiBold",
+  },
+  sourcesLabel: {
+    fontSize: moderateScale(11),
+    fontFamily: "Inter-Medium",
+  },
+  actionsContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: horizontalScale(8),
+  },
+  actionButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: horizontalScale(10),
+    paddingVertical: verticalScale(8),
+    borderRadius: moderateScale(8),
+    borderWidth: 1,
+    gap: horizontalScale(4),
+  },
+  actionText: {
+    fontSize: moderateScale(12),
+    fontFamily: "Inter-SemiBold",
+  },
+  primaryButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: horizontalScale(12),
+    paddingVertical: verticalScale(8),
+    borderRadius: moderateScale(8),
+    gap: horizontalScale(4),
+  },
+  primaryButtonText: {
+    fontSize: moderateScale(12),
+    fontFamily: "Inter-SemiBold",
   },
 });
 

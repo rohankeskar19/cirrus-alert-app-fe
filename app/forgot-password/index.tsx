@@ -137,7 +137,7 @@ const styles = StyleSheet.create({
     textAlign: "center",
     marginBottom: verticalScale(32),
     marginTop: "auto",
-    fontFamily: "SpaceGrotesk-Medium",
+    fontFamily: "Inter-Medium",
   },
   buttonsContainer: {
     width: "90%",

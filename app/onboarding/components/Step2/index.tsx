@@ -77,7 +77,7 @@ const styles = StyleSheet.create({
     fontSize: moderateScale(35),
     marginBottom: verticalScale(27),
     marginTop: verticalScale(20),
-    fontFamily: "SpaceGrotesk-Medium",
+    fontFamily: "Inter-Medium",
   },
   stepContainer: {
     flex: 1,
@@ -107,7 +107,7 @@ const styles = StyleSheet.create({
   textArea: {
     flex: 1,
     fontSize: moderateScale(18),
-    fontFamily: "SpaceGrotesk-Regular",
+    fontFamily: "Inter-Regular",
     lineHeight: moderateScale(22),
     minHeight: verticalScale(88),
   },
@@ -116,7 +116,7 @@ const styles = StyleSheet.create({
     fontSize: moderateScale(14),
     marginTop: verticalScale(4),
     marginLeft: horizontalScale(16),
-    fontFamily: "SpaceGrotesk-Regular",
+    fontFamily: "Inter-Regular",
   },
 });
 

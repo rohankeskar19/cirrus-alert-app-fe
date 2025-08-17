@@ -338,9 +338,7 @@ const styles = StyleSheet.create({
     lineHeight: moderateScale(32),
     marginBottom: verticalScale(20),
   },
-  blockContainer: {
-    marginBottom: verticalScale(16),
-  },
+  blockContainer: {},
   heading: {
     fontFamily: "Inter-SemiBold",
     marginBottom: verticalScale(8),

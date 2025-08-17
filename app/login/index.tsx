@@ -238,7 +238,7 @@ const styles = StyleSheet.create({
     textAlign: "center",
     marginBottom: verticalScale(32),
     marginTop: "auto",
-    fontFamily: "SpaceGrotesk-Medium",
+    fontFamily: "Inter-Medium",
   },
   buttonsContainer: {
     width: "90%",
@@ -261,7 +261,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: horizontalScale(10),
     color: "#E5E5E5",
     fontSize: moderateScale(13),
-    fontFamily: "SpaceGrotesk-Medium",
+    fontFamily: "Inter-Medium",
   },
   signupContainer: {
     marginTop: "auto",
@@ -271,7 +271,7 @@ const styles = StyleSheet.create({
   signupText: {
     fontSize: moderateScale(15),
     padding: moderateScale(5),
-    fontFamily: "SpaceGrotesk-Medium",
+    fontFamily: "Inter-Medium",
   },
   backButton: {
     padding: moderateScale(5),
@@ -281,7 +281,7 @@ const styles = StyleSheet.create({
   linkText: {
     textDecorationLine: "underline",
     fontSize: moderateScale(16),
-    fontFamily: "SpaceGrotesk-Medium",
+    fontFamily: "Inter-Medium",
   },
   forgotPasswordContainer: {
     alignItems: "center",

@@ -165,14 +165,13 @@ const styles = StyleSheet.create({
   },
   greeting: {
     fontSize: moderateScale(30),
-    fontFamily: "SpaceGrotesk-Medium",
+    fontFamily: "Inter-Medium",
   },
   newMatchesHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
     marginBottom: verticalScale(20),
-    marginTop: verticalScale(19),
   },
   newMatchesTitle: {
     flexDirection: "row",
@@ -180,7 +179,7 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: moderateScale(20),
-    fontFamily: "SpaceGrotesk-SemiBold",
+    fontFamily: "Inter-Medium",
     marginRight: moderateScale(10),
   },
   matchesBadge: {
@@ -193,11 +192,11 @@ const styles = StyleSheet.create({
   matchesBadgeText: {
     color: "white",
     fontSize: moderateScale(15),
-    fontFamily: "SpaceGrotesk-SemiBold",
+    fontFamily: "Inter-Medium",
   },
   viewedLink: {
     fontSize: moderateScale(15),
-    fontFamily: "SpaceGrotesk-Regular",
+    fontFamily: "Inter-Regular",
     marginRight: horizontalScale(10),
   },
   separator: {

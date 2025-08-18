@@ -34,8 +34,7 @@ export default function TabLayout() {
             display: "flex",
             flexDirection: "row",
             alignItems: "flex-start",
-            borderTopColor: "#EBEBEB",
-            borderTopWidth: 2,
+            borderTopColor: "transparent",
           },
           default: {
             height: verticalScale(75),
@@ -45,8 +44,7 @@ export default function TabLayout() {
             display: "flex",
             flexDirection: "row",
             alignItems: "flex-start",
-            borderTopColor: "#EBEBEB",
-            borderTopWidth: 2,
+            borderTopColor: "transparent",
           },
         }),
       }}

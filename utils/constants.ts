@@ -48,9 +48,9 @@ export const SHOW_TOAST_MESSAGE = "SHOW_TOAST_MESSAGE";
 export const HIDE_TOAST_MESSAGE = "HIDE_TOAST_MESSAGE";
 
 export const THEMES = {
-  AUTO: "system-theme",
-  DARK: "dark-theme",
-  LIGHT: "light-theme",
+  AUTO: "system",
+  DARK: "dark",
+  LIGHT: "light",
 };
 
 export const SCREEN_BACKGROUNDS = {

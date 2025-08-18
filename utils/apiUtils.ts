@@ -563,3 +563,81 @@ export const fetchAllUserAlerts = async (): Promise<Alert[]> => {
 
   return data as Alert[];
 };
+
+/**
+ * Delete user account and all associated data
+ * @returns Boolean indicating success
+ */
+export const deleteUserAccount = async (): Promise<boolean> => {
+  try {
+    const {
+      data: { session },
+      error: sessionError,
+    } = await supabase.auth.getSession();
+
+    if (sessionError || !session) {
+      console.error("Not logged in:", sessionError?.message);
+      return false;
+    }
+
+    // Delete user data (this should be handled by database triggers/policies)
+    const { error: deleteError } = await supabase.rpc("delete_user_account", {
+      user_id: session.user.id,
+    });
+
+    if (deleteError) {
+      console.error("Error deleting user data:", deleteError.message);
+      return false;
+    }
+
+    // Sign out the user
+    await signOutUser();
+    return true;
+  } catch (error: any) {
+    console.error("Unexpected error deleting account:", error.message);
+    return false;
+  }
+};
+
+/**
+ * Get user subscription information
+ * @returns User subscription data
+ */
+export const getUserSubscription = async (): Promise<{
+  plan: string;
+  status: string;
+  expires_at?: string;
+  features: string[];
+} | null> => {
+  try {
+    return null;
+    // const {
+    //   data: { session },
+    //   error: sessionError,
+    // } = await supabase.auth.getSession();
+
+    // if (sessionError || !session) return null;
+
+    // const { data, error } = await supabase
+    //   .from("user_subscriptions")
+    //   .select("*")
+    //   .eq("user_id", session.user.id)
+    //   .maybeSingle();
+
+    // if (error) {
+    //   console.error("Error fetching subscription:", error.message);
+    //   return null;
+    // }
+
+    // return (
+    //   data || {
+    //     plan: "free",
+    //     status: "active",
+    //     features: ["5 alerts", "Basic sources", "Email notifications"],
+    //   }
+    // );
+  } catch (error) {
+    console.error("Error getting subscription:", error);
+    return null;
+  }
+};

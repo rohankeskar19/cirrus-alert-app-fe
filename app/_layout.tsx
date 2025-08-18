@@ -92,6 +92,8 @@ export default function RootLayout() {
 
   if (!fontsLoaded) return;
 
+  console.log("Theme ", theme);
+
   return (
     <Provider store={store}>
       <ThemeContext.Provider value={themeData as any}>

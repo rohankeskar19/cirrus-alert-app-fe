@@ -6,7 +6,6 @@ import {
   AlertReport,
   fetchActiveAlerts,
   fetchUnreadAlertReports,
-  supabase,
 } from "@/utils/apiUtils";
 import { horizontalScale, moderateScale, verticalScale } from "@/utils/metrics";
 import { getGreetingMessage } from "@/utils/uiUtils";
@@ -51,43 +50,6 @@ const HomeTab = () => {
       duration: 300,
       useNativeDriver: true,
     }).start();
-
-    const channel = supabase
-      .channel("alert_reports_changes")
-      .on(
-        "postgres_changes",
-        {
-          event: "*",
-          schema: "public",
-          table: "alert_reports",
-        },
-        (payload) => {
-          if (payload.eventType === "INSERT") {
-            setAlertReports((prev) => [payload.new as AlertReport, ...prev]);
-          }
-
-          if (payload.eventType === "UPDATE") {
-            setAlertReports((prev) =>
-              prev.map((report) =>
-                report.id === payload.new.id
-                  ? (payload.new as AlertReport)
-                  : report
-              )
-            );
-          }
-
-          if (payload.eventType === "DELETE") {
-            setAlertReports((prev) =>
-              prev.filter((report) => report.id !== payload.old.id)
-            );
-          }
-        }
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
   }, []);
 
   const fetchData = async () => {

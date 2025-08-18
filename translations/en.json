@@ -237,5 +237,6 @@
   "edit_alert": "Edit Alert",
   "updating": "Updating",
   "update": "Update",
-  "create": "Create"
+  "create": "Create",
+  "no_alerts_to_show": "No alerts to show"
 }

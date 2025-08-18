@@ -117,19 +117,15 @@ const ActiveAlertsAccordion = ({
           ) : (
             <View style={styles.alertsList}>
               {alerts.map((alert, index) => (
-                <TouchableOpacity
+                <View
                   key={alert.id}
                   style={[
                     styles.alertItem,
                     {
                       backgroundColor,
-
-                      marginBottom:
-                        index === alerts.length - 1 ? 0 : verticalScale(8),
+                      marginBottom: verticalScale(8),
                     },
                   ]}
-                  activeOpacity={0.7}
-                  onPress={() => onAlertPress?.(alert)}
                 >
                   <View style={styles.alertContent}>
                     <View style={styles.alertHeader}>
@@ -194,7 +190,7 @@ const ActiveAlertsAccordion = ({
                       </Text>
                     </View>
                   </View>
-                </TouchableOpacity>
+                </View>
               ))}
             </View>
           )}
@@ -290,9 +286,7 @@ const styles = StyleSheet.create({
   alertItem: {
     borderRadius: moderateScale(12),
   },
-  alertContent: {
-    flex: 1,
-  },
+  alertContent: {},
   alertHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -315,12 +309,8 @@ const styles = StyleSheet.create({
     textTransform: "uppercase",
     letterSpacing: 0.5,
   },
-  statusIndicator: {
-    width: moderateScale(8),
-    height: moderateScale(8),
-    borderRadius: moderateScale(4),
-  },
   alertText: {
+    width: "90%",
     fontSize: moderateScale(15),
     fontFamily: "Inter-SemiBold",
     lineHeight: moderateScale(20),

@@ -829,26 +829,8 @@ const AlertsTab = () => {
         <BellIcon width={32} height={32} color={placeholderGray} />
       </View>
       <Text style={[styles.emptyStateTitle, { color: textColor }]}>
-        <FormattedMessage id="no_alerts_yet" />
+        <FormattedMessage id="no_alerts_to_show" />
       </Text>
-      <Text style={[styles.emptyStateSubtitle, { color: placeholderGray }]}>
-        <FormattedMessage id="create_first_alert" />
-      </Text>
-      <Pressable
-        style={({ pressed }) => [
-          styles.emptyStateButton,
-          {
-            backgroundColor: accentColor,
-            opacity: pressed ? 0.9 : 1,
-          },
-        ]}
-        onPress={() => setShowCreateModal(true)}
-      >
-        <PlusIcon width={16} height={16} color="#ffffff" />
-        <Text style={[styles.emptyStateButtonText, { color: "#ffffff" }]}>
-          <FormattedMessage id="create" />
-        </Text>
-      </Pressable>
     </View>
   );
 
@@ -1091,7 +1073,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     position: "absolute",
-    bottom: verticalScale(100),
+    bottom: verticalScale(90),
     right: horizontalScale(20),
   },
   searchContainer: {

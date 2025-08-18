@@ -206,11 +206,11 @@ const HomeTab = () => {
   return (
     <View style={[styles.screenContainer, { backgroundColor }]}>
       <SafeAreaView style={styles.safeArea}>
+        {renderHeader()}
         <FlatList
           data={alertReports}
           renderItem={renderAlertReport}
           keyExtractor={(item) => item.id.toString()}
-          ListHeaderComponent={renderHeader}
           ListEmptyComponent={
             alertReports.length === 0 ? renderEmptyState : null
           }
@@ -245,7 +245,7 @@ const styles = StyleSheet.create({
     marginTop: verticalScale(20),
   },
   contentContainer: {
-    paddingBottom: verticalScale(20),
+    paddingBottom: verticalScale(80),
   },
   emptyContentContainer: {
     flexGrow: 1,

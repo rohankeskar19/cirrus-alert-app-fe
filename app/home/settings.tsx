@@ -26,7 +26,6 @@ import DeleteIcon from "@/assets/icons/delete.svg";
 import LockIcon from "@/assets/icons/lock.svg";
 import LogoutIcon from "@/assets/icons/logout.svg";
 import MoonIcon from "@/assets/icons/moon.svg";
-import SettingsIcon from "@/assets/icons/settings-tab.svg";
 import SunIcon from "@/assets/icons/sun.svg";
 import ThemeIcon from "@/assets/icons/theme.svg";
 import UserIcon from "@/assets/icons/user.svg";
@@ -369,14 +368,6 @@ const SettingsTab = () => {
         {/* Header */}
         <View style={styles.header}>
           <View style={styles.headerLeft}>
-            <View
-              style={[
-                styles.headerIcon,
-                { backgroundColor: `${accentColor}20` },
-              ]}
-            >
-              <SettingsIcon width={24} height={24} color={accentColor} />
-            </View>
             <View>
               <Text style={[styles.headerTitle, { color: textColor }]}>
                 Settings
@@ -534,15 +525,17 @@ const styles = StyleSheet.create({
     marginRight: horizontalScale(12),
   },
   headerTitle: {
-    fontSize: moderateScale(24),
+    fontSize: moderateScale(32),
     fontFamily: "Inter-Bold",
-    lineHeight: moderateScale(28),
+    lineHeight: moderateScale(38),
+    letterSpacing: -0.5,
   },
   headerSubtitle: {
-    fontSize: moderateScale(14),
-    fontFamily: "Inter-Regular",
-    lineHeight: moderateScale(18),
-    marginTop: verticalScale(2),
+    fontSize: moderateScale(16),
+    fontFamily: "Inter-Medium",
+    lineHeight: moderateScale(20),
+    marginTop: verticalScale(4),
+    opacity: 0.8,
   },
   scrollContainer: {
     flex: 1,
@@ -723,7 +716,8 @@ const styles = StyleSheet.create({
   deleteModalButton: {
     flex: 1,
     paddingVertical: verticalScale(12),
-    borderRadius: moderateScale(8),
+    paddingHorizontal: horizontalScale(12),
+    borderRadius: moderateScale(100),
     alignItems: "center",
     justifyContent: "center",
   },

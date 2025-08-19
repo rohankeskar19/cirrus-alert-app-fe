@@ -198,7 +198,12 @@ const AlertReportCard = ({
               ]}
               onPress={markAsRead}
             >
-              <TickIcon width={14} height={14} color={textColor} />
+              <TickIcon
+                width={14}
+                height={14}
+                color={textColor}
+                style={{ opacity: 0.8 }}
+              />
               <Text style={[styles.markReadText, { color: textColor }]}>
                 <FormattedMessage id="mark_as_read" />
               </Text>
@@ -273,7 +278,7 @@ const styles = StyleSheet.create({
     opacity: 0.75,
   },
   cardContent: {
-    paddingTop: verticalScale(11),
+    paddingVertical: verticalScale(11),
   },
   newsTitle: {
     fontSize: moderateScale(20),
@@ -360,6 +365,7 @@ const styles = StyleSheet.create({
     fontSize: moderateScale(15),
     fontFamily: "Inter-Medium",
     letterSpacing: 0.2,
+    opacity: 0.8,
   },
 });
 

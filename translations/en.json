@@ -105,5 +105,8 @@
   "updating": "Updating",
   "update": "Update",
   "create": "Create",
-  "no_alerts_to_show": "No alerts to show"
+  "no_alerts_to_show": "No alerts to show",
+  "active_alerts_count": "{count} active",
+  "unread_matches": "Unread matches",
+  "view_all": "View all"
 }

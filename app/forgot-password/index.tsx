@@ -137,7 +137,7 @@ const styles = StyleSheet.create({
     textAlign: "center",
     marginBottom: verticalScale(32),
     marginTop: "auto",
-    fontFamily: "Inter-Medium",
+    fontFamily: "Inter-SemiBold",
   },
   buttonsContainer: {
     width: "90%",

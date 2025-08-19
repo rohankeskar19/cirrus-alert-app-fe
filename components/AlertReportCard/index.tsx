@@ -7,7 +7,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 import { Image, Pressable, StyleSheet, Text, View } from "react-native";
 
-import ClockIcon from "@/assets/icons/clock.svg";
+import ArrowTopRight from "@/assets/icons/arrow-top-right.svg";
 import TickIcon from "@/assets/icons/tick.svg";
 
 import { FormattedMessage } from "react-intl";
@@ -77,7 +77,6 @@ const AlertReportCard = ({
         {
           backgroundColor,
           borderColor,
-          transform: [{ scale: pressed ? 0.98 : 1 }],
         },
       ]}
       onPress={handleCardPress}
@@ -90,12 +89,6 @@ const AlertReportCard = ({
           colors={["transparent", "rgba(0,0,0,0.3)"]}
           style={styles.imageGradient}
         />
-
-        <View
-          style={[styles.floatingAlertTag, { backgroundColor: accentColor }]}
-        >
-          <Text style={styles.floatingAlertText}>{alertText}</Text>
-        </View>
 
         {featuredSource && (
           <View
@@ -115,6 +108,7 @@ const AlertReportCard = ({
             <Text style={styles.sourceCreditText} numberOfLines={1}>
               {featuredSource.domain}
             </Text>
+            <ArrowTopRight />
           </View>
         )}
       </View>
@@ -128,28 +122,30 @@ const AlertReportCard = ({
           {alertReport.title}
         </Text>
 
+        <Text
+          style={[styles.alertTextTitle, { color: accentColor }]}
+          numberOfLines={1}
+          ellipsizeMode="tail"
+        >
+          {alertText}
+        </Text>
+
         <View style={styles.metadataRow}>
           <View style={styles.timeContainer}>
-            <ClockIcon width={12} height={12} color={placeholderGray} />
             <Text style={[styles.metadataText, { color: placeholderGray }]}>
               {dayjs(alertReport.generated_at).fromNow()}
             </Text>
           </View>
 
-          <View style={styles.statsContainer}>
-            <Text style={[styles.metadataText, { color: placeholderGray }]}>
-              <FormattedMessage id="read_time" values={{ time: readingTime }} />
-            </Text>
-            <Text style={[styles.statsDivider, { color: placeholderGray }]}>
-              •
-            </Text>
-            <Text style={[styles.metadataText, { color: placeholderGray }]}>
-              <FormattedMessage
-                id="sources_count"
-                values={{ count: alertReport.match_count }}
-              />
-            </Text>
-          </View>
+          <Text style={[styles.statsDivider, { color: placeholderGray }]}>
+            •
+          </Text>
+          <Text style={[styles.metadataText, { color: placeholderGray }]}>
+            <FormattedMessage
+              id="sources_count"
+              values={{ count: alertReport.match_count }}
+            />
+          </Text>
         </View>
 
         <View style={styles.footerRow}>
@@ -202,8 +198,8 @@ const AlertReportCard = ({
               ]}
               onPress={markAsRead}
             >
-              <TickIcon width={14} height={14} color={accentColor} />
-              <Text style={[styles.markReadText, { color: accentColor }]}>
+              <TickIcon width={14} height={14} color={textColor} />
+              <Text style={[styles.markReadText, { color: textColor }]}>
                 <FormattedMessage id="mark_as_read" />
               </Text>
             </Pressable>
@@ -217,10 +213,8 @@ const AlertReportCard = ({
 const styles = StyleSheet.create({
   newsCard: {
     width: "100%",
-    borderRadius: moderateScale(20),
     overflow: "hidden",
     marginBottom: verticalScale(12),
-    borderWidth: 1,
   },
   imageContainer: {
     position: "relative",
@@ -231,6 +225,7 @@ const styles = StyleSheet.create({
     width: "100%",
     height: "100%",
     resizeMode: "cover",
+    borderRadius: moderateScale(4),
   },
   imageGradient: {
     position: "absolute",
@@ -265,31 +260,38 @@ const styles = StyleSheet.create({
     paddingVertical: moderateScale(4),
   },
   sourceCreditFavicon: {
-    width: moderateScale(14),
-    height: moderateScale(14),
-    borderRadius: moderateScale(7),
-    marginRight: horizontalScale(4),
+    width: moderateScale(16),
+    height: moderateScale(16),
+    marginRight: horizontalScale(6),
+    borderRadius: moderateScale(4),
   },
   sourceCreditText: {
-    fontSize: moderateScale(11),
+    fontSize: moderateScale(13),
     fontFamily: "Inter-Medium",
     color: "#ffffff",
+    marginRight: horizontalScale(8),
+    opacity: 0.75,
   },
   cardContent: {
-    padding: moderateScale(20),
+    paddingTop: verticalScale(11),
   },
   newsTitle: {
     fontSize: moderateScale(20),
-    fontFamily: "Inter-Bold",
+    fontFamily: "Inter-SemiBold",
     lineHeight: moderateScale(26),
-    marginBottom: verticalScale(16),
-    letterSpacing: -0.2,
+    marginBottom: verticalScale(8),
+  },
+  alertTextTitle: {
+    fontSize: moderateScale(15),
+    fontFamily: "Inter-Medium",
+    lineHeight: moderateScale(26),
+    marginBottom: verticalScale(11),
   },
   metadataRow: {
     flexDirection: "row",
-    justifyContent: "space-between",
     alignItems: "center",
     marginBottom: verticalScale(20),
+    gap: horizontalScale(12),
   },
   timeContainer: {
     flexDirection: "row",
@@ -327,15 +329,15 @@ const styles = StyleSheet.create({
     borderRadius: 100,
   },
   sourceFavicon: {
-    width: moderateScale(28),
-    height: moderateScale(28),
-    borderRadius: moderateScale(14),
+    width: moderateScale(38),
+    height: moderateScale(38),
+    borderRadius: moderateScale(100),
     borderWidth: 2,
   },
   extraSourceBadge: {
-    width: moderateScale(28),
-    height: moderateScale(28),
-    borderRadius: moderateScale(14),
+    width: moderateScale(38),
+    height: moderateScale(38),
+    borderRadius: moderateScale(100),
     alignItems: "center",
     justifyContent: "center",
     borderWidth: 2,
@@ -348,15 +350,15 @@ const styles = StyleSheet.create({
   markReadButton: {
     flexDirection: "row",
     alignItems: "center",
-    paddingHorizontal: moderateScale(16),
-    paddingVertical: moderateScale(8),
-    borderRadius: moderateScale(20),
+    paddingHorizontal: moderateScale(14),
+    paddingVertical: moderateScale(10),
+    borderRadius: moderateScale(5),
     borderWidth: 1,
-    gap: horizontalScale(6),
+    gap: horizontalScale(13),
   },
   markReadText: {
-    fontSize: moderateScale(12),
-    fontFamily: "Inter-SemiBold",
+    fontSize: moderateScale(15),
+    fontFamily: "Inter-Medium",
     letterSpacing: 0.2,
   },
 });

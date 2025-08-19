@@ -90,7 +90,7 @@ const HomeTab = () => {
 
   const renderEmptyState = () => (
     <View style={styles.emptyState}>
-      <NewsIcon width={48} height={48} color={placeholderGray} />
+      <NewsIcon width={56} height={56} color={placeholderGray} />
       <Text style={[styles.emptyStateTitle, { color: textColor }]}>
         <FormattedMessage id="no_new_matches" />
       </Text>
@@ -119,12 +119,6 @@ const HomeTab = () => {
 
       <View style={styles.newMatchesHeader}>
         <View style={styles.newMatchesTitle}>
-          <Text style={[styles.sectionTitle, { color: textColor }]}>
-            <FormattedMessage
-              id="new_matches"
-              defaultMessage="Latest Reports"
-            />
-          </Text>
           {alertReports.length > 0 && (
             <View
               style={[styles.matchesBadge, { backgroundColor: accentColor }]}
@@ -132,6 +126,9 @@ const HomeTab = () => {
               <Text style={styles.matchesBadgeText}>{alertReports.length}</Text>
             </View>
           )}
+          <Text style={[styles.sectionTitle, { color: textColor }]}>
+            <FormattedMessage id="unread_matches" />
+          </Text>
         </View>
 
         <View style={styles.headerActions}>
@@ -141,7 +138,7 @@ const HomeTab = () => {
             onPress={openViewAll}
           >
             <Text style={[styles.viewAllText, { color: accentColor }]}>
-              <FormattedMessage id="view_all" defaultMessage="View All" />
+              <FormattedMessage id="view_all" />
             </Text>
             <ChevronRightIcon color={accentColor} width={14} height={14} />
           </TouchableOpacity>
@@ -217,16 +214,16 @@ const styles = StyleSheet.create({
     paddingBottom: verticalScale(24),
   },
   greeting: {
-    fontSize: moderateScale(32),
-    fontFamily: "Inter-Bold",
+    fontSize: moderateScale(38),
+    fontFamily: "Inter-Medium",
     lineHeight: moderateScale(38),
     letterSpacing: -0.5,
   },
   subGreeting: {
-    fontSize: moderateScale(16),
-    fontFamily: "Inter-Medium",
+    fontSize: moderateScale(18),
+    fontFamily: "Inter-Regular",
     lineHeight: moderateScale(20),
-    marginTop: verticalScale(4),
+    marginTop: verticalScale(14),
     opacity: 0.8,
   },
 
@@ -331,16 +328,17 @@ const styles = StyleSheet.create({
     marginRight: moderateScale(8),
   },
   matchesBadge: {
-    minWidth: moderateScale(24),
-    height: moderateScale(24),
-    borderRadius: moderateScale(12),
+    minWidth: moderateScale(34),
+    height: moderateScale(34),
+    borderRadius: moderateScale(100),
     alignItems: "center",
     justifyContent: "center",
     paddingHorizontal: horizontalScale(8),
+    marginRight: horizontalScale(12),
   },
   matchesBadgeText: {
     color: "#ffffff",
-    fontSize: moderateScale(12),
+    fontSize: moderateScale(15),
     fontFamily: "Inter-SemiBold",
   },
   headerActions: {

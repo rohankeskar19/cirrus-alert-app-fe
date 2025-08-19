@@ -11,9 +11,9 @@ import {
   View,
 } from "react-native";
 
-import BellIcon from "@/assets/icons/alerts-tab.svg";
-import ChevronDownIcon from "@/assets/icons/chevron-down.svg";
-import SearchIcon from "@/assets/icons/search.svg";
+import BookOpen from "@/assets/icons/book-open.svg";
+import CalendarWeek from "@/assets/icons/calendar-week.svg";
+import ThunderIcon from "@/assets/icons/thunder.svg";
 
 type ActiveAlertsAccordionProps = {
   alerts: Alert[];
@@ -52,22 +52,11 @@ const ActiveAlertsAccordion = ({
   const getAlertTypeIcon = (alertType?: string) => {
     switch (alertType) {
       case "immediate":
-        return <BellIcon width={14} height={14} color={accentColor} />;
-      case "search":
-        return <SearchIcon width={14} height={14} color={placeholderGray} />;
+        return <ThunderIcon width={18} height={18} color={textColor} />;
+      case "daily":
+        return <BookOpen width={18} height={18} color={textColor} />;
       default:
-        return <BellIcon width={14} height={14} color={accentColor} />;
-    }
-  };
-
-  const getAlertTypeColor = (alertType?: string) => {
-    switch (alertType) {
-      case "immediate":
-        return accentColor;
-      case "search":
-        return placeholderGray;
-      default:
-        return accentColor;
+        return <CalendarWeek width={18} height={18} color={textColor} />;
     }
   };
 
@@ -87,16 +76,12 @@ const ActiveAlertsAccordion = ({
         </View>
 
         <View style={styles.headerRight}>
-          <View style={[styles.countBadge, { backgroundColor: accentColor }]}>
-            <Text style={[styles.countText, { color: "#ffffff" }]}>
-              {alerts.length}
-            </Text>
-          </View>
-          <Animated.View
-            style={[styles.chevronContainer, { transform: [{ rotate }] }]}
-          >
-            <ChevronDownIcon width={20} height={20} color={placeholderGray} />
-          </Animated.View>
+          <Text style={[styles.countText, { color: accentColor }]}>
+            <FormattedMessage
+              id="active_alerts_count"
+              values={{ count: alerts.length }}
+            />
+          </Text>
         </View>
       </TouchableOpacity>
 
@@ -104,14 +89,8 @@ const ActiveAlertsAccordion = ({
         <View style={styles.accordionContent}>
           {alerts.length === 0 ? (
             <View style={styles.emptyState}>
-              <BellIcon width={32} height={32} color={placeholderGray} />
               <Text style={[styles.emptyStateTitle, { color: textColor }]}>
                 <FormattedMessage id="no_active_alerts" />
-              </Text>
-              <Text
-                style={[styles.emptyStateSubtitle, { color: placeholderGray }]}
-              >
-                <FormattedMessage id="create_first_alert" />
               </Text>
             </View>
           ) : (
@@ -127,69 +106,14 @@ const ActiveAlertsAccordion = ({
                     },
                   ]}
                 >
-                  <View style={styles.alertContent}>
-                    <View style={styles.alertHeader}>
-                      <View style={styles.alertTypeContainer}>
-                        {getAlertTypeIcon(alert.alert_type)}
-                        <View
-                          style={[
-                            styles.alertTypeBadge,
-                            {
-                              backgroundColor: `${getAlertTypeColor(
-                                alert.alert_type
-                              )}20`,
-                            },
-                          ]}
-                        >
-                          <Text
-                            style={[
-                              styles.alertTypeText,
-                              { color: getAlertTypeColor(alert.alert_type) },
-                            ]}
-                          >
-                            {alert.alert_type || "immediate"}
-                          </Text>
-                        </View>
-                      </View>
-                    </View>
-
-                    <Text
-                      style={[styles.alertText, { color: textColor }]}
-                      numberOfLines={2}
-                      ellipsizeMode="tail"
-                    >
-                      {alert.alert_text}
-                    </Text>
-
-                    <View style={styles.alertMeta}>
-                      <Text
-                        style={[
-                          styles.alertMetaText,
-                          { color: placeholderGray },
-                        ]}
-                      >
-                        <FormattedMessage
-                          id="sources_count"
-                          values={{ count: alert.alert_sources?.length }}
-                        />
-                      </Text>
-                      <Text
-                        style={[
-                          styles.alertMetaText,
-                          { color: placeholderGray },
-                        ]}
-                      >
-                        <FormattedMessage
-                          id="created"
-                          values={{
-                            created_at: new Date(
-                              alert.created_at
-                            ).toLocaleDateString(),
-                          }}
-                        />
-                      </Text>
-                    </View>
-                  </View>
+                  {getAlertTypeIcon(alert.alert_type)}
+                  <Text
+                    style={[styles.alertText, { color: textColor }]}
+                    numberOfLines={2}
+                    ellipsizeMode="tail"
+                  >
+                    {alert.alert_text}
+                  </Text>
                 </View>
               ))}
             </View>
@@ -202,7 +126,7 @@ const ActiveAlertsAccordion = ({
 
 const styles = StyleSheet.create({
   accordionContainer: {
-    borderRadius: moderateScale(16),
+    borderRadius: moderateScale(5),
     borderWidth: 1,
     overflow: "hidden",
     marginBottom: verticalScale(16),
@@ -230,39 +154,22 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   accordionTitle: {
-    fontSize: moderateScale(16),
+    fontSize: moderateScale(15),
     fontFamily: "Inter-SemiBold",
     lineHeight: moderateScale(20),
-  },
-  accordionSubtitle: {
-    fontSize: moderateScale(13),
-    fontFamily: "Inter-Regular",
-    lineHeight: moderateScale(16),
-    marginTop: verticalScale(2),
   },
   headerRight: {
     flexDirection: "row",
     alignItems: "center",
     gap: horizontalScale(8),
   },
-  countBadge: {
-    minWidth: moderateScale(24),
-    height: moderateScale(24),
-    borderRadius: moderateScale(12),
-    alignItems: "center",
-    justifyContent: "center",
-    paddingHorizontal: horizontalScale(8),
-  },
   countText: {
-    fontSize: moderateScale(12),
+    fontSize: moderateScale(15),
     fontFamily: "Inter-SemiBold",
-  },
-  chevronContainer: {
-    padding: moderateScale(4),
   },
   accordionContent: {
     paddingHorizontal: horizontalScale(16),
-    paddingBottom: verticalScale(16),
+    paddingVertical: verticalScale(16),
   },
   emptyState: {
     alignItems: "center",
@@ -284,57 +191,16 @@ const styles = StyleSheet.create({
     gap: verticalScale(8),
   },
   alertItem: {
-    borderRadius: moderateScale(12),
-  },
-  alertContent: {},
-  alertHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: verticalScale(8),
-  },
-  alertTypeContainer: {
+    display: "flex",
     flexDirection: "row",
     alignItems: "center",
-    gap: horizontalScale(6),
-  },
-  alertTypeBadge: {
-    paddingHorizontal: horizontalScale(8),
-    paddingVertical: verticalScale(2),
-    borderRadius: moderateScale(4),
-  },
-  alertTypeText: {
-    fontSize: moderateScale(10),
-    fontFamily: "Inter-SemiBold",
-    textTransform: "uppercase",
-    letterSpacing: 0.5,
   },
   alertText: {
     width: "90%",
     fontSize: moderateScale(15),
-    fontFamily: "Inter-SemiBold",
-    lineHeight: moderateScale(20),
-    marginBottom: verticalScale(8),
-  },
-  alertMeta: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-  },
-  alertMetaText: {
-    fontSize: moderateScale(12),
     fontFamily: "Inter-Medium",
-  },
-  manageButton: {
-    marginTop: verticalScale(16),
-    borderWidth: 1,
-    borderRadius: moderateScale(100),
-    paddingVertical: verticalScale(12),
-    alignItems: "center",
-  },
-  manageButtonText: {
-    fontSize: moderateScale(14),
-    fontFamily: "Inter-SemiBold",
+    lineHeight: moderateScale(20),
+    marginLeft: horizontalScale(13),
   },
 });
 

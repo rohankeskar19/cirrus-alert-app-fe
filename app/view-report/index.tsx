@@ -17,7 +17,6 @@ import {
 } from "react-native";
 
 import BackIcon from "@/assets/icons/chevron-left.svg";
-import ClockIcon from "@/assets/icons/clock.svg";
 import ExternalLinkIcon from "@/assets/icons/external-link.svg";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -109,14 +108,11 @@ const ViewReportScreen = () => {
           <Text style={[styles.reportTitle, { color: textColor }]}>
             {alertReport.title}
           </Text>
-          <View style={[styles.alertTag, { backgroundColor: accentColor }]}>
-            <Text style={[styles.alertTagText, { color: "#ffffff" }]}>
-              {alertReport.alerts?.alert_text.toUpperCase() ?? "Alert"}
-            </Text>
-          </View>
+          <Text style={[styles.alertTagText, { color: accentColor }]}>
+            {alertReport.alerts?.alert_text}
+          </Text>
           <View style={styles.metadataContainer}>
             <View style={styles.timeContainer}>
-              <ClockIcon width={16} height={16} color={placeholderGray} />
               <Text style={[styles.timeText, { color: placeholderGray }]}>
                 {dayjs(alertReport.generated_at).fromNow()}
               </Text>
@@ -254,24 +250,18 @@ const styles = StyleSheet.create({
     marginRight: horizontalScale(4),
   },
   contentContainer: {
-    padding: horizontalScale(16),
+    padding: moderateScale(16),
   },
   reportTitle: {
     fontSize: moderateScale(24),
     fontFamily: "Inter-Bold",
     lineHeight: moderateScale(32),
-    marginBottom: verticalScale(16),
-  },
-  alertTag: {
-    alignSelf: "flex-start",
-    borderRadius: moderateScale(20),
-    paddingHorizontal: moderateScale(8),
-    paddingVertical: verticalScale(4),
-    marginBottom: verticalScale(16),
+    marginBottom: verticalScale(13),
   },
   alertTagText: {
-    fontSize: moderateScale(12),
+    fontSize: moderateScale(16),
     fontFamily: "Inter-SemiBold",
+    marginBottom: verticalScale(16),
   },
   metadataContainer: {
     flexDirection: "row",

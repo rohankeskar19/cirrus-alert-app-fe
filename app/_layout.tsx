@@ -30,6 +30,7 @@ export default function RootLayout() {
     "Inter-Regular": require("@/assets/fonts/inter_regular.ttf"),
     "Inter-SemiBold": require("@/assets/fonts/inter_semibold.ttf"),
     "Inter-Bold": require("@/assets/fonts/inter_bold.ttf"),
+    "Inter-Medium": require("@/assets/fonts/inter_medium.ttf"),
   });
 
   useEffect(() => {
@@ -91,8 +92,6 @@ export default function RootLayout() {
   const themeData = { theme, setTheme };
 
   if (!fontsLoaded) return;
-
-  console.log("Theme ", theme);
 
   return (
     <Provider store={store}>

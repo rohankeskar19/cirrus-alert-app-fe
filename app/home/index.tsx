@@ -1,5 +1,6 @@
 import ActiveAlertsAccordion from "@/components/ActiveAlertsAccordion";
 import AlertReportCard from "@/components/AlertReportCard";
+import ShimmerAlertReportCard from "@/components/ShimmerAlertReportCard";
 import { useThemeColor } from "@/hooks/useThemeColor";
 import {
   Alert,
@@ -13,7 +14,6 @@ import { router } from "expo-router";
 import { useEffect, useState } from "react";
 import { FormattedMessage } from "react-intl";
 import {
-  ActivityIndicator,
   Animated,
   FlatList,
   ListRenderItem,
@@ -35,7 +35,7 @@ const HomeTab = () => {
   const placeholderGray = useThemeColor("placeholderGray");
   const dividerGray = useThemeColor("dividerGray");
 
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [isAlertsExpanded, setIsAlertsExpanded] = useState(false);
   const [alertReports, setAlertReports] = useState<AlertReport[]>([]);
@@ -82,10 +82,18 @@ const HomeTab = () => {
   const renderAlertReport: ListRenderItem<AlertReport> = ({ item, index }) => (
     <>
       <AlertReportCard alertReport={item} onMarkAsRead={handleMarkAsRead} />
-      <View
-        style={[styles.reportDivider, { backgroundColor: dividerGray }]}
-      ></View>
+      <View style={[styles.reportDivider, { backgroundColor: dividerGray }]} />
     </>
+  );
+
+  const renderShimmerContent = () => (
+    <View style={styles.shimmerContainer}>
+      <ShimmerAlertReportCard />
+      <View style={[styles.reportDivider, { backgroundColor: dividerGray }]} />
+      <ShimmerAlertReportCard />
+      <View style={[styles.reportDivider, { backgroundColor: dividerGray }]} />
+      <ShimmerAlertReportCard />
+    </View>
   );
 
   const openViewAll = () => {
@@ -123,12 +131,26 @@ const HomeTab = () => {
 
       <View style={styles.newMatchesHeader}>
         <View style={styles.newMatchesTitle}>
-          {alertReports.length > 0 && (
+          {!loading && alertReports.length > 0 && (
             <View
               style={[styles.matchesBadge, { backgroundColor: accentColor }]}
             >
               <Text style={styles.matchesBadgeText}>{alertReports.length}</Text>
             </View>
+          )}
+          {loading && (
+            <Animated.View
+              style={[
+                styles.shimmerBadge,
+                {
+                  backgroundColor: placeholderGray + "40",
+                  opacity: fadeAnim.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: [0.3, 0.7],
+                  }),
+                },
+              ]}
+            />
           )}
           <Text style={[styles.sectionTitle, { color: textColor }]}>
             <FormattedMessage id="unread_matches" />
@@ -140,57 +162,60 @@ const HomeTab = () => {
             style={styles.viewAllButton}
             activeOpacity={1}
             onPress={openViewAll}
+            disabled={loading}
           >
-            <Text style={[styles.viewAllText, { color: accentColor }]}>
+            <Text
+              style={[
+                styles.viewAllText,
+                { color: loading ? placeholderGray : accentColor },
+              ]}
+            >
               <FormattedMessage id="view_all" />
             </Text>
-            <ChevronRightIcon color={accentColor} width={14} height={14} />
+            <ChevronRightIcon
+              color={loading ? placeholderGray : accentColor}
+              width={14}
+              height={14}
+            />
           </TouchableOpacity>
         </View>
       </View>
     </View>
   );
 
-  if (loading && alertReports.length === 0) {
+  const renderContent = () => {
+    if (loading) {
+      return renderShimmerContent();
+    }
+
     return (
-      <View style={[styles.screenContainer, { backgroundColor }]}>
-        <SafeAreaView style={styles.safeArea}>
-          <View style={styles.loadingContainer}>
-            <ActivityIndicator size="large" color={accentColor} />
-            <Text style={[styles.loadingText, { color: placeholderGray }]}>
-              <FormattedMessage id="loading_your_alerts" />
-            </Text>
-          </View>
-        </SafeAreaView>
-      </View>
+      <FlatList
+        data={alertReports}
+        renderItem={renderAlertReport}
+        keyExtractor={(item) => item.id.toString()}
+        ListEmptyComponent={alertReports.length === 0 ? renderEmptyState : null}
+        contentContainerStyle={[
+          styles.contentContainer,
+          alertReports.length === 0 && styles.emptyContentContainer,
+        ]}
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            colors={[accentColor]}
+            tintColor={accentColor}
+          />
+        }
+      />
     );
-  }
+  };
 
   return (
     <View style={[styles.screenContainer, { backgroundColor }]}>
       <SafeAreaView style={styles.safeArea}>
         {renderHeader()}
-        <FlatList
-          data={alertReports}
-          renderItem={renderAlertReport}
-          keyExtractor={(item) => item.id.toString()}
-          ListEmptyComponent={
-            alertReports.length === 0 ? renderEmptyState : null
-          }
-          contentContainerStyle={[
-            styles.contentContainer,
-            alertReports.length === 0 && styles.emptyContentContainer,
-          ]}
-          showsVerticalScrollIndicator={false}
-          refreshControl={
-            <RefreshControl
-              refreshing={refreshing}
-              onRefresh={onRefresh}
-              colors={[accentColor]}
-              tintColor={accentColor}
-            />
-          }
-        />
+        {renderContent()}
       </SafeAreaView>
     </View>
   );
@@ -212,6 +237,15 @@ const styles = StyleSheet.create({
   },
   emptyContentContainer: {
     flexGrow: 1,
+  },
+  shimmerContainer: {
+    flex: 1,
+  },
+  shimmerBadge: {
+    width: moderateScale(34),
+    height: moderateScale(34),
+    borderRadius: moderateScale(100),
+    marginRight: horizontalScale(12),
   },
   greetingSection: {
     paddingTop: verticalScale(20),

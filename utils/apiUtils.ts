@@ -445,27 +445,32 @@ export const getReportsStats = async (): Promise<{
   } = await supabase.auth.getSession();
   if (sessionError || !session) return { total: 0, unread: 0, read: 0 };
 
+  const userId = session.user.id;
+
   const [totalResult, unreadResult, readResult] = await Promise.all([
     supabase
       .from("alert_reports")
-      .select("*", { count: "exact", head: true })
-      .eq("alerts.user_id", session.user.id),
+      .select("id", { count: "exact", head: true })
+      .eq("alerts.user_id", userId)
+      .select("id, alerts!inner(id)"), // 👈 inner join alerts
     supabase
       .from("alert_reports")
-      .select("*", { count: "exact", head: true })
+      .select("id", { count: "exact", head: true })
       .eq("is_read", false)
-      .eq("alerts.user_id", session.user.id),
+      .eq("alerts.user_id", userId)
+      .select("id, alerts!inner(id)"),
     supabase
       .from("alert_reports")
-      .select("*", { count: "exact", head: true })
+      .select("id", { count: "exact", head: true })
       .eq("is_read", true)
-      .eq("alerts.user_id", session.user.id),
+      .eq("alerts.user_id", userId)
+      .select("id, alerts!inner(id)"),
   ]);
 
   return {
-    total: totalResult.count || 0,
-    unread: unreadResult.count || 0,
-    read: readResult.count || 0,
+    total: totalResult?.count || 0,
+    unread: unreadResult?.count || 0,
+    read: readResult?.count || 0,
   };
 };
 

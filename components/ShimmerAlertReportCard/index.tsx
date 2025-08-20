@@ -37,83 +37,118 @@ const ShimmerAlertReportCard = () => {
   };
 
   return (
-    <View style={[styles.shimmerCard, { backgroundColor, borderColor }]}>
-      <View style={styles.shimmerImageContainer}>
+    <View style={[styles.newsCard, { backgroundColor, borderColor }]}>
+      {/* Image Container */}
+      <View style={styles.imageContainer}>
         <Animated.View
           style={[
-            styles.shimmerImage,
+            styles.featuredImage,
             shimmerStyle,
             { backgroundColor: placeholderGray + "40" },
           ]}
         />
-        <Animated.View
-          style={[
-            styles.shimmerAlertTag,
-            shimmerStyle,
-            { backgroundColor: placeholderGray + "60" },
-          ]}
-        />
+        {/* Source Credit Shimmer */}
+        <View style={styles.sourceCredit}>
+          <Animated.View
+            style={[
+              styles.sourceCreditFavicon,
+              shimmerStyle,
+              { backgroundColor: placeholderGray + "60" },
+            ]}
+          />
+          <Animated.View
+            style={[
+              styles.sourceCreditText,
+              shimmerStyle,
+              { backgroundColor: placeholderGray + "50" },
+            ]}
+          />
+        </View>
       </View>
-      <View style={styles.shimmerContent}>
+
+      {/* Card Content */}
+      <View style={styles.cardContent}>
+        {/* News Title */}
         <Animated.View
           style={[
-            styles.shimmerTitle,
+            styles.newsTitle,
             shimmerStyle,
             { backgroundColor: placeholderGray + "50" },
           ]}
         />
         <Animated.View
           style={[
-            styles.shimmerTitleSecond,
+            styles.newsTitleSecond,
             shimmerStyle,
             { backgroundColor: placeholderGray + "40" },
           ]}
         />
 
-        <View style={styles.shimmerMetadata}>
+        {/* Alert Text */}
+        <Animated.View
+          style={[
+            styles.alertTextTitle,
+            shimmerStyle,
+            { backgroundColor: placeholderGray + "30" },
+          ]}
+        />
+
+        {/* Metadata Row */}
+        <View style={styles.metadataRow}>
           <Animated.View
             style={[
-              styles.shimmerTime,
+              styles.timeShimmer,
               shimmerStyle,
               { backgroundColor: placeholderGray + "30" },
             ]}
           />
           <Animated.View
             style={[
-              styles.shimmerStats,
+              styles.statsDivider,
+              shimmerStyle,
+              { backgroundColor: placeholderGray + "40" },
+            ]}
+          />
+          <Animated.View
+            style={[
+              styles.statsShimmer,
               shimmerStyle,
               { backgroundColor: placeholderGray + "30" },
             ]}
           />
         </View>
 
-        <View style={styles.shimmerFooter}>
-          <View style={styles.shimmerSources}>
-            <Animated.View
-              style={[
-                styles.shimmerSourceIcon,
-                shimmerStyle,
-                { backgroundColor: placeholderGray + "40" },
-              ]}
-            />
-            <Animated.View
-              style={[
-                styles.shimmerSourceIcon,
-                shimmerStyle,
-                { backgroundColor: placeholderGray + "40" },
-              ]}
-            />
-            <Animated.View
-              style={[
-                styles.shimmerSourceIcon,
-                shimmerStyle,
-                { backgroundColor: placeholderGray + "40" },
-              ]}
-            />
+        {/* Footer Row */}
+        <View style={styles.footerRow}>
+          <View style={styles.sourcesContainer}>
+            <View style={styles.sourceIconsRow}>
+              <Animated.View
+                style={[
+                  styles.sourceFavicon,
+                  shimmerStyle,
+                  { backgroundColor: placeholderGray + "40" },
+                ]}
+              />
+              <Animated.View
+                style={[
+                  styles.sourceFavicon,
+                  shimmerStyle,
+                  { backgroundColor: placeholderGray + "40" },
+                ]}
+              />
+              <Animated.View
+                style={[
+                  styles.sourceFavicon,
+                  shimmerStyle,
+                  { backgroundColor: placeholderGray + "40" },
+                ]}
+              />
+            </View>
           </View>
+
           <Animated.View
             style={[
-              styles.shimmerButton,
+              styles.markReadButton,
               shimmerStyle,
               { backgroundColor: placeholderGray + "30" },
             ]}
@@ -125,295 +160,106 @@ const ShimmerAlertReportCard = () => {
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  safeArea: {
-    flex: 1,
-  },
-  headerContainer: {},
-  headerBar: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingHorizontal: horizontalScale(14),
-    paddingVertical: verticalScale(16),
-  },
-  backButton: {
-    width: moderateScale(40),
-    height: moderateScale(40),
-    borderRadius: moderateScale(20),
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  headerTitle: {
-    fontSize: moderateScale(20),
-    fontFamily: "Inter-Bold",
-    flex: 1,
-    textAlign: "center",
-    letterSpacing: -0.3,
-  },
-  headerActions: {
-    flexDirection: "row",
-    gap: horizontalScale(8),
-  },
-  headerActionButton: {
-    width: moderateScale(40),
-    height: moderateScale(40),
-    borderRadius: moderateScale(20),
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  searchContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginHorizontal: horizontalScale(20),
-    marginBottom: verticalScale(8),
-    paddingHorizontal: horizontalScale(13),
-    paddingVertical: verticalScale(12),
-    borderRadius: moderateScale(100),
-    borderWidth: 1,
-  },
-  searchInput: {
-    flex: 1,
-    fontSize: moderateScale(16),
-    fontFamily: "Inter-Regular",
-    marginHorizontal: horizontalScale(12),
-  },
-  statsBar: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    paddingHorizontal: horizontalScale(20),
-    paddingVertical: verticalScale(12),
-  },
-  statsText: {
-    fontSize: moderateScale(14),
-    fontFamily: "Inter-Medium",
-  },
-  statsRight: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  unreadBadge: {
-    paddingHorizontal: moderateScale(12),
-    paddingVertical: moderateScale(4),
-    borderRadius: moderateScale(12),
-  },
-  unreadBadgeText: {
-    fontSize: moderateScale(12),
-    fontFamily: "Inter-SemiBold",
-  },
-  selectionBar: {
-    height: verticalScale(64),
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    paddingHorizontal: horizontalScale(20),
-    marginHorizontal: horizontalScale(20),
-    marginVertical: verticalScale(12),
-    borderRadius: moderateScale(16),
-    borderWidth: 1,
-  },
-  selectAllButton: {
-    paddingHorizontal: moderateScale(12),
-    paddingVertical: moderateScale(8),
-  },
-  selectAllText: {
-    fontSize: moderateScale(14),
-    fontFamily: "Inter-SemiBold",
-  },
-  bulkActionButton: {
-    paddingHorizontal: horizontalScale(20),
-    paddingVertical: verticalScale(10),
-    borderRadius: moderateScale(20),
-  },
-  bulkActionText: {
-    fontSize: moderateScale(14),
-    fontFamily: "Inter-SemiBold",
-  },
-  contentContainer: {
-    paddingBottom: verticalScale(20),
-  },
-  reportItemContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingHorizontal: horizontalScale(20),
-    marginBottom: verticalScale(4),
-  },
-  selectionButton: {
-    width: moderateScale(28),
-    height: moderateScale(28),
-    borderRadius: moderateScale(14),
-    borderWidth: 2,
-    alignItems: "center",
-    justifyContent: "center",
-    marginRight: horizontalScale(16),
-  },
-  reportCardContainer: {
-    flex: 1,
-  },
-  footerLoader: {
-    alignItems: "center",
-    paddingVertical: verticalScale(20),
-    gap: verticalScale(8),
-  },
-  footerLoaderText: {
-    fontSize: moderateScale(14),
-    fontFamily: "Inter-Medium",
-  },
-  shimmerContainer: {
-    paddingHorizontal: horizontalScale(20),
-    paddingTop: verticalScale(8),
-  },
-  shimmerCard: {
-    borderRadius: moderateScale(20),
+  newsCard: {
+    width: "100%",
     overflow: "hidden",
-    marginBottom: verticalScale(20),
-    borderWidth: 1,
+    marginBottom: verticalScale(12),
+    paddingHorizontal: horizontalScale(16),
+    paddingVertical: verticalScale(10),
   },
-  shimmerImageContainer: {
+  imageContainer: {
     position: "relative",
     width: "100%",
     height: verticalScale(180),
+    marginBottom: verticalScale(11),
   },
-  shimmerImage: {
+  featuredImage: {
     width: "100%",
     height: "100%",
+    borderRadius: moderateScale(4),
   },
-  shimmerAlertTag: {
+  sourceCredit: {
     position: "absolute",
-    top: moderateScale(16),
-    left: moderateScale(16),
-    width: moderateScale(60),
-    height: moderateScale(24),
-    borderRadius: moderateScale(12),
-  },
-  shimmerContent: {
-    padding: moderateScale(20),
-  },
-  shimmerTitle: {
-    height: moderateScale(24),
-    borderRadius: moderateScale(4),
-    marginBottom: verticalScale(8),
-  },
-  shimmerTitleSecond: {
-    height: moderateScale(24),
-    borderRadius: moderateScale(4),
-    width: "70%",
-    marginBottom: verticalScale(16),
-  },
-  shimmerMetadata: {
+    bottom: moderateScale(12),
+    right: moderateScale(12),
     flexDirection: "row",
-    justifyContent: "space-between",
-    marginBottom: verticalScale(20),
-  },
-  shimmerTime: {
-    width: moderateScale(80),
-    height: moderateScale(16),
-    borderRadius: moderateScale(8),
-  },
-  shimmerStats: {
-    width: moderateScale(120),
-    height: moderateScale(16),
-    borderRadius: moderateScale(8),
-  },
-  shimmerFooter: {
-    flexDirection: "row",
-    justifyContent: "space-between",
     alignItems: "center",
-  },
-  shimmerSources: {
-    flexDirection: "row",
-    gap: horizontalScale(8),
-  },
-  shimmerSourceIcon: {
-    width: moderateScale(28),
-    height: moderateScale(28),
-    borderRadius: moderateScale(14),
-  },
-  shimmerButton: {
-    width: moderateScale(100),
-    height: moderateScale(32),
     borderRadius: moderateScale(16),
-  },
-  modalContainer: {
-    flex: 1,
-  },
-  modalHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    paddingHorizontal: horizontalScale(20),
-    paddingVertical: verticalScale(20),
-  },
-  modalTitle: {
-    fontSize: moderateScale(20),
-    fontFamily: "Inter-Bold",
-    letterSpacing: -0.3,
-  },
-  modalContent: {
-    flex: 1,
-    paddingHorizontal: horizontalScale(20),
-  },
-  filterSection: {
-    marginVertical: verticalScale(20),
-  },
-  filterSectionTitle: {
-    fontSize: moderateScale(18),
-    fontFamily: "Inter-Bold",
-    marginBottom: verticalScale(16),
-    letterSpacing: -0.2,
-  },
-  filterOption: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    paddingHorizontal: horizontalScale(20),
-    paddingVertical: verticalScale(16),
-    borderRadius: moderateScale(16),
-    borderWidth: 1,
-    marginBottom: verticalScale(12),
-  },
-  filterOptionText: {
-    fontSize: moderateScale(16),
-    fontFamily: "Inter-Medium",
-    flex: 1,
-  },
-  filterCountBadge: {
     paddingHorizontal: moderateScale(8),
     paddingVertical: moderateScale(4),
-    borderRadius: moderateScale(8),
   },
-  filterOptionCount: {
-    fontSize: moderateScale(12),
-    fontFamily: "Inter-SemiBold",
+  sourceCreditFavicon: {
+    width: moderateScale(16),
+    height: moderateScale(16),
+    marginRight: horizontalScale(6),
+    borderRadius: moderateScale(4),
   },
-  modalFooter: {
+  sourceCreditText: {
+    width: moderateScale(60),
+    height: moderateScale(13),
+    borderRadius: moderateScale(4),
+  },
+  cardContent: {},
+  newsTitle: {
+    height: moderateScale(26),
+    borderRadius: moderateScale(4),
+    marginBottom: verticalScale(4),
+  },
+  newsTitleSecond: {
+    height: moderateScale(26),
+    borderRadius: moderateScale(4),
+    width: "70%",
+    marginBottom: verticalScale(8),
+  },
+  alertTextTitle: {
+    height: moderateScale(20),
+    borderRadius: moderateScale(4),
+    width: "50%",
+    marginBottom: verticalScale(11),
+  },
+  metadataRow: {
     flexDirection: "row",
-    paddingHorizontal: horizontalScale(20),
-    paddingVertical: verticalScale(20),
-    gap: horizontalScale(16),
+    alignItems: "center",
+    marginBottom: verticalScale(20),
+    gap: horizontalScale(12),
   },
-  clearButton: {
-    flex: 1,
-    paddingVertical: verticalScale(16),
-    borderRadius: moderateScale(100),
-    borderWidth: 1,
+  timeShimmer: {
+    width: moderateScale(80),
+    height: moderateScale(12),
+    borderRadius: moderateScale(6),
+  },
+  statsDivider: {
+    width: moderateScale(5),
+    height: moderateScale(5),
+    borderRadius: 100,
+  },
+  statsShimmer: {
+    width: moderateScale(90),
+    height: moderateScale(12),
+    borderRadius: moderateScale(6),
+  },
+  footerRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
     alignItems: "center",
   },
-  clearButtonText: {
-    fontSize: moderateScale(16),
-    fontFamily: "Inter-SemiBold",
-  },
-  applyButton: {
+  sourcesContainer: {
     flex: 1,
-    paddingVertical: verticalScale(16),
-    borderRadius: moderateScale(100),
+  },
+  sourceIconsRow: {
+    flexDirection: "row",
     alignItems: "center",
   },
-  applyButtonText: {
-    fontSize: moderateScale(16),
-    fontFamily: "Inter-SemiBold",
+  sourceFavicon: {
+    width: moderateScale(38),
+    height: moderateScale(38),
+    borderRadius: moderateScale(100),
+    marginRight: -horizontalScale(12),
+  },
+  markReadButton: {
+    width: moderateScale(120),
+    height: moderateScale(40),
+    borderRadius: moderateScale(5),
   },
 });
 

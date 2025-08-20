@@ -16,6 +16,7 @@ import {
   View,
 } from "react-native";
 
+import ArrowTopRight from "@/assets/icons/arrow-top-right.svg";
 import BackIcon from "@/assets/icons/chevron-left.svg";
 import ExternalLinkIcon from "@/assets/icons/external-link.svg";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -59,7 +60,7 @@ const ViewReportScreen = () => {
           style={styles.backButton}
           activeOpacity={1}
         >
-          <BackIcon width={24} height={24} color={textColor} />
+          <BackIcon width={18} height={18} color={textColor} />
         </TouchableOpacity>
       </View>
       <ScrollView
@@ -69,38 +70,25 @@ const ViewReportScreen = () => {
         <View style={styles.imageContainer}>
           <Image source={{ uri: featuredImage }} style={styles.featuredImage} />
           {featuredSource && (
-            <TouchableOpacity
+            <View
               style={[
-                styles.imageCreditOverlay,
-                { backgroundColor: `${backgroundColor}E6` },
+                styles.sourceCredit,
+                { backgroundColor: "rgba(0,0,0,0.6)" },
               ]}
-              onPress={handleImageCredit}
-              activeOpacity={0.8}
             >
-              <View style={styles.creditContent}>
-                {featuredSource.favicon && (
-                  <Image
-                    source={{
-                      uri:
-                        featuredSource.favicon ||
-                        `https://www.google.com/s2/favicons?sz=64&domain_url=${featuredSource.domain}`,
-                    }}
-                    style={styles.creditFavicon}
-                  />
-                )}
-                <Text
-                  style={[styles.creditText, { color: textColor }]}
-                  numberOfLines={1}
-                >
-                  {featuredSource.domain}
-                </Text>
-                <ExternalLinkIcon
-                  width={12}
-                  height={12}
-                  color={placeholderGray}
-                />
-              </View>
-            </TouchableOpacity>
+              <Image
+                source={{
+                  uri:
+                    featuredSource.favicon ||
+                    `https://www.google.com/s2/favicons?sz=64&domain_url=${featuredSource.domain}`,
+                }}
+                style={styles.sourceCreditFavicon}
+              />
+              <Text style={styles.sourceCreditText} numberOfLines={1}>
+                {featuredSource.domain}
+              </Text>
+              <ArrowTopRight />
+            </View>
           )}
         </View>
 
@@ -333,6 +321,29 @@ const styles = StyleSheet.create({
     fontFamily: "Inter-Medium",
     textAlign: "center",
     marginTop: verticalScale(16),
+  },
+  sourceCredit: {
+    position: "absolute",
+    bottom: moderateScale(12),
+    right: moderateScale(12),
+    flexDirection: "row",
+    alignItems: "center",
+    borderRadius: moderateScale(16),
+    paddingHorizontal: moderateScale(8),
+    paddingVertical: moderateScale(4),
+  },
+  sourceCreditFavicon: {
+    width: moderateScale(16),
+    height: moderateScale(16),
+    marginRight: horizontalScale(6),
+    borderRadius: moderateScale(4),
+  },
+  sourceCreditText: {
+    fontSize: moderateScale(13),
+    fontFamily: "Inter-Medium",
+    color: "#ffffff",
+    marginRight: horizontalScale(8),
+    opacity: 0.75,
   },
 });
 

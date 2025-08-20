@@ -52,7 +52,6 @@ const AlertFilterModal = ({
   const inputBg = useThemeColor("inputBg");
   const borderColor = useThemeColor("inputBorder");
   const placeholderGray = useThemeColor("placeholderGray");
-  const secondaryGray = useThemeColor("secondaryGray");
 
   const statusOptions: { key: FilterStatus; label: string }[] = [
     { key: "all", label: "All" },

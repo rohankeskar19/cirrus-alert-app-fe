@@ -107,7 +107,7 @@ const Input: React.FC<InputProps> = ({
     <View style={[{ borderRadius: moderateScale(20), width: "100%" }, style]}>
       <View
         style={[
-          { backgroundColor: inputBg, borderRadius: moderateScale(20) },
+          { backgroundColor: inputBg, borderRadius: moderateScale(5) },
           styles.container,
         ]}
       >
@@ -152,7 +152,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     borderWidth: 1,
-    borderRadius: moderateScale(100),
+    borderRadius: moderateScale(5),
     paddingLeft: horizontalScale(20),
     paddingRight: horizontalScale(14),
     height: verticalScale(56),

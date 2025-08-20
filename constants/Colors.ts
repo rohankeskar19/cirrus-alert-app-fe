@@ -37,6 +37,9 @@ export const Colors = {
     dropdownBg: "#F2F2F2",
     dropdownBorder: "#C7C7C7",
     tabBackground: "#E8E8E8",
+    dividerGray: "#D7D6D6",
+    timeSinceGray: "#9B9999",
+    markAsReadGray: "#636363",
   },
   dark: {
     background: "#363636",
@@ -71,5 +74,8 @@ export const Colors = {
     dropdownBg: "#3B3B3B",
     dropdownBorder: "#727272",
     tabBackground: "#575656",
+    dividerGray: "#D7D6D6",
+    timeSinceGray: "#9B9999",
+    markAsReadGray: "#636363",
   },
 };

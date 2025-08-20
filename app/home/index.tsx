@@ -33,6 +33,7 @@ const HomeTab = () => {
   const backgroundColor = useThemeColor("background");
   const accentColor = useThemeColor("accentColor");
   const placeholderGray = useThemeColor("placeholderGray");
+  const dividerGray = useThemeColor("dividerGray");
 
   const [loading, setLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
@@ -79,9 +80,12 @@ const HomeTab = () => {
   };
 
   const renderAlertReport: ListRenderItem<AlertReport> = ({ item, index }) => (
-    <View style={styles.cardContainer}>
+    <>
       <AlertReportCard alertReport={item} onMarkAsRead={handleMarkAsRead} />
-    </View>
+      <View
+        style={[styles.reportDivider, { backgroundColor: dividerGray }]}
+      ></View>
+    </>
   );
 
   const openViewAll = () => {
@@ -215,8 +219,7 @@ const styles = StyleSheet.create({
   },
   greeting: {
     fontSize: moderateScale(38),
-    fontFamily: "Inter-Medium",
-    lineHeight: moderateScale(38),
+    fontFamily: "Inter-SemiBold",
     letterSpacing: -0.5,
   },
   subGreeting: {
@@ -406,6 +409,10 @@ const styles = StyleSheet.create({
     fontSize: moderateScale(14),
     fontFamily: "Inter-Medium",
     marginTop: verticalScale(12),
+  },
+  reportDivider: {
+    width: "100%",
+    height: verticalScale(1),
   },
 });
 

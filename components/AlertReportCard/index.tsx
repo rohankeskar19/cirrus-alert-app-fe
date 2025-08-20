@@ -29,6 +29,8 @@ const AlertReportCard = ({
   const accentColor = useThemeColor("accentColor");
   const borderColor = useThemeColor("inputBorder");
   const placeholderGray = useThemeColor("placeholderGray");
+  const timeSinceGray = useThemeColor("timeSinceGray");
+  const markAsReadGray = useThemeColor("markAsReadGray");
 
   const matches = alertReport.matches_data ?? ([] as any);
   const featuredMatch = matches.find((m: any) => m.images?.featured) || null;
@@ -132,15 +134,17 @@ const AlertReportCard = ({
 
         <View style={styles.metadataRow}>
           <View style={styles.timeContainer}>
-            <Text style={[styles.metadataText, { color: placeholderGray }]}>
+            <Text style={[styles.metadataText, { color: timeSinceGray }]}>
               {dayjs(alertReport.generated_at).fromNow()}
             </Text>
           </View>
 
-          <Text style={[styles.statsDivider, { color: placeholderGray }]}>
+          <View
+            style={[styles.statsDivider, { backgroundColor: timeSinceGray }]}
+          >
             •
-          </Text>
-          <Text style={[styles.metadataText, { color: placeholderGray }]}>
+          </View>
+          <Text style={[styles.metadataText, { color: timeSinceGray }]}>
             <FormattedMessage
               id="sources_count"
               values={{ count: alertReport.match_count }}
@@ -156,7 +160,10 @@ const AlertReportCard = ({
                   key={icon.key}
                   style={[
                     styles.sourceIconWrapper,
-                    { zIndex: sourceIcons.length + index, backgroundColor },
+                    {
+                      zIndex: sourceIcons.length + index,
+                      backgroundColor,
+                    },
                   ]}
                 >
                   <Image
@@ -165,6 +172,7 @@ const AlertReportCard = ({
                       styles.sourceFavicon,
                       { borderColor: backgroundColor },
                     ]}
+                    resizeMode="contain"
                   />
                 </View>
               ))}
@@ -173,13 +181,15 @@ const AlertReportCard = ({
                   style={[
                     styles.extraSourceBadge,
                     {
-                      backgroundColor: borderColor,
+                      backgroundColor: markAsReadGray,
                       borderColor: backgroundColor,
                       zIndex: 1000,
                     },
                   ]}
                 >
-                  <Text style={[styles.extraSourceText, { color: textColor }]}>
+                  <Text
+                    style={[styles.extraSourceText, { color: backgroundColor }]}
+                  >
                     +{extraSourceCount}
                   </Text>
                 </View>
@@ -198,13 +208,8 @@ const AlertReportCard = ({
               ]}
               onPress={markAsRead}
             >
-              <TickIcon
-                width={14}
-                height={14}
-                color={textColor}
-                style={{ opacity: 0.8 }}
-              />
-              <Text style={[styles.markReadText, { color: textColor }]}>
+              <TickIcon width={14} height={14} color={markAsReadGray} />
+              <Text style={[styles.markReadText, { color: markAsReadGray }]}>
                 <FormattedMessage id="mark_as_read" />
               </Text>
             </Pressable>
@@ -220,11 +225,14 @@ const styles = StyleSheet.create({
     width: "100%",
     overflow: "hidden",
     marginBottom: verticalScale(12),
+    paddingHorizontal: horizontalScale(16),
+    paddingVertical: verticalScale(10),
   },
   imageContainer: {
     position: "relative",
     width: "100%",
     height: verticalScale(180),
+    marginBottom: verticalScale(11),
   },
   featuredImage: {
     width: "100%",
@@ -277,9 +285,7 @@ const styles = StyleSheet.create({
     marginRight: horizontalScale(8),
     opacity: 0.75,
   },
-  cardContent: {
-    paddingVertical: verticalScale(11),
-  },
+  cardContent: {},
   newsTitle: {
     fontSize: moderateScale(20),
     fontFamily: "Inter-SemiBold",
@@ -311,11 +317,11 @@ const styles = StyleSheet.create({
   metadataText: {
     fontSize: moderateScale(12),
     fontFamily: "Inter-Medium",
-    opacity: 0.8,
   },
   statsDivider: {
-    fontSize: moderateScale(12),
-    opacity: 0.5,
+    width: moderateScale(5),
+    height: moderateScale(5),
+    borderRadius: 100,
   },
   footerRow: {
     flexDirection: "row",
@@ -349,8 +355,8 @@ const styles = StyleSheet.create({
     marginLeft: horizontalScale(4),
   },
   extraSourceText: {
-    fontSize: moderateScale(10),
-    fontFamily: "Inter-Bold",
+    fontSize: moderateScale(16),
+    fontFamily: "Inter-SemiBold",
   },
   markReadButton: {
     flexDirection: "row",
@@ -365,7 +371,6 @@ const styles = StyleSheet.create({
     fontSize: moderateScale(15),
     fontFamily: "Inter-Medium",
     letterSpacing: 0.2,
-    opacity: 0.8,
   },
 });
 

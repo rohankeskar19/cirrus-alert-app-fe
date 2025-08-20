@@ -93,7 +93,7 @@
   "read": "Read",
   "delete": "Delete",
   "edit": "Edit",
-  "alert_text_label": "Alert Text *",
+  "alert_text_label": "Alert Text",
   "alert_frequency_label": "Alert Frequency",
   "sources_to_monitor": "Sources to Monitor",
   "alerts": "Alerts",
@@ -108,5 +108,7 @@
   "no_alerts_to_show": "No alerts to show",
   "active_alerts_count": "{count} active",
   "unread_matches": "Unread matches",
-  "view_all": "View all"
+  "view_all": "View all",
+  "search": "Search",
+  "new_alert": "New alert"
 }

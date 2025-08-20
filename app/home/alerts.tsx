@@ -14,153 +14,36 @@ import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import React, { useCallback, useEffect, useState } from "react";
 import {
-  ActivityIndicator,
-  Animated,
   FlatList,
   ListRenderItem,
-  Modal,
   Pressable,
   RefreshControl,
   Alert as RNAlert,
-  ScrollView,
   StyleSheet,
-  Switch,
   Text,
   TextInput,
   View,
 } from "react-native";
 
 import BellIcon from "@/assets/icons/alerts-tab.svg";
-import CloseIcon from "@/assets/icons/cross.svg";
-import DeleteIcon from "@/assets/icons/delete.svg";
-import EditIcon from "@/assets/icons/edit-pen.svg";
+import FilterIcon from "@/assets/icons/filter.svg";
 import PlusIcon from "@/assets/icons/plus.svg";
-import SearchIcon from "@/assets/icons/search.svg";
-import SaveIcon from "@/assets/icons/tick.svg";
-import { FormattedMessage } from "react-intl";
+
+import AlertCard from "@/components/AlertCard";
+import FilterModal from "@/components/AlertFilterModal";
+import CreateAlertModal from "@/components/CreateAlertModal";
+import ShimmerAlertCard from "@/components/ShimmerAlertCard";
+import { FormattedMessage, useIntl } from "react-intl";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 dayjs.extend(relativeTime);
 
-type AlertFormData = {
-  alert_text: string;
-  alert_sources: string[];
-  alert_type: AlertType;
-  similarity_threshold: number;
-};
+type FilterStatus = "all" | "active" | "inactive";
 
-// Shimmer Alert Card Component
-const ShimmerAlertCard = () => {
-  const backgroundColor = useThemeColor("background");
-  const borderColor = useThemeColor("inputBorder");
-  const placeholderGray = useThemeColor("placeholderGray");
-
-  const shimmerValue = new Animated.Value(0);
-
-  React.useEffect(() => {
-    const shimmerAnimation = Animated.loop(
-      Animated.sequence([
-        Animated.timing(shimmerValue, {
-          toValue: 1,
-          duration: 1000,
-          useNativeDriver: false,
-        }),
-        Animated.timing(shimmerValue, {
-          toValue: 0,
-          duration: 1000,
-          useNativeDriver: false,
-        }),
-      ])
-    );
-    shimmerAnimation.start();
-    return () => shimmerAnimation.stop();
-  }, []);
-
-  const shimmerStyle = {
-    opacity: shimmerValue.interpolate({
-      inputRange: [0, 1],
-      outputRange: [0.3, 0.7],
-    }),
-  };
-
-  return (
-    <View style={[styles.shimmerCard, { backgroundColor, borderColor }]}>
-      <View style={styles.shimmerHeader}>
-        <Animated.View
-          style={[
-            styles.shimmerTitle,
-            shimmerStyle,
-            { backgroundColor: placeholderGray + "40" },
-          ]}
-        />
-        <Animated.View
-          style={[
-            styles.shimmerSwitch,
-            shimmerStyle,
-            { backgroundColor: placeholderGray + "30" },
-          ]}
-        />
-      </View>
-
-      <View style={styles.shimmerMeta}>
-        <Animated.View
-          style={[
-            styles.shimmerBadge,
-            shimmerStyle,
-            { backgroundColor: placeholderGray + "50" },
-          ]}
-        />
-        <Animated.View
-          style={[
-            styles.shimmerDate,
-            shimmerStyle,
-            { backgroundColor: placeholderGray + "30" },
-          ]}
-        />
-      </View>
-
-      <View style={styles.shimmerSources}>
-        <Animated.View
-          style={[
-            styles.shimmerSourceTag,
-            shimmerStyle,
-            { backgroundColor: placeholderGray + "30" },
-          ]}
-        />
-        <Animated.View
-          style={[
-            styles.shimmerSourceTag,
-            shimmerStyle,
-            { backgroundColor: placeholderGray + "30" },
-          ]}
-        />
-        <Animated.View
-          style={[
-            styles.shimmerSourceTag,
-            shimmerStyle,
-            { backgroundColor: placeholderGray + "30" },
-          ]}
-        />
-      </View>
-
-      <View style={styles.shimmerActions}>
-        <Animated.View
-          style={[
-            styles.shimmerButton,
-            shimmerStyle,
-            { backgroundColor: placeholderGray + "30" },
-          ]}
-        />
-        <Animated.View
-          style={[
-            styles.shimmerButton,
-            shimmerStyle,
-            { backgroundColor: placeholderGray + "30" },
-          ]}
-        />
-      </View>
-    </View>
-  );
+type FilterData = {
+  status: FilterStatus;
+  alertFrequency: AlertType[];
+  sources: string[];
 };
 
 const AlertsTab = () => {
@@ -168,6 +51,7 @@ const AlertsTab = () => {
   const backgroundColor = useThemeColor("background");
   const accentColor = useThemeColor("accentColor");
   const borderColor = useThemeColor("inputBorder");
+  const inputBg = useThemeColor("inputBg");
   const placeholderGray = useThemeColor("placeholderGray");
 
   const [alerts, setAlerts] = useState<Alert[]>([]);
@@ -177,17 +61,18 @@ const AlertsTab = () => {
   const [showEditModal, setShowEditModal] = useState(false);
   const [editingAlert, setEditingAlert] = useState<Alert | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
-  const [filterType, setFilterType] = useState<"all" | "active" | "inactive">(
-    "all"
-  );
 
-  const [formData, setFormData] = useState<AlertFormData>({
-    alert_text: "",
-    alert_sources: ["news", "blogs"],
-    alert_type: "immediate",
-    similarity_threshold: 0.5,
+  // Filter state
+  const [filterModalVisible, setFilterModalVisible] = useState(false);
+  const [appliedFilters, setAppliedFilters] = useState<FilterData>({
+    status: "all",
+    alertFrequency: ["immediate", "daily", "weekly"],
+    sources: ["news", "blogs", "reddit", "youtube"],
   });
-  const [formLoading, setFormLoading] = useState(false);
+
+  const [modalLoading, setModalLoading] = useState(false);
+
+  const intl = useIntl();
 
   useEffect(() => {
     loadAlerts();
@@ -231,16 +116,28 @@ const AlertsTab = () => {
   }, []);
 
   const filteredAlerts = alerts.filter((alert) => {
+    // Search filter
     const matchesSearch = alert.alert_text
       .toLowerCase()
       .includes(searchQuery.toLowerCase());
 
-    const matchesFilter =
-      filterType === "all" ||
-      (filterType === "active" && alert.is_active) ||
-      (filterType === "inactive" && !alert.is_active);
+    // Status filter
+    const matchesStatus =
+      appliedFilters.status === "all" ||
+      (appliedFilters.status === "active" && alert.is_active) ||
+      (appliedFilters.status === "inactive" && !alert.is_active);
 
-    return matchesSearch && matchesFilter;
+    // Alert frequency filter
+    const matchesFrequency = appliedFilters.alertFrequency.includes(
+      alert.alert_type
+    );
+
+    // Sources filter - check if any of the alert's sources are in the filter
+    const matchesSources = alert.alert_sources.some((source) =>
+      appliedFilters.sources.includes(source)
+    );
+
+    return matchesSearch && matchesStatus && matchesFrequency && matchesSources;
   });
 
   const handleToggleStatus = async (
@@ -287,18 +184,18 @@ const AlertsTab = () => {
     );
   };
 
-  const handleCreateAlert = async () => {
-    if (!formData.alert_text.trim()) {
+  const handleCreateAlert = async (alert: Alert) => {
+    if (!alert.alert_text.trim()) {
       RNAlert.alert("Error", "Please enter alert text");
       return;
     }
 
     try {
-      setFormLoading(true);
+      setModalLoading(true);
       const success = await createAlert(
-        formData.alert_text,
-        formData.alert_sources,
-        formData.alert_type
+        alert.alert_text,
+        alert.alert_sources,
+        alert.alert_type
       );
 
       if (success) {
@@ -309,23 +206,23 @@ const AlertsTab = () => {
     } catch (error) {
       console.error("Error creating alert:", error);
     } finally {
-      setFormLoading(false);
+      setModalLoading(false);
     }
   };
 
-  const handleEditAlert = async () => {
-    if (!editingAlert || !formData.alert_text.trim()) {
+  const handleEditAlert = async (alert: Alert) => {
+    if (!editingAlert || !alert.alert_text.trim()) {
       RNAlert.alert("Error", "Please enter alert text");
       return;
     }
 
     try {
-      setFormLoading(true);
+      setModalLoading(true);
       const success = await updateAlert(editingAlert.id, {
-        alert_text: formData.alert_text,
-        alert_sources: formData.alert_sources,
-        alert_type: formData.alert_type,
-        similarity_threshold: formData.similarity_threshold,
+        alert_text: alert.alert_text,
+        alert_sources: alert.alert_sources,
+        alert_type: alert.alert_type,
+        similarity_threshold: alert.similarity_threshold,
       });
 
       if (success) {
@@ -337,365 +234,49 @@ const AlertsTab = () => {
     } catch (error) {
       console.error("Error updating alert:", error);
     } finally {
-      setFormLoading(false);
+      setModalLoading(false);
     }
   };
 
   const openEditModal = (alert: Alert) => {
     setEditingAlert(alert);
-    setFormData({
-      alert_text: alert.alert_text,
-      alert_sources: alert.alert_sources,
-      alert_type: alert.alert_type,
-      similarity_threshold: alert.similarity_threshold,
-    });
     setShowEditModal(true);
   };
 
   const resetForm = () => {
-    setFormData({
-      alert_text: "",
-      alert_sources: ["news", "blogs"],
-      alert_type: "immediate",
-      similarity_threshold: 0.5,
-    });
+    // Form reset logic if needed
   };
 
-  const closeCreateModal = () => {
+  const closeModal = () => {
     setShowCreateModal(false);
-    resetForm();
-  };
-
-  const closeEditModal = () => {
     setShowEditModal(false);
     setEditingAlert(null);
     resetForm();
   };
 
-  const getAlertTypeLabel = (alertType: AlertType) => {
-    switch (alertType) {
-      case "immediate":
-        return "Immediate";
-      case "daily":
-        return "Daily";
-      case "weekly":
-        return "Weekly";
-      default:
-        return "Unknown";
-    }
+  const handleApplyFilters = (filters: FilterData) => {
+    setAppliedFilters(filters);
+    setFilterModalVisible(false);
   };
 
-  const getAlertTypeColor = (alertType: AlertType) => {
-    switch (alertType) {
-      case "immediate":
-        return accentColor;
-      case "daily":
-        return "#10B981";
-      case "weekly":
-        return "#F59E0B";
-      default:
-        return accentColor;
-    }
+  const handleResetFilters = () => {
+    setAppliedFilters({
+      status: "all",
+      alertFrequency: ["immediate", "daily", "weekly"],
+      sources: ["news", "blogs", "reddit", "youtube"],
+    });
+    setFilterModalVisible(false);
   };
 
   const renderAlertItem: ListRenderItem<Alert> = ({ item }) => (
-    <View
-      style={[
-        styles.alertCard,
-        {
-          backgroundColor,
-          borderColor,
-        },
-      ]}
-    >
-      <View style={styles.alertHeader}>
-        <View style={styles.alertInfo}>
-          <View style={styles.alertTitleRow}>
-            <Text
-              style={[styles.alertTitle, { color: textColor }]}
-              numberOfLines={2}
-            >
-              {item.alert_text}
-            </Text>
-            <Switch
-              value={item.is_active}
-              onValueChange={() => handleToggleStatus(item.id, item.is_active)}
-              trackColor={{
-                false: borderColor + "80",
-                true: accentColor + "40",
-              }}
-              thumbColor={item.is_active ? accentColor : placeholderGray}
-              ios_backgroundColor={borderColor}
-            />
-          </View>
-
-          <View style={styles.alertMetadata}>
-            <View
-              style={[
-                styles.alertTypeBadge,
-                {
-                  backgroundColor: getAlertTypeColor(item.alert_type) + "20",
-                  borderColor: getAlertTypeColor(item.alert_type) + "40",
-                },
-              ]}
-            >
-              <View
-                style={[
-                  styles.statusDot,
-                  { backgroundColor: getAlertTypeColor(item.alert_type) },
-                ]}
-              />
-              <Text
-                style={[
-                  styles.alertTypeText,
-                  { color: getAlertTypeColor(item.alert_type) },
-                ]}
-              >
-                {getAlertTypeLabel(item.alert_type)}
-              </Text>
-            </View>
-
-            <Text style={[styles.alertDate, { color: placeholderGray }]}>
-              {dayjs(item.created_at).format("MMM D, YYYY")}
-            </Text>
-          </View>
-
-          <View style={styles.alertSources}>
-            <Text
-              style={[styles.alertSourcesLabel, { color: placeholderGray }]}
-            >
-              Sources:
-            </Text>
-            {item.alert_sources.slice(0, 3).map((source, index) => (
-              <View
-                key={source}
-                style={[
-                  styles.sourceTag,
-                  {
-                    backgroundColor: borderColor + "40",
-                  },
-                ]}
-              >
-                <Text style={[styles.sourceTagText, { color: textColor }]}>
-                  {source}
-                </Text>
-              </View>
-            ))}
-            {item.alert_sources.length > 3 && (
-              <View
-                style={[
-                  styles.sourceTag,
-                  { backgroundColor: borderColor + "60" },
-                ]}
-              >
-                <Text style={[styles.sourceTagText, { color: textColor }]}>
-                  +{item.alert_sources.length - 3}
-                </Text>
-              </View>
-            )}
-          </View>
-        </View>
-      </View>
-
-      <View style={styles.alertActions}>
-        <Pressable
-          style={({ pressed }) => [
-            styles.actionButton,
-            styles.editButton,
-            {
-              borderColor,
-              backgroundColor: pressed ? borderColor + "30" : "transparent",
-            },
-          ]}
-          onPress={() => openEditModal(item)}
-        >
-          <EditIcon width={16} height={16} color={textColor} />
-          <Text style={[styles.actionButtonText, { color: textColor }]}>
-            <FormattedMessage id="edit" />
-          </Text>
-        </Pressable>
-
-        <Pressable
-          style={({ pressed }) => [
-            styles.actionButton,
-            styles.deleteButton,
-            {
-              backgroundColor: pressed ? "#EF4444" + "20" : "#EF4444" + "10",
-              borderColor: "#EF4444" + "30",
-            },
-          ]}
-          onPress={() => handleDeleteAlert(item)}
-        >
-          <DeleteIcon width={16} height={16} color="#EF4444" />
-          <Text style={[styles.actionButtonText, { color: "#EF4444" }]}>
-            <FormattedMessage id="delete" />
-          </Text>
-        </Pressable>
-      </View>
-    </View>
-  );
-
-  const renderForm = () => (
-    <ScrollView
-      style={styles.formContainer}
-      showsVerticalScrollIndicator={false}
-    >
-      {/* Alert Text */}
-      <View style={styles.formSection}>
-        <Text style={[styles.formLabel, { color: textColor }]}>
-          <FormattedMessage id="alert_text_label" />
-        </Text>
-        <TextInput
-          style={[
-            styles.formInput,
-            {
-              color: textColor,
-              borderColor,
-              backgroundColor: backgroundColor,
-            },
-          ]}
-          value={formData.alert_text}
-          onChangeText={(text) =>
-            setFormData((prev) => ({ ...prev, alert_text: text }))
-          }
-          placeholder="Enter keywords or topics to monitor..."
-          placeholderTextColor={placeholderGray}
-          selectionColor={accentColor}
-          multiline
-          numberOfLines={3}
-        />
-      </View>
-
-      {/* Alert Type */}
-      <View style={styles.formSection}>
-        <Text style={[styles.formLabel, { color: textColor }]}>
-          <FormattedMessage id="alert_frequency_label" />
-        </Text>
-        <View style={styles.radioGroup}>
-          {(["immediate", "daily", "weekly"] as AlertType[]).map((type) => (
-            <Pressable
-              key={type}
-              style={({ pressed }) => [
-                styles.radioOption,
-                {
-                  backgroundColor:
-                    formData.alert_type === type
-                      ? getAlertTypeColor(type) + "20"
-                      : pressed
-                      ? borderColor + "30"
-                      : backgroundColor,
-                  borderColor:
-                    formData.alert_type === type
-                      ? getAlertTypeColor(type)
-                      : borderColor,
-                },
-              ]}
-              onPress={() =>
-                setFormData((prev) => ({ ...prev, alert_type: type }))
-              }
-            >
-              <View style={[styles.radioOptionContent]}>
-                <View
-                  style={[
-                    styles.radioIndicator,
-                    {
-                      backgroundColor:
-                        formData.alert_type === type
-                          ? getAlertTypeColor(type)
-                          : "transparent",
-                      borderColor:
-                        formData.alert_type === type
-                          ? getAlertTypeColor(type)
-                          : borderColor,
-                    },
-                  ]}
-                />
-                <Text
-                  style={[
-                    styles.radioOptionText,
-                    {
-                      color:
-                        formData.alert_type === type
-                          ? getAlertTypeColor(type)
-                          : textColor,
-                    },
-                  ]}
-                >
-                  {getAlertTypeLabel(type)}
-                </Text>
-              </View>
-            </Pressable>
-          ))}
-        </View>
-      </View>
-
-      {/* Alert Sources */}
-      <View style={styles.formSection}>
-        <Text style={[styles.formLabel, { color: textColor }]}>
-          <FormattedMessage id="sources_to_monitor" />
-        </Text>
-        <View style={styles.sourcesGrid}>
-          {["news", "blogs", "youtube", "reddit"].map((source) => (
-            <Pressable
-              key={source}
-              style={({ pressed }) => [
-                styles.sourceOption,
-                {
-                  backgroundColor: formData.alert_sources.includes(source)
-                    ? accentColor + "20"
-                    : pressed
-                    ? borderColor + "30"
-                    : backgroundColor,
-                  borderColor: formData.alert_sources.includes(source)
-                    ? accentColor
-                    : borderColor,
-                },
-              ]}
-              onPress={() => {
-                setFormData((prev) => ({
-                  ...prev,
-                  alert_sources: prev.alert_sources.includes(source)
-                    ? prev.alert_sources.filter((s) => s !== source)
-                    : [...prev.alert_sources, source],
-                }));
-              }}
-            >
-              <View style={styles.sourceOptionContent}>
-                <View
-                  style={[
-                    styles.checkboxIndicator,
-                    {
-                      backgroundColor: formData.alert_sources.includes(source)
-                        ? accentColor
-                        : "transparent",
-                      borderColor: formData.alert_sources.includes(source)
-                        ? accentColor
-                        : borderColor,
-                    },
-                  ]}
-                >
-                  {formData.alert_sources.includes(source) && (
-                    <SaveIcon width={12} height={12} color="#ffffff" />
-                  )}
-                </View>
-                <Text
-                  style={[
-                    styles.sourceOptionText,
-                    {
-                      color: formData.alert_sources.includes(source)
-                        ? accentColor
-                        : textColor,
-                    },
-                  ]}
-                >
-                  {source.charAt(0).toUpperCase() + source.slice(1)}
-                </Text>
-              </View>
-            </Pressable>
-          ))}
-        </View>
-      </View>
-    </ScrollView>
+    <AlertCard
+      alert={item}
+      onEdit={(alert) => {
+        setShowEditModal(true);
+        setEditingAlert(alert);
+      }}
+      onToggle={() => {}}
+    />
   );
 
   const renderHeader = () => (
@@ -703,18 +284,9 @@ const AlertsTab = () => {
       {/* Title Section */}
       <View style={styles.titleSection}>
         <View style={styles.titleLeft}>
-          <View>
-            <Text style={[styles.title, { color: textColor }]}>
-              <FormattedMessage id="alerts" />
-            </Text>
-            <Text style={[styles.subtitle, { color: placeholderGray }]}>
-              {alerts.length === 0
-                ? "No alerts configured"
-                : `${alerts.length} alert${
-                    alerts.length !== 1 ? "s" : ""
-                  } active`}
-            </Text>
-          </View>
+          <Text style={[styles.title, { color: textColor }]}>
+            <FormattedMessage id="alerts" />
+          </Text>
         </View>
       </View>
 
@@ -723,89 +295,25 @@ const AlertsTab = () => {
         style={[
           styles.searchContainer,
           {
-            backgroundColor,
+            backgroundColor: inputBg,
             borderColor,
           },
         ]}
       >
-        <SearchIcon width={20} height={20} color={placeholderGray} />
         <TextInput
           style={[styles.searchInput, { color: textColor }]}
-          placeholder="Search alerts..."
+          placeholder={intl.formatMessage({ id: "search" })}
           placeholderTextColor={placeholderGray}
           value={searchQuery}
           onChangeText={setSearchQuery}
           selectionColor={accentColor}
         />
-        {searchQuery.length > 0 && (
-          <Pressable
-            style={({ pressed }) => [{ opacity: pressed ? 0.6 : 1 }]}
-            onPress={() => setSearchQuery("")}
-          >
-            <CloseIcon width={20} height={20} color={placeholderGray} />
-          </Pressable>
-        )}
-      </View>
-
-      {/* Filter Tabs */}
-      <View style={styles.filterTabs}>
-        {[
-          { key: "all", label: "All", count: alerts.length },
-          {
-            key: "active",
-            label: "Active",
-            count: alerts.filter((a) => a.is_active).length,
-          },
-          {
-            key: "inactive",
-            label: "Inactive",
-            count: alerts.filter((a) => !a.is_active).length,
-          },
-        ].map((tab) => (
-          <Pressable
-            key={tab.key}
-            style={({ pressed }) => [
-              styles.filterTab,
-              {
-                backgroundColor:
-                  filterType === tab.key
-                    ? accentColor
-                    : pressed
-                    ? borderColor + "30"
-                    : backgroundColor,
-                borderColor: filterType === tab.key ? accentColor : borderColor,
-              },
-            ]}
-            onPress={() => setFilterType(tab.key as any)}
-          >
-            <Text
-              style={[
-                styles.filterTabText,
-                { color: filterType === tab.key ? "#ffffff" : textColor },
-              ]}
-            >
-              {tab.label}
-            </Text>
-            <View
-              style={[
-                styles.filterTabBadge,
-                {
-                  backgroundColor:
-                    filterType === tab.key ? "#ffffff30" : borderColor + "60",
-                },
-              ]}
-            >
-              <Text
-                style={[
-                  styles.filterTabBadgeText,
-                  { color: filterType === tab.key ? "#ffffff" : textColor },
-                ]}
-              >
-                {tab.count}
-              </Text>
-            </View>
-          </Pressable>
-        ))}
+        <Pressable
+          style={({ pressed }) => [{ opacity: pressed ? 0.6 : 1 }]}
+          onPress={() => setFilterModalVisible(true)}
+        >
+          <FilterIcon width={24} height={24} color={placeholderGray} />
+        </Pressable>
       </View>
     </View>
   );
@@ -870,135 +378,31 @@ const AlertsTab = () => {
         )}
       </SafeAreaView>
 
-      {/* Create Modal */}
-      <Modal
-        visible={showCreateModal}
-        animationType="slide"
-        presentationStyle="pageSheet"
-      >
-        <SafeAreaView style={[styles.modalContainer, { backgroundColor }]}>
-          <View style={[styles.modalHeader]}>
-            <Text style={[styles.modalTitle, { color: textColor }]}>
-              <FormattedMessage id="create" />
-            </Text>
-            <Pressable
-              style={({ pressed }) => [{ opacity: pressed ? 0.6 : 1 }]}
-              onPress={closeCreateModal}
-            >
-              <CloseIcon width={24} height={24} color={textColor} />
-            </Pressable>
-          </View>
+      {/* Modals */}
+      <CreateAlertModal
+        visible={showEditModal || showCreateModal}
+        alert={editingAlert}
+        isEdit={showEditModal}
+        loading={modalLoading}
+        onSubmit={(alert: Alert) => {
+          if (showEditModal) {
+            handleEditAlert(alert);
+          } else {
+            handleCreateAlert(alert);
+          }
+        }}
+        onClose={closeModal}
+      />
 
-          {renderForm()}
+      <FilterModal
+        visible={filterModalVisible}
+        initialFilters={appliedFilters}
+        onClose={() => setFilterModalVisible(false)}
+        onApply={handleApplyFilters}
+        onReset={handleResetFilters}
+      />
 
-          <View style={styles.modalFooter}>
-            <Pressable
-              style={({ pressed }) => [
-                styles.cancelButton,
-                {
-                  borderColor,
-                  backgroundColor: pressed ? borderColor + "20" : "transparent",
-                },
-              ]}
-              onPress={closeCreateModal}
-            >
-              <Text style={[styles.cancelButtonText, { color: textColor }]}>
-                <FormattedMessage id="cancel" />
-              </Text>
-            </Pressable>
-
-            <Pressable
-              style={({ pressed }) => [
-                styles.saveButton,
-                {
-                  backgroundColor: formLoading
-                    ? placeholderGray
-                    : pressed
-                    ? accentColor + "CC"
-                    : accentColor,
-                },
-              ]}
-              onPress={handleCreateAlert}
-              disabled={formLoading}
-            >
-              {formLoading ? (
-                <ActivityIndicator size="small" color="#ffffff" />
-              ) : (
-                <SaveIcon width={16} height={16} color="#ffffff" />
-              )}
-              <Text style={[styles.saveButtonText, { color: "#ffffff" }]}>
-                {formLoading ? "Creating..." : "Create Alert"}
-              </Text>
-            </Pressable>
-          </View>
-        </SafeAreaView>
-      </Modal>
-
-      {/* Edit Modal */}
-      <Modal
-        visible={showEditModal}
-        animationType="slide"
-        presentationStyle="pageSheet"
-      >
-        <SafeAreaView style={[styles.modalContainer, { backgroundColor }]}>
-          <View style={[styles.modalHeader]}>
-            <Text style={[styles.modalTitle, { color: textColor }]}>
-              <FormattedMessage id="edit_alert" />
-            </Text>
-            <Pressable
-              style={({ pressed }) => [{ opacity: pressed ? 0.6 : 1 }]}
-              onPress={closeEditModal}
-            >
-              <CloseIcon width={24} height={24} color={textColor} />
-            </Pressable>
-          </View>
-
-          {renderForm()}
-
-          <View style={styles.modalFooter}>
-            <Pressable
-              style={({ pressed }) => [
-                styles.cancelButton,
-                {
-                  borderColor,
-                  backgroundColor: pressed ? borderColor + "20" : "transparent",
-                },
-              ]}
-              onPress={closeEditModal}
-            >
-              <Text style={[styles.cancelButtonText, { color: textColor }]}>
-                <FormattedMessage id="cancel" />
-              </Text>
-            </Pressable>
-
-            <Pressable
-              style={({ pressed }) => [
-                styles.saveButton,
-                {
-                  backgroundColor: formLoading
-                    ? placeholderGray
-                    : pressed
-                    ? accentColor + "CC"
-                    : accentColor,
-                },
-              ]}
-              onPress={handleEditAlert}
-              disabled={formLoading}
-            >
-              {formLoading ? (
-                <ActivityIndicator size="small" color="#ffffff" />
-              ) : (
-                <SaveIcon width={16} height={16} color="#ffffff" />
-              )}
-              <Text style={[styles.saveButtonText, { color: "#ffffff" }]}>
-                <FormattedMessage id={formLoading ? "updating" : "update"} />
-              </Text>
-            </Pressable>
-          </View>
-        </SafeAreaView>
-      </Modal>
-
-      {/* Floating Create Button */}
+      {/* Create Button */}
       <Pressable
         style={({ pressed }) => [
           styles.createButton,
@@ -1038,7 +442,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: verticalScale(24),
+    marginBottom: verticalScale(22),
   },
   titleLeft: {
     flexDirection: "row",
@@ -1054,17 +458,9 @@ const styles = StyleSheet.create({
     marginRight: horizontalScale(16),
   },
   title: {
-    fontSize: moderateScale(32),
-    fontFamily: "Inter-Bold",
-    lineHeight: moderateScale(38),
+    fontSize: moderateScale(38),
+    fontFamily: "Inter-SemiBold",
     letterSpacing: -0.5,
-  },
-  subtitle: {
-    fontSize: moderateScale(16),
-    fontFamily: "Inter-Medium",
-    lineHeight: moderateScale(20),
-    marginTop: verticalScale(4),
-    opacity: 0.8,
   },
   createButton: {
     width: moderateScale(60),
@@ -1073,23 +469,22 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     position: "absolute",
-    bottom: verticalScale(90),
+    bottom: verticalScale(125),
     right: horizontalScale(20),
   },
   searchContainer: {
     flexDirection: "row",
     alignItems: "center",
-    paddingHorizontal: horizontalScale(20),
+    paddingHorizontal: horizontalScale(24),
     paddingVertical: verticalScale(8),
-    borderRadius: moderateScale(100),
+    borderRadius: moderateScale(5),
     borderWidth: 1,
-    marginBottom: verticalScale(20),
+    marginBottom: verticalScale(18),
   },
   searchInput: {
     flex: 1,
     fontSize: moderateScale(16),
     fontFamily: "Inter-Regular",
-    marginLeft: horizontalScale(12),
   },
   filterTabs: {
     flexDirection: "row",
@@ -1123,9 +518,9 @@ const styles = StyleSheet.create({
   alertCard: {
     marginHorizontal: horizontalScale(20),
     marginBottom: verticalScale(16),
-    borderRadius: moderateScale(20),
+    borderRadius: moderateScale(5),
     borderWidth: 1,
-    padding: moderateScale(20),
+    padding: moderateScale(14),
   },
   alertHeader: {
     marginBottom: verticalScale(16),
@@ -1137,15 +532,24 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "flex-start",
-    marginBottom: verticalScale(16),
+    marginBottom: verticalScale(23),
   },
   alertTitle: {
-    fontSize: moderateScale(18),
-    fontFamily: "Inter-Bold",
+    fontSize: moderateScale(23),
+    fontFamily: "Inter-Medium",
     lineHeight: moderateScale(24),
     flex: 1,
-    marginRight: horizontalScale(16),
     letterSpacing: -0.2,
+  },
+  metaDivider: {
+    width: 1,
+    height: verticalScale(30),
+    marginHorizontal: horizontalScale(10),
+  },
+  sourceSeparator: {
+    width: 4,
+    height: 4,
+    borderRadius: 100,
   },
   alertMetadata: {
     flexDirection: "row",
@@ -1153,13 +557,9 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     marginBottom: verticalScale(16),
   },
-  alertTypeBadge: {
+  alertTypeContainer: {
     flexDirection: "row",
     alignItems: "center",
-    paddingHorizontal: horizontalScale(12),
-    paddingVertical: verticalScale(6),
-    borderRadius: moderateScale(16),
-    borderWidth: 1,
     gap: horizontalScale(6),
   },
   statusDot: {
@@ -1168,8 +568,8 @@ const styles = StyleSheet.create({
     borderRadius: moderateScale(4),
   },
   alertTypeText: {
-    fontSize: moderateScale(12),
-    fontFamily: "Inter-Medium",
+    fontSize: moderateScale(15),
+    fontFamily: "Inter-Regular",
     letterSpacing: 0.5,
   },
   alertDate: {
@@ -1189,14 +589,13 @@ const styles = StyleSheet.create({
     fontFamily: "Inter-Medium",
     opacity: 0.8,
   },
-  sourceTag: {
+  alertSource: {
     paddingHorizontal: horizontalScale(10),
     paddingVertical: verticalScale(4),
-    borderRadius: moderateScale(12),
   },
-  sourceTagText: {
-    fontSize: moderateScale(12),
-    fontFamily: "Inter-SemiBold",
+  alertSourceText: {
+    fontSize: moderateScale(15),
+    fontFamily: "Inter-Regular",
     textTransform: "capitalize",
   },
   alertActions: {
@@ -1270,7 +669,7 @@ const styles = StyleSheet.create({
     gap: horizontalScale(8),
     marginBottom: verticalScale(16),
   },
-  shimmerSourceTag: {
+  shimmeralertSource: {
     width: moderateScale(50),
     height: moderateScale(20),
     borderRadius: moderateScale(10),

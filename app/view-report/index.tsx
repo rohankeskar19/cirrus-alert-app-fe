@@ -46,12 +46,6 @@ const ViewReportScreen = () => {
     router.back();
   };
 
-  const handleImageCredit = () => {
-    if (featuredSource?.url) {
-      Linking.openURL(featuredSource.url);
-    }
-  };
-
   return (
     <SafeAreaView style={[styles.container, { backgroundColor }]}>
       <View style={[styles.header, { borderBottomColor: borderColor }]}>
@@ -189,10 +183,9 @@ const styles = StyleSheet.create({
     height: verticalScale(60),
     flexDirection: "row",
     alignItems: "center",
-    paddingHorizontal: horizontalScale(8),
+    paddingHorizontal: horizontalScale(14),
   },
   backButton: {
-    padding: moderateScale(8),
     height: "100%",
     marginVertical: "auto",
     alignItems: "center",

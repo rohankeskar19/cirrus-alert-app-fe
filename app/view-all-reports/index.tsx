@@ -342,16 +342,13 @@ const styles = StyleSheet.create({
     paddingVertical: verticalScale(16),
   },
   backButton: {
-    width: moderateScale(40),
-    height: moderateScale(40),
-    borderRadius: moderateScale(20),
     alignItems: "center",
     justifyContent: "center",
   },
   headerTitle: {
     fontSize: moderateScale(20),
     fontFamily: "Inter-Medium",
-    flex: 0.88,
+    flex: 0.91,
     textAlign: "center",
     letterSpacing: -0.3,
   },

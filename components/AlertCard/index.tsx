@@ -278,7 +278,7 @@ const styles = StyleSheet.create({
   },
   alertActions: {
     flexDirection: "row",
-    gap: horizontalScale(12),
+    height: verticalScale(50),
   },
   alertActionsPlaceholder: {
     height: verticalScale(50),

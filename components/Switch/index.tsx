@@ -8,9 +8,9 @@ const CirrusSwitch = ({
   onToggle = (state: boolean) => {},
   size = "medium",
   activeColor = "#ADEC56",
-  inactiveColor = "#e5e7eb",
 }) => {
   const thumbColor = useThemeColor("background");
+  const inactiveColor = useThemeColor("placeholderGray");
 
   const [switchValue] = useState(new Animated.Value(isOn ? 1 : 0));
 

@@ -1,7 +1,7 @@
 import { useThemeColor } from "@/hooks/useThemeColor";
 import { Alert } from "@/utils/apiUtils";
 import { horizontalScale, moderateScale, verticalScale } from "@/utils/metrics";
-import React from "react";
+import React, { useState } from "react";
 import { FormattedMessage } from "react-intl";
 import {
   Animated,
@@ -22,17 +22,20 @@ type ActiveAlertsAccordionProps = {
   onAlertPress?: (alert: Alert) => void;
 };
 
+const INITIAL_ALERTS_LIMIT = 5;
+
 const ActiveAlertsAccordion = ({
   alerts,
   isExpanded,
   onToggle,
   onAlertPress,
 }: ActiveAlertsAccordionProps) => {
+  const [showAllAlerts, setShowAllAlerts] = useState(false);
+
   const textColor = useThemeColor("textColor");
   const backgroundColor = useThemeColor("background");
   const borderColor = useThemeColor("inputBorder");
   const accentColor = useThemeColor("accentColor");
-  const placeholderGray = useThemeColor("placeholderGray");
 
   const rotateValue = new Animated.Value(isExpanded ? 1 : 0);
 
@@ -42,6 +45,13 @@ const ActiveAlertsAccordion = ({
       duration: 200,
       useNativeDriver: true,
     }).start();
+  }, [isExpanded]);
+
+  // Reset showAllAlerts when accordion is collapsed
+  React.useEffect(() => {
+    if (!isExpanded) {
+      setShowAllAlerts(false);
+    }
   }, [isExpanded]);
 
   const rotate = rotateValue.interpolate({
@@ -58,6 +68,17 @@ const ActiveAlertsAccordion = ({
       default:
         return <CalendarWeek width={18} height={18} color={textColor} />;
     }
+  };
+
+  const displayedAlerts = showAllAlerts
+    ? alerts
+    : alerts.slice(0, INITIAL_ALERTS_LIMIT);
+
+  const hasMoreAlerts = alerts.length > INITIAL_ALERTS_LIMIT;
+  const hiddenAlertsCount = alerts.length - INITIAL_ALERTS_LIMIT;
+
+  const handleSeeMorePress = () => {
+    setShowAllAlerts(!showAllAlerts);
   };
 
   return (
@@ -95,8 +116,8 @@ const ActiveAlertsAccordion = ({
             </View>
           ) : (
             <View style={styles.alertsList}>
-              {alerts.map((alert, index) => (
-                <View
+              {displayedAlerts.map((alert, index) => (
+                <TouchableOpacity
                   key={alert.id}
                   style={[
                     styles.alertItem,
@@ -105,6 +126,8 @@ const ActiveAlertsAccordion = ({
                       marginBottom: verticalScale(8),
                     },
                   ]}
+                  onPress={() => onAlertPress?.(alert)}
+                  activeOpacity={0.7}
                 >
                   {getAlertTypeIcon(alert.alert_type)}
                   <Text
@@ -114,8 +137,32 @@ const ActiveAlertsAccordion = ({
                   >
                     {alert.alert_text}
                   </Text>
-                </View>
+                </TouchableOpacity>
               ))}
+
+              {hasMoreAlerts && (
+                <TouchableOpacity
+                  style={[
+                    styles.seeMoreButton,
+                    {
+                      borderColor: borderColor,
+                    },
+                  ]}
+                  onPress={handleSeeMorePress}
+                  activeOpacity={0.7}
+                >
+                  <Text style={[styles.seeMoreText, { color: accentColor }]}>
+                    {showAllAlerts ? (
+                      <FormattedMessage id="see_less" />
+                    ) : (
+                      <FormattedMessage
+                        id="see_more"
+                        values={{ count: hiddenAlertsCount }}
+                      />
+                    )}
+                  </Text>
+                </TouchableOpacity>
+              )}
             </View>
           )}
         </View>
@@ -194,6 +241,9 @@ const styles = StyleSheet.create({
     display: "flex",
     flexDirection: "row",
     alignItems: "center",
+    paddingVertical: verticalScale(4),
+    paddingHorizontal: horizontalScale(4),
+    borderRadius: moderateScale(4),
   },
   alertText: {
     width: "90%",
@@ -201,6 +251,29 @@ const styles = StyleSheet.create({
     fontFamily: "Inter-Medium",
     lineHeight: moderateScale(20),
     marginLeft: horizontalScale(13),
+  },
+  seeMoreButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: verticalScale(12),
+    paddingHorizontal: horizontalScale(16),
+    borderTopWidth: 1,
+    marginTop: verticalScale(8),
+    gap: horizontalScale(6),
+  },
+  seeMoreText: {
+    fontSize: moderateScale(14),
+    fontFamily: "Inter-SemiBold",
+  },
+  seeMoreIcon: {
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  chevron: {
+    fontSize: moderateScale(16),
+    fontWeight: "bold",
+    transform: [{ rotate: "90deg" }],
   },
 });
 

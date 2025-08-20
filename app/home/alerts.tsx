@@ -5,7 +5,6 @@ import {
   createAlert,
   deleteAlert,
   fetchAllUserAlerts,
-  supabase,
   toggleAlertStatus,
   updateAlert,
 } from "@/utils/apiUtils";
@@ -28,11 +27,13 @@ import {
 import BellIcon from "@/assets/icons/alerts-tab.svg";
 import FilterIcon from "@/assets/icons/filter.svg";
 import PlusIcon from "@/assets/icons/plus.svg";
+import TrashIcon from "@/assets/icons/trash.svg";
 
 import AlertCard from "@/components/AlertCard";
 import FilterModal from "@/components/AlertFilterModal";
 import CreateAlertModal from "@/components/CreateAlertModal";
 import ShimmerAlertCard from "@/components/ShimmerAlertCard";
+import _ from "lodash";
 import { FormattedMessage, useIntl } from "react-intl";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -54,6 +55,12 @@ const AlertsTab = () => {
   const inputBg = useThemeColor("inputBg");
   const placeholderGray = useThemeColor("placeholderGray");
 
+  const initialFilter: FilterData = {
+    status: "all",
+    alertFrequency: ["immediate", "daily", "weekly"],
+    sources: ["news", "blogs", "reddit", "youtube"],
+  };
+
   const [alerts, setAlerts] = useState<Alert[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -62,13 +69,13 @@ const AlertsTab = () => {
   const [editingAlert, setEditingAlert] = useState<Alert | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
 
-  // Filter state
   const [filterModalVisible, setFilterModalVisible] = useState(false);
-  const [appliedFilters, setAppliedFilters] = useState<FilterData>({
-    status: "all",
-    alertFrequency: ["immediate", "daily", "weekly"],
-    sources: ["news", "blogs", "reddit", "youtube"],
-  });
+  const [appliedFilters, setAppliedFilters] =
+    useState<FilterData>(initialFilter);
+
+  // Selection mode state
+  const [isSelectionMode, setIsSelectionMode] = useState(false);
+  const [selectedAlerts, setSelectedAlerts] = useState<Set<string>>(new Set());
 
   const [modalLoading, setModalLoading] = useState(false);
 
@@ -76,31 +83,17 @@ const AlertsTab = () => {
 
   useEffect(() => {
     loadAlerts();
-
-    const channel = supabase
-      .channel("alerts_changes")
-      .on(
-        "postgres_changes",
-        {
-          event: "*",
-          schema: "public",
-          table: "alerts",
-        },
-        () => {
-          loadAlerts();
-        }
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
   }, []);
 
   const loadAlerts = async () => {
     try {
       setLoading(true);
-      const alertsData = await fetchAllUserAlerts();
+      const alertsData = await fetchAllUserAlerts({
+        status: appliedFilters.status,
+        alertFrequency: appliedFilters.alertFrequency,
+        sources: appliedFilters.sources,
+        searchQuery,
+      });
       setAlerts(alertsData);
     } catch (error) {
       console.error("Error loading alerts:", error);
@@ -116,23 +109,19 @@ const AlertsTab = () => {
   }, []);
 
   const filteredAlerts = alerts.filter((alert) => {
-    // Search filter
     const matchesSearch = alert.alert_text
       .toLowerCase()
       .includes(searchQuery.toLowerCase());
 
-    // Status filter
     const matchesStatus =
       appliedFilters.status === "all" ||
       (appliedFilters.status === "active" && alert.is_active) ||
       (appliedFilters.status === "inactive" && !alert.is_active);
 
-    // Alert frequency filter
     const matchesFrequency = appliedFilters.alertFrequency.includes(
       alert.alert_type
     );
 
-    // Sources filter - check if any of the alert's sources are in the filter
     const matchesSources = alert.alert_sources.some((source) =>
       appliedFilters.sources.includes(source)
     );
@@ -160,36 +149,7 @@ const AlertsTab = () => {
     }
   };
 
-  const handleDeleteAlert = (alert: Alert) => {
-    RNAlert.alert(
-      "Delete Alert",
-      `Are you sure you want to delete "${alert.alert_text}"? This action cannot be undone.`,
-      [
-        { text: "Cancel", style: "cancel" },
-        {
-          text: "Delete",
-          style: "destructive",
-          onPress: async () => {
-            try {
-              const success = await deleteAlert(alert.id);
-              if (success) {
-                setAlerts((prev) => prev.filter((a) => a.id !== alert.id));
-              }
-            } catch (error) {
-              console.error("Error deleting alert:", error);
-            }
-          },
-        },
-      ]
-    );
-  };
-
   const handleCreateAlert = async (alert: Alert) => {
-    if (!alert.alert_text.trim()) {
-      RNAlert.alert("Error", "Please enter alert text");
-      return;
-    }
-
     try {
       setModalLoading(true);
       const success = await createAlert(
@@ -200,7 +160,6 @@ const AlertsTab = () => {
 
       if (success) {
         setShowCreateModal(false);
-        resetForm();
         await loadAlerts();
       }
     } catch (error) {
@@ -212,7 +171,6 @@ const AlertsTab = () => {
 
   const handleEditAlert = async (alert: Alert) => {
     if (!editingAlert || !alert.alert_text.trim()) {
-      RNAlert.alert("Error", "Please enter alert text");
       return;
     }
 
@@ -228,7 +186,6 @@ const AlertsTab = () => {
       if (success) {
         setShowEditModal(false);
         setEditingAlert(null);
-        resetForm();
         await loadAlerts();
       }
     } catch (error) {
@@ -238,20 +195,10 @@ const AlertsTab = () => {
     }
   };
 
-  const openEditModal = (alert: Alert) => {
-    setEditingAlert(alert);
-    setShowEditModal(true);
-  };
-
-  const resetForm = () => {
-    // Form reset logic if needed
-  };
-
   const closeModal = () => {
     setShowCreateModal(false);
     setShowEditModal(false);
     setEditingAlert(null);
-    resetForm();
   };
 
   const handleApplyFilters = (filters: FilterData) => {
@@ -268,29 +215,133 @@ const AlertsTab = () => {
     setFilterModalVisible(false);
   };
 
+  const handleLongPress = (alert: Alert) => {
+    setIsSelectionMode(true);
+    setSelectedAlerts(new Set([alert.id]));
+  };
+
+  const handleAlertPress = (alert: Alert) => {
+    if (isSelectionMode) {
+      const newSelectedAlerts = new Set(selectedAlerts);
+      if (newSelectedAlerts.has(alert.id)) {
+        newSelectedAlerts.delete(alert.id);
+      } else {
+        newSelectedAlerts.add(alert.id);
+      }
+      setSelectedAlerts(newSelectedAlerts);
+
+      if (newSelectedAlerts.size === 0) {
+        setIsSelectionMode(false);
+      }
+    }
+  };
+
+  const handleCancelSelection = () => {
+    setIsSelectionMode(false);
+    setSelectedAlerts(new Set());
+  };
+
+  const handleDeleteSelected = () => {
+    const selectedCount = selectedAlerts.size;
+    const alertTexts = alerts
+      .filter((alert) => selectedAlerts.has(alert.id))
+      .map((alert) => alert.alert_text)
+      .slice(0, 3);
+
+    RNAlert.alert(
+      intl.formatMessage({
+        id: selectedCount > 1 ? "delete_alerts" : "delete_alert",
+      }),
+      intl.formatMessage(
+        {
+          id:
+            selectedCount > 1
+              ? "are_you_sure_count_plural"
+              : "are_you_sure_count_singular",
+        },
+        {
+          count: selectedCount,
+        }
+      ),
+      [
+        { text: intl.formatMessage({ id: "cancel" }), style: "cancel" },
+        {
+          text: intl.formatMessage({ id: "delete" }),
+          style: "destructive",
+          onPress: async () => {
+            try {
+              const deletePromises = Array.from(selectedAlerts).map((alertId) =>
+                deleteAlert(alertId)
+              );
+
+              const results = await Promise.all(deletePromises);
+              const successfulDeletes = results.filter(
+                (success) => success
+              ).length;
+
+              if (successfulDeletes > 0) {
+                setAlerts((prev) =>
+                  prev.filter((alert) => !selectedAlerts.has(alert.id))
+                );
+                setIsSelectionMode(false);
+                setSelectedAlerts(new Set());
+              }
+            } catch (error) {
+              console.error("Error deleting selected alerts:", error);
+            }
+          },
+        },
+      ]
+    );
+  };
+
   const renderAlertItem: ListRenderItem<Alert> = ({ item }) => (
     <AlertCard
       alert={item}
       onEdit={(alert) => {
-        setShowEditModal(true);
-        setEditingAlert(alert);
+        if (!isSelectionMode) {
+          setShowEditModal(true);
+          setEditingAlert(alert);
+        }
       }}
-      onToggle={() => {}}
+      onToggle={(alertId: string, status) =>
+        !isSelectionMode && handleToggleStatus(alertId, status)
+      }
+      onLongPress={handleLongPress}
+      onPress={handleAlertPress}
+      isSelected={selectedAlerts.has(item.id)}
+      isSelectionMode={isSelectionMode}
     />
   );
 
   const renderHeader = () => (
     <View style={styles.headerContainer}>
-      {/* Title Section */}
       <View style={styles.titleSection}>
         <View style={styles.titleLeft}>
-          <Text style={[styles.title, { color: textColor }]}>
-            <FormattedMessage id="alerts" />
-          </Text>
+          {isSelectionMode ? (
+            <View style={styles.selectionHeader}>
+              <Pressable onPress={handleCancelSelection}>
+                <Text style={[styles.cancelText, { color: accentColor }]}>
+                  <FormattedMessage id="cancel" />
+                </Text>
+              </Pressable>
+            </View>
+          ) : (
+            <Text style={[styles.title, { color: textColor }]}>
+              <FormattedMessage id="alerts" />
+            </Text>
+          )}
         </View>
+        {isSelectionMode && selectedAlerts.size > 0 && (
+          <Pressable
+            style={[styles.deleteButton]}
+            onPress={handleDeleteSelected}
+          >
+            <TrashIcon width={20} height={20} color={textColor} />
+          </Pressable>
+        )}
       </View>
 
-      {/* Search Container */}
       <View
         style={[
           styles.searchContainer,
@@ -313,6 +364,11 @@ const AlertsTab = () => {
           onPress={() => setFilterModalVisible(true)}
         >
           <FilterIcon width={24} height={24} color={placeholderGray} />
+          {!_.isEqual(appliedFilters, initialFilter) && (
+            <View
+              style={[styles.filterBubble, { backgroundColor: accentColor }]}
+            />
+          )}
         </Pressable>
       </View>
     </View>
@@ -378,7 +434,6 @@ const AlertsTab = () => {
         )}
       </SafeAreaView>
 
-      {/* Modals */}
       <CreateAlertModal
         visible={showEditModal || showCreateModal}
         alert={editingAlert}
@@ -402,19 +457,20 @@ const AlertsTab = () => {
         onReset={handleResetFilters}
       />
 
-      {/* Create Button */}
-      <Pressable
-        style={({ pressed }) => [
-          styles.createButton,
-          {
-            backgroundColor: accentColor,
-            transform: [{ scale: pressed ? 0.95 : 1 }],
-          },
-        ]}
-        onPress={() => setShowCreateModal(true)}
-      >
-        <PlusIcon width={24} height={24} color="#ffffff" />
-      </Pressable>
+      {!isSelectionMode && (
+        <Pressable
+          style={({ pressed }) => [
+            styles.createButton,
+            {
+              backgroundColor: accentColor,
+              transform: [{ scale: pressed ? 0.95 : 1 }],
+            },
+          ]}
+          onPress={() => setShowCreateModal(true)}
+        >
+          <PlusIcon width={24} height={24} color="#ffffff" />
+        </Pressable>
+      )}
     </View>
   );
 };
@@ -439,6 +495,7 @@ const styles = StyleSheet.create({
     paddingBottom: verticalScale(20),
   },
   titleSection: {
+    height: verticalScale(60),
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
@@ -449,18 +506,32 @@ const styles = StyleSheet.create({
     alignItems: "center",
     flex: 1,
   },
-  titleIcon: {
-    width: moderateScale(52),
-    height: moderateScale(52),
-    borderRadius: moderateScale(26),
-    alignItems: "center",
-    justifyContent: "center",
-    marginRight: horizontalScale(16),
-  },
   title: {
     fontSize: moderateScale(38),
     fontFamily: "Inter-SemiBold",
     letterSpacing: -0.5,
+  },
+  selectionHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  cancelText: {
+    fontSize: moderateScale(16),
+    fontFamily: "Inter-Medium",
+  },
+  selectionCount: {
+    fontSize: moderateScale(20),
+    fontFamily: "Inter-SemiBold",
+  },
+  deleteButton: {
+    width: moderateScale(44),
+    height: moderateScale(44),
+    borderRadius: moderateScale(22),
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  deleteIconPlaceholder: {
+    fontSize: moderateScale(20),
   },
   createButton: {
     width: moderateScale(60),
@@ -471,6 +542,12 @@ const styles = StyleSheet.create({
     position: "absolute",
     bottom: verticalScale(125),
     right: horizontalScale(20),
+  },
+  shimmerContainer: {
+    display: "flex",
+    flexDirection: "column",
+    gap: verticalScale(14),
+    paddingHorizontal: horizontalScale(18),
   },
   searchContainer: {
     flexDirection: "row",
@@ -486,205 +563,6 @@ const styles = StyleSheet.create({
     fontSize: moderateScale(16),
     fontFamily: "Inter-Regular",
   },
-  filterTabs: {
-    flexDirection: "row",
-    gap: horizontalScale(5),
-    marginBottom: verticalScale(8),
-  },
-  filterTab: {
-    flex: 1,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    paddingVertical: verticalScale(12),
-    paddingHorizontal: horizontalScale(24),
-    borderRadius: moderateScale(100),
-    borderWidth: 1,
-    gap: horizontalScale(8),
-  },
-  filterTabText: {
-    fontSize: moderateScale(14),
-    fontFamily: "Inter-SemiBold",
-  },
-  filterTabBadge: {
-    paddingHorizontal: horizontalScale(8),
-    paddingVertical: verticalScale(2),
-    borderRadius: moderateScale(100),
-  },
-  filterTabBadgeText: {
-    fontSize: moderateScale(12),
-    fontFamily: "Inter-Bold",
-  },
-  alertCard: {
-    marginHorizontal: horizontalScale(20),
-    marginBottom: verticalScale(16),
-    borderRadius: moderateScale(5),
-    borderWidth: 1,
-    padding: moderateScale(14),
-  },
-  alertHeader: {
-    marginBottom: verticalScale(16),
-  },
-  alertInfo: {
-    flex: 1,
-  },
-  alertTitleRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "flex-start",
-    marginBottom: verticalScale(23),
-  },
-  alertTitle: {
-    fontSize: moderateScale(23),
-    fontFamily: "Inter-Medium",
-    lineHeight: moderateScale(24),
-    flex: 1,
-    letterSpacing: -0.2,
-  },
-  metaDivider: {
-    width: 1,
-    height: verticalScale(30),
-    marginHorizontal: horizontalScale(10),
-  },
-  sourceSeparator: {
-    width: 4,
-    height: 4,
-    borderRadius: 100,
-  },
-  alertMetadata: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    marginBottom: verticalScale(16),
-  },
-  alertTypeContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: horizontalScale(6),
-  },
-  statusDot: {
-    width: moderateScale(8),
-    height: moderateScale(8),
-    borderRadius: moderateScale(4),
-  },
-  alertTypeText: {
-    fontSize: moderateScale(15),
-    fontFamily: "Inter-Regular",
-    letterSpacing: 0.5,
-  },
-  alertDate: {
-    fontSize: moderateScale(13),
-    fontFamily: "Inter-Medium",
-    opacity: 0.8,
-  },
-  alertSources: {
-    flexDirection: "row",
-    alignItems: "center",
-    flexWrap: "wrap",
-    gap: horizontalScale(8),
-    marginTop: verticalScale(4),
-  },
-  alertSourcesLabel: {
-    fontSize: moderateScale(13),
-    fontFamily: "Inter-Medium",
-    opacity: 0.8,
-  },
-  alertSource: {
-    paddingHorizontal: horizontalScale(10),
-    paddingVertical: verticalScale(4),
-  },
-  alertSourceText: {
-    fontSize: moderateScale(15),
-    fontFamily: "Inter-Regular",
-    textTransform: "capitalize",
-  },
-  alertActions: {
-    flexDirection: "row",
-    gap: horizontalScale(12),
-  },
-  actionButton: {
-    flex: 1,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    paddingVertical: verticalScale(12),
-    borderRadius: moderateScale(100),
-    gap: horizontalScale(6),
-  },
-  editButton: {
-    borderWidth: 1,
-  },
-  deleteButton: {
-    borderWidth: 1,
-  },
-  actionButtonText: {
-    fontSize: moderateScale(14),
-    fontFamily: "Inter-SemiBold",
-  },
-
-  // Shimmer styles
-  shimmerContainer: {
-    paddingHorizontal: horizontalScale(20),
-  },
-  shimmerCard: {
-    borderRadius: moderateScale(20),
-    borderWidth: 1,
-    padding: moderateScale(20),
-    marginBottom: verticalScale(16),
-  },
-  shimmerHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "flex-start",
-    marginBottom: verticalScale(16),
-  },
-  shimmerTitle: {
-    height: moderateScale(20),
-    borderRadius: moderateScale(4),
-    flex: 1,
-    marginRight: horizontalScale(16),
-  },
-  shimmerSwitch: {
-    width: moderateScale(44),
-    height: moderateScale(24),
-    borderRadius: moderateScale(12),
-  },
-  shimmerMeta: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginBottom: verticalScale(16),
-  },
-  shimmerBadge: {
-    width: moderateScale(60),
-    height: moderateScale(24),
-    borderRadius: moderateScale(12),
-  },
-  shimmerDate: {
-    width: moderateScale(80),
-    height: moderateScale(16),
-    borderRadius: moderateScale(8),
-  },
-  shimmerSources: {
-    flexDirection: "row",
-    gap: horizontalScale(8),
-    marginBottom: verticalScale(16),
-  },
-  shimmeralertSource: {
-    width: moderateScale(50),
-    height: moderateScale(20),
-    borderRadius: moderateScale(10),
-  },
-  shimmerActions: {
-    flexDirection: "row",
-    gap: horizontalScale(12),
-  },
-  shimmerButton: {
-    flex: 1,
-    height: moderateScale(36),
-    borderRadius: moderateScale(16),
-  },
-
-  // Empty state
   emptyState: {
     flex: 1,
     justifyContent: "center",
@@ -707,145 +585,13 @@ const styles = StyleSheet.create({
     textAlign: "center",
     letterSpacing: -0.3,
   },
-  emptyStateSubtitle: {
-    fontSize: moderateScale(16),
-    fontFamily: "Inter-Medium",
-    textAlign: "center",
-    lineHeight: moderateScale(22),
-    marginBottom: verticalScale(32),
-    opacity: 0.8,
-  },
-  emptyStateButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingHorizontal: horizontalScale(24),
-    paddingVertical: verticalScale(14),
-    borderRadius: moderateScale(24),
-    gap: horizontalScale(8),
-  },
-  emptyStateButtonText: {
-    fontSize: moderateScale(16),
-    fontFamily: "Inter-Bold",
-  },
-  modalContainer: {
-    flex: 1,
-  },
-  modalHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    paddingHorizontal: horizontalScale(20),
-    paddingVertical: verticalScale(10),
-    borderBottomWidth: 1,
-    borderBottomColor: "transparent",
-  },
-  modalTitle: {
-    fontSize: moderateScale(22),
-    fontFamily: "Inter-Bold",
-    letterSpacing: -0.3,
-  },
-  formContainer: {
-    flex: 1,
-    paddingHorizontal: horizontalScale(20),
-  },
-  formSection: {
-    marginVertical: verticalScale(10),
-  },
-  formLabel: {
-    fontSize: moderateScale(18),
-    fontFamily: "Inter-Bold",
-    marginBottom: verticalScale(12),
-    letterSpacing: -0.2,
-  },
-  formInput: {
-    borderWidth: 1,
-    borderRadius: moderateScale(16),
-    paddingHorizontal: horizontalScale(20),
-    paddingVertical: verticalScale(16),
-    fontSize: moderateScale(16),
-    fontFamily: "Inter-Regular",
-    textAlignVertical: "top",
-    minHeight: verticalScale(80),
-  },
-  radioGroup: {
-    gap: verticalScale(12),
-  },
-  radioOption: {
-    paddingHorizontal: horizontalScale(20),
-    paddingVertical: verticalScale(16),
-    borderRadius: moderateScale(16),
-    borderWidth: 1,
-  },
-  radioOptionContent: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: horizontalScale(12),
-  },
-  radioIndicator: {
-    width: moderateScale(20),
-    height: moderateScale(20),
-    borderRadius: moderateScale(10),
-    borderWidth: 2,
-  },
-  radioOptionText: {
-    fontSize: moderateScale(16),
-    fontFamily: "Inter-SemiBold",
-  },
-  sourcesGrid: {
-    gap: verticalScale(12),
-  },
-  sourceOption: {
-    paddingHorizontal: horizontalScale(20),
-    paddingVertical: verticalScale(16),
-    borderRadius: moderateScale(16),
-    borderWidth: 1,
-  },
-  sourceOptionContent: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: horizontalScale(12),
-  },
-  checkboxIndicator: {
-    width: moderateScale(20),
-    height: moderateScale(20),
-    borderRadius: moderateScale(4),
-    borderWidth: 2,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  sourceOptionText: {
-    fontSize: moderateScale(16),
-    fontFamily: "Inter-SemiBold",
-  },
-  modalFooter: {
-    flexDirection: "row",
-    paddingHorizontal: horizontalScale(20),
-    paddingVertical: verticalScale(20),
-    gap: horizontalScale(16),
-  },
-  cancelButton: {
-    flex: 1,
-    paddingVertical: verticalScale(16),
+  filterBubble: {
+    width: moderateScale(8),
+    height: moderateScale(8),
     borderRadius: moderateScale(100),
-    borderWidth: 1,
-    alignItems: "center",
-  },
-  cancelButtonText: {
-    fontSize: moderateScale(16),
-    fontFamily: "Inter-SemiBold",
-  },
-  saveButton: {
-    flex: 1,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    paddingVertical: verticalScale(16),
-    borderRadius: moderateScale(100),
-    gap: horizontalScale(8),
-  },
-  saveButtonText: {
-    fontSize: moderateScale(16),
-    fontFamily: "Inter-SemiBold",
+    position: "absolute",
+    right: 0,
+    top: -2,
   },
 });
 

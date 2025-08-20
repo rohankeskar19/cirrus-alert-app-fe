@@ -543,21 +543,46 @@ export const updateAlert = async (
  * Get all alerts for the current user (both active and inactive)
  * @returns Array of all user alerts
  */
-export const fetchAllUserAlerts = async (): Promise<Alert[]> => {
+export const fetchAllUserAlerts = async (filters?: {
+  status?: "all" | "active" | "inactive";
+  alertFrequency?: AlertType[];
+  sources?: string[];
+  searchQuery?: string;
+}): Promise<Alert[]> => {
   const {
     data: { session },
     error: sessionError,
   } = await supabase.auth.getSession();
   if (sessionError || !session) return [];
 
-  const { data, error } = await supabase
+  let query = supabase
     .from("alerts")
     .select("*")
     .eq("user_id", session.user.id)
     .order("created_at", { ascending: false });
 
+  if (filters?.status === "active") {
+    query = query.eq("is_active", true);
+  } else if (filters?.status === "inactive") {
+    query = query.eq("is_active", false);
+  }
+
+  if (filters?.alertFrequency && filters.alertFrequency.length > 0) {
+    query = query.in("alert_type", filters.alertFrequency);
+  }
+
+  if (filters?.sources && filters.sources.length > 0) {
+    query = query.overlaps("alert_sources", filters.sources);
+  }
+
+  if (filters?.searchQuery && filters.searchQuery.trim() !== "") {
+    query = query.ilike("alert_text", `%${filters.searchQuery.trim()}%`);
+  }
+
+  const { data, error } = await query;
+
   if (error) {
-    console.error("Error fetching all user alerts:", error.message);
+    console.error("Error fetching alerts:", error.message);
     return [];
   }
 

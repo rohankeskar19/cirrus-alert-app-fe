@@ -110,5 +110,14 @@
   "unread_matches": "Unread matches",
   "view_all": "View all",
   "search": "Search",
-  "new_alert": "New alert"
+  "new_alert": "New alert",
+  "reset_filters": "Reset filters",
+  "status": "Status",
+  "see_more": "See more",
+  "see_less": "See less",
+  "selected_count": "{count} selected",
+  "delete_alerts": "Delete alerts",
+  "delete_alert": "Delete alert",
+  "are_you_sure_count_plural": "Are you sure you want to delete {count} alerts?",
+  "are_you_sure_count_singular": "Are you sure you want to delete {count} alert?"
 }

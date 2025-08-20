@@ -17,6 +17,7 @@ import CircleCheck from "@/assets/icons/circle-check.svg";
 import SearchIcon from "@/assets/icons/search.svg";
 import ThunderIcon from "@/assets/icons/thunder.svg";
 import TickIcon from "@/assets/icons/tick.svg";
+import { FormattedMessage } from "react-intl";
 
 type FilterStatus = "all" | "active" | "inactive";
 
@@ -117,11 +118,12 @@ const AlertFilterModal = ({
       style={styles.formContainer}
       showsVerticalScrollIndicator={false}
     >
-      {/* Status Section */}
       <View style={styles.formSection}>
         <View style={styles.formLabelContainer}>
-          <CircleCheck width={20} height={20} />
-          <Text style={[styles.formLabel, { color: textColor }]}>Status</Text>
+          <CircleCheck width={20} height={20} color={textColor} />
+          <Text style={[styles.formLabel, { color: textColor }]}>
+            <FormattedMessage id="status" />
+          </Text>
         </View>
 
         <View style={[styles.statusGroup, { backgroundColor: inputBg }]}>
@@ -157,12 +159,11 @@ const AlertFilterModal = ({
         </View>
       </View>
 
-      {/* Alert Frequency Section */}
       <View style={styles.formSection}>
         <View style={styles.formLabelContainer}>
-          <ThunderIcon width={20} height={20} />
+          <ThunderIcon width={20} height={20} color={textColor} />
           <Text style={[styles.formLabel, { color: textColor }]}>
-            Alert frequency
+            <FormattedMessage id="alert_frequency_label" />
           </Text>
         </View>
 
@@ -208,11 +209,12 @@ const AlertFilterModal = ({
         </View>
       </View>
 
-      {/* Sources Section */}
       <View style={styles.formSection}>
         <View style={styles.formLabelContainer}>
-          <SearchIcon width={20} height={20} />
-          <Text style={[styles.formLabel, { color: textColor }]}>Sources</Text>
+          <SearchIcon width={20} height={20} color={textColor} />
+          <Text style={[styles.formLabel, { color: textColor }]}>
+            <FormattedMessage id="sources" />
+          </Text>
         </View>
 
         <View style={styles.checkboxGroup}>
@@ -267,7 +269,9 @@ const AlertFilterModal = ({
     >
       <SafeAreaView style={[styles.modalContainer, { backgroundColor }]}>
         <View style={[styles.modalHeader]}>
-          <Text style={[styles.modalTitle, { color: textColor }]}>Filters</Text>
+          <Text style={[styles.modalTitle, { color: textColor }]}>
+            <FormattedMessage id="filters" />
+          </Text>
         </View>
 
         {renderForm()}
@@ -284,7 +288,7 @@ const AlertFilterModal = ({
             onPress={handleReset}
           >
             <Text style={[styles.resetButtonText, { color: textColor }]}>
-              Reset filters
+              <FormattedMessage id="reset_filters" />
             </Text>
           </Pressable>
 
@@ -298,7 +302,7 @@ const AlertFilterModal = ({
             onPress={handleApply}
           >
             <Text style={[styles.applyButtonText, { color: "#ffffff" }]}>
-              Apply filters
+              <FormattedMessage id="apply_filters" />
             </Text>
           </Pressable>
         </View>

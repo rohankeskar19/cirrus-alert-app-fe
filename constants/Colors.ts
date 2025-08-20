@@ -18,7 +18,7 @@ export const Colors = {
     inputBorder: "#DBDBDB",
     questStat: "#F1F1F1",
     secondaryText: "#B9B9B9",
-    secondaryGray: "#C9C9C9",
+    secondaryGray: "#858585",
     accentColor: "#25A1FF",
     greenColor: "#94D900",
     redColor: "#FF6B6B",

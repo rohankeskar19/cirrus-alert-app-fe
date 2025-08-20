@@ -3,7 +3,6 @@ import { horizontalScale, moderateScale, verticalScale } from "@/utils/metrics";
 import React, { useEffect, useState } from "react";
 import { FormattedMessage, useIntl } from "react-intl";
 import {
-  ActivityIndicator,
   Modal,
   Pressable,
   ScrollView,
@@ -54,6 +53,7 @@ const CreateAlertModal = ({
   const borderColor = useThemeColor("inputBorder");
   const inputBg = useThemeColor("inputBg");
   const placeholderGray = useThemeColor("placeholderGray");
+  const secondaryGray = useThemeColor("secondaryGray");
 
   const intl = useIntl();
 
@@ -64,6 +64,13 @@ const CreateAlertModal = ({
         alert_text: alert?.alert_text || "",
         alert_sources: alert?.alert_sources || [],
         alert_type: alert?.alert_type || "immediate",
+      });
+    } else {
+      setFormData({
+        ...formData,
+        alert_text: "",
+        alert_sources: ["news", "blogs", "youtube", "reddit"],
+        alert_type: "immediate",
       });
     }
   }, [alert]);
@@ -88,7 +95,7 @@ const CreateAlertModal = ({
     >
       <View style={styles.formSection}>
         <View style={styles.formLabelContainer}>
-          <EditIcon width={20} height={20} />
+          <EditIcon width={20} height={20} color={textColor} />
           <Text style={[styles.formLabel, { color: textColor }]}>
             <FormattedMessage id="alert_text_label" />
           </Text>
@@ -114,10 +121,9 @@ const CreateAlertModal = ({
         />
       </View>
 
-      {/* Alert Type - Simple Radio Buttons */}
       <View style={styles.formSection}>
         <View style={styles.formLabelContainer}>
-          <ThunderIcon width={20} height={20} />
+          <ThunderIcon width={20} height={20} color={textColor} />
           <Text style={[styles.formLabel, { color: textColor }]}>
             <FormattedMessage id="alert_frequency_label" />
           </Text>
@@ -170,10 +176,9 @@ const CreateAlertModal = ({
         </View>
       </View>
 
-      {/* Alert Sources - Simple Checkboxes */}
       <View style={styles.formSection}>
         <View style={styles.formLabelContainer}>
-          <SearchIcon width={20} height={20} />
+          <SearchIcon width={20} height={20} color={textColor} />
           <Text style={[styles.formLabel, { color: textColor }]}>
             <FormattedMessage id="sources_to_monitor" />
           </Text>
@@ -265,17 +270,27 @@ const CreateAlertModal = ({
             style={({ pressed }) => [
               styles.saveButton,
               {
-                backgroundColor: loading
-                  ? placeholderGray
-                  : pressed
-                  ? accentColor + "CC"
-                  : accentColor,
+                backgroundColor:
+                  loading ||
+                  formData.alert_text.trim().length == 0 ||
+                  formData.alert_sources.length == 0
+                    ? secondaryGray
+                    : pressed
+                    ? accentColor + "CC"
+                    : accentColor,
               },
             ]}
-            onPress={() => onSubmit(formData as Alert)}
+            onPress={() => {
+              if (
+                !loading &&
+                formData.alert_text.trim().length > 0 &&
+                formData.alert_sources.length > 0
+              ) {
+                onSubmit(formData as Alert);
+              }
+            }}
             disabled={loading}
           >
-            {loading && <ActivityIndicator size="small" color="#ffffff" />}
             <Text style={[styles.saveButtonText, { color: "#ffffff" }]}>
               <FormattedMessage id={isEdit ? "update" : "create"} />
             </Text>

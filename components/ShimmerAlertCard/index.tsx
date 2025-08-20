@@ -105,13 +105,6 @@ const ShimmerAlertCard = () => {
             { backgroundColor: placeholderGray + "30" },
           ]}
         />
-        <Animated.View
-          style={[
-            styles.shimmerButton,
-            shimmerStyle,
-            { backgroundColor: placeholderGray + "30" },
-          ]}
-        />
       </View>
     </View>
   );

@@ -11,6 +11,7 @@ import ArrowTopRight from "@/assets/icons/arrow-top-right.svg";
 import TickIcon from "@/assets/icons/tick.svg";
 
 import { FormattedMessage } from "react-intl";
+import Favicon from "../FavIcon";
 
 dayjs.extend(relativeTime);
 
@@ -99,14 +100,14 @@ const AlertReportCard = ({
               { backgroundColor: "rgba(0,0,0,0.6)" },
             ]}
           >
-            <Image
-              source={{
-                uri:
-                  featuredSource.favicon ||
-                  `https://www.google.com/s2/favicons?sz=64&domain_url=${featuredSource.domain}`,
-              }}
+            <Favicon
+              uri={
+                featuredSource.favicon ||
+                `https://www.google.com/s2/favicons?sz=64&domain_url=${featuredSource.domain}`
+              }
               style={styles.sourceCreditFavicon}
             />
+
             <Text style={styles.sourceCreditText} numberOfLines={1}>
               {featuredSource.domain}
             </Text>
@@ -224,9 +225,9 @@ const styles = StyleSheet.create({
   newsCard: {
     width: "100%",
     overflow: "hidden",
-    marginBottom: verticalScale(12),
+
     paddingHorizontal: horizontalScale(16),
-    paddingVertical: verticalScale(10),
+    paddingVertical: verticalScale(18),
   },
   imageContainer: {
     position: "relative",

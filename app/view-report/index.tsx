@@ -19,6 +19,7 @@ import {
 import ArrowTopRight from "@/assets/icons/arrow-top-right.svg";
 import BackIcon from "@/assets/icons/chevron-left.svg";
 import ExternalLinkIcon from "@/assets/icons/external-link.svg";
+import Favicon from "@/components/FavIcon";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 dayjs.extend(relativeTime);
@@ -133,14 +134,14 @@ const ViewReportScreen = () => {
                 activeOpacity={0.7}
               >
                 <View style={styles.sourceContent}>
-                  <Image
-                    source={{
-                      uri:
-                        source.favicon ||
-                        `https://www.google.com/s2/favicons?sz=64&domain_url=${source.domain}`,
-                    }}
+                  <Favicon
+                    uri={
+                      source.favicon ||
+                      `https://www.google.com/s2/favicons?sz=64&domain_url=${source.domain}`
+                    }
                     style={styles.sourceFavicon}
                   />
+
                   <View style={styles.sourceTextContainer}>
                     <Text
                       style={[styles.sourceTitle, { color: textColor }]}

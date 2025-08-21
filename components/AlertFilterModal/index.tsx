@@ -43,7 +43,7 @@ const AlertFilterModal = ({
   const [filterData, setFilterData] = useState<FilterData>({
     status: "all",
     alertFrequency: ["immediate", "daily", "weekly"],
-    sources: ["news", "blogs", "reddit", "youtube"],
+    sources: ["news", "reddit", "youtube"],
   });
 
   const textColor = useThemeColor("textColor");
@@ -67,7 +67,6 @@ const AlertFilterModal = ({
 
   const sourceOptions: { key: string; label: string }[] = [
     { key: "news", label: "News" },
-    { key: "blogs", label: "Blogs" },
     { key: "reddit", label: "Reddit" },
     { key: "youtube", label: "Youtube" },
   ];
@@ -102,7 +101,7 @@ const AlertFilterModal = ({
     setFilterData({
       status: "all",
       alertFrequency: ["immediate", "daily", "weekly"],
-      sources: ["news", "blogs", "reddit", "youtube"],
+      sources: ["news", "reddit", "youtube"],
     });
     onReset();
   };

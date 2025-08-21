@@ -58,7 +58,7 @@ const AlertsTab = () => {
   const initialFilter: FilterData = {
     status: "all",
     alertFrequency: ["immediate", "daily", "weekly"],
-    sources: ["news", "blogs", "reddit", "youtube"],
+    sources: ["news", "reddit", "youtube"],
   };
 
   const [alerts, setAlerts] = useState<Alert[]>([]);
@@ -210,7 +210,7 @@ const AlertsTab = () => {
     setAppliedFilters({
       status: "all",
       alertFrequency: ["immediate", "daily", "weekly"],
-      sources: ["news", "blogs", "reddit", "youtube"],
+      sources: ["news", "reddit", "youtube"],
     });
     setFilterModalVisible(false);
   };

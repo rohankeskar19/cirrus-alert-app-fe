@@ -43,7 +43,7 @@ const CreateAlertModal = ({
 }) => {
   const [formData, setFormData] = useState<AlertFormData>({
     alert_text: "",
-    alert_sources: ["news", "blogs", "youtube", "reddit"],
+    alert_sources: ["news", "youtube", "reddit"],
     alert_type: "immediate",
   });
 
@@ -69,7 +69,7 @@ const CreateAlertModal = ({
       setFormData({
         ...formData,
         alert_text: "",
-        alert_sources: ["news", "blogs", "youtube", "reddit"],
+        alert_sources: ["news", "youtube", "reddit"],
         alert_type: "immediate",
       });
     }
@@ -185,7 +185,7 @@ const CreateAlertModal = ({
         </View>
 
         <View style={styles.sourcesGrid}>
-          {["news", "blogs", "youtube", "reddit"].map((source) => {
+          {["news", "youtube", "reddit"].map((source) => {
             const isSelected = formData.alert_sources.includes(source);
             return (
               <Pressable

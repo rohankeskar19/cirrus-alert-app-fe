@@ -2,7 +2,6 @@ import React from "react";
 import { FormattedMessage, useIntl } from "react-intl";
 import { StyleSheet, Text, View } from "react-native";
 
-import BlogsIcon from "@/assets/icons/blogs-icon.svg";
 import NewsArticleIcon from "@/assets/icons/news-article.svg";
 import RedditIcon from "@/assets/icons/reddit.svg";
 import YoutubeIcon from "@/assets/icons/youtube-icon.svg";
@@ -30,11 +29,6 @@ const Step3 = ({ selectedSources, setSelectedSources }: Step3Props) => {
       value: "reddit",
       label: intl.formatMessage({ id: "reddit" }),
       icon: <RedditIcon />,
-    },
-    {
-      value: "blogs",
-      label: intl.formatMessage({ id: "blogs" }),
-      icon: <BlogsIcon />,
     },
     {
       value: "youtube",

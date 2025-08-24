@@ -97,8 +97,9 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "flex-start",
     borderWidth: 1,
-    borderRadius: moderateScale(20),
-    padding: moderateScale(12),
+    borderRadius: moderateScale(5),
+    paddingVertical: verticalScale(6),
+    paddingHorizontal: horizontalScale(12),
     minHeight: verticalScale(120),
   },
   inputError: {
@@ -106,9 +107,8 @@ const styles = StyleSheet.create({
   },
   textArea: {
     flex: 1,
-    fontSize: moderateScale(18),
+    fontSize: moderateScale(16),
     fontFamily: "Inter-Regular",
-    lineHeight: moderateScale(22),
     minHeight: verticalScale(88),
   },
   errorText: {

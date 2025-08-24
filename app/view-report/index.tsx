@@ -47,6 +47,11 @@ const ViewReportScreen = () => {
     router.back();
   };
 
+  console.log(
+    "Matches ",
+    matches.map((m: any) => m.published_at)
+  );
+
   return (
     <SafeAreaView style={[styles.container, { backgroundColor }]}>
       <View style={[styles.header, { borderBottomColor: borderColor }]}>

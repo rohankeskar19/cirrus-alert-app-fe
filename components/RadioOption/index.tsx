@@ -43,7 +43,7 @@ const RadioOption: React.FC<RadioOptionProps> = ({
               },
             ]}
           >
-            {isSelected && <Tick />}
+            {isSelected && <Tick color="#ffffff" />}
           </View>
         </View>
       </View>
@@ -58,7 +58,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: horizontalScale(16),
     paddingVertical: verticalScale(12),
     borderWidth: 2,
-    borderRadius: moderateScale(12),
+    borderRadius: moderateScale(5),
     marginBottom: verticalScale(8),
   },
   iconContainer: {

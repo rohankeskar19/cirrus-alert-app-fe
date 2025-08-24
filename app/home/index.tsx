@@ -28,6 +28,8 @@ import {
 import ChevronRightIcon from "@/assets/icons/chevron-right.svg";
 import NewsIcon from "@/assets/icons/news.svg";
 
+type Row = { _type: "sticky" } | AlertReport;
+
 const HomeTab = () => {
   const textColor = useThemeColor("textColor");
   const backgroundColor = useThemeColor("background");
@@ -80,10 +82,10 @@ const HomeTab = () => {
   };
 
   const renderAlertReport: ListRenderItem<AlertReport> = ({ item, index }) => (
-    <>
+    <View>
       <AlertReportCard alertReport={item} onMarkAsRead={handleMarkAsRead} />
       <View style={[styles.reportDivider, { backgroundColor: dividerGray }]} />
-    </>
+    </View>
   );
 
   const renderShimmerContent = () => (
@@ -112,17 +114,15 @@ const HomeTab = () => {
     </View>
   );
 
-  const renderHeader = () => (
-    <View style={styles.headerContainer}>
-      <View style={styles.greetingSection}>
-        <Text style={[styles.greeting, { color: textColor }]}>
-          {getGreetingMessage()}
-        </Text>
-        <Text style={[styles.subGreeting, { color: placeholderGray }]}>
-          <FormattedMessage id="stay_informed" />
-        </Text>
-      </View>
-
+  const renderStickyHeader = () => (
+    <View
+      style={[
+        styles.headerContainer,
+        {
+          backgroundColor,
+        },
+      ]}
+    >
       <ActiveAlertsAccordion
         alerts={activeAlerts}
         isExpanded={isAlertsExpanded}
@@ -183,39 +183,60 @@ const HomeTab = () => {
     </View>
   );
 
-  const renderContent = () => {
-    if (loading) {
-      return renderShimmerContent();
+  const dataWithSticky: Row[] = [{ _type: "sticky" }, ...alertReports];
+
+  const renderRow: ListRenderItem<Row> = ({ item }) => {
+    if ("_type" in item && item._type === "sticky") {
+      return (
+        <View style={[{ backgroundColor }, styles.stickyWrapper]}>
+          {renderStickyHeader()}
+        </View>
+      );
     }
 
-    return (
-      <FlatList
-        data={alertReports}
-        renderItem={renderAlertReport}
-        keyExtractor={(item) => item.id.toString()}
-        ListEmptyComponent={alertReports.length === 0 ? renderEmptyState : null}
-        contentContainerStyle={[
-          styles.contentContainer,
-          alertReports.length === 0 && styles.emptyContentContainer,
-        ]}
-        showsVerticalScrollIndicator={false}
-        refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={onRefresh}
-            colors={[accentColor]}
-            tintColor={accentColor}
-          />
-        }
-      />
-    );
+    return renderAlertReport({
+      item: item as AlertReport,
+      index: 0,
+      separators: undefined as any,
+    });
   };
-
   return (
     <View style={[styles.screenContainer, { backgroundColor }]}>
       <SafeAreaView style={styles.safeArea}>
-        {renderHeader()}
-        {renderContent()}
+        <FlatList
+          data={dataWithSticky}
+          renderItem={renderRow}
+          keyExtractor={(item, i) =>
+            "_type" in item ? "sticky" : (item as AlertReport).id.toString()
+          }
+          ListHeaderComponent={
+            <View style={styles.greetingSection}>
+              <Text style={[styles.greeting, { color: textColor }]}>
+                {getGreetingMessage()}
+              </Text>
+              <Text style={[styles.subGreeting, { color: placeholderGray }]}>
+                <FormattedMessage id="stay_informed" />
+              </Text>
+            </View>
+          }
+          stickyHeaderIndices={[1]}
+          ListEmptyComponent={
+            alertReports.length === 0 ? renderEmptyState : null
+          }
+          contentContainerStyle={[
+            styles.contentContainer,
+            alertReports.length === 0 && styles.emptyContentContainer,
+          ]}
+          showsVerticalScrollIndicator={false}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={onRefresh}
+              colors={[accentColor]}
+              tintColor={accentColor}
+            />
+          }
+        />
       </SafeAreaView>
     </View>
   );
@@ -227,10 +248,11 @@ const styles = StyleSheet.create({
   },
   safeArea: {
     flex: 1,
+    paddingTop: verticalScale(16),
   },
   headerContainer: {
     paddingHorizontal: horizontalScale(16),
-    marginTop: verticalScale(20),
+    paddingTop: verticalScale(32),
   },
   contentContainer: {
     paddingBottom: verticalScale(80),
@@ -249,7 +271,7 @@ const styles = StyleSheet.create({
   },
   greetingSection: {
     paddingTop: verticalScale(20),
-    paddingBottom: verticalScale(24),
+    paddingHorizontal: horizontalScale(16),
   },
   greeting: {
     fontSize: moderateScale(38),
@@ -447,6 +469,10 @@ const styles = StyleSheet.create({
   reportDivider: {
     width: "100%",
     height: verticalScale(1),
+  },
+  stickyWrapper: {
+    zIndex: 10,
+    elevation: 0,
   },
 });
 

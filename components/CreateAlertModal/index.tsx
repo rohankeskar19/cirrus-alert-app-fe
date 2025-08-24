@@ -66,12 +66,7 @@ const CreateAlertModal = ({
         alert_type: alert?.alert_type || "immediate",
       });
     } else {
-      setFormData({
-        ...formData,
-        alert_text: "",
-        alert_sources: ["news", "youtube", "reddit"],
-        alert_type: "immediate",
-      });
+      resetFormData();
     }
   }, [alert]);
 
@@ -86,6 +81,14 @@ const CreateAlertModal = ({
       default:
         return type;
     }
+  };
+
+  const resetFormData = () => {
+    setFormData({
+      alert_text: "",
+      alert_sources: ["news", "youtube", "reddit"],
+      alert_type: "immediate",
+    });
   };
 
   const renderForm = () => (
@@ -259,7 +262,10 @@ const CreateAlertModal = ({
                 backgroundColor: pressed ? borderColor + "20" : "transparent",
               },
             ]}
-            onPress={onClose}
+            onPress={() => {
+              onClose();
+              resetFormData();
+            }}
           >
             <Text style={[styles.cancelButtonText, { color: textColor }]}>
               <FormattedMessage id="cancel" />
@@ -287,6 +293,7 @@ const CreateAlertModal = ({
                 formData.alert_sources.length > 0
               ) {
                 onSubmit(formData as Alert);
+                resetFormData();
               }
             }}
             disabled={loading}

@@ -7,6 +7,7 @@ import {
   AlertReport,
   fetchActiveAlerts,
   fetchUnreadAlertReports,
+  supabase,
 } from "@/utils/apiUtils";
 import { horizontalScale, moderateScale, verticalScale } from "@/utils/metrics";
 import { getGreetingMessage } from "@/utils/uiUtils";
@@ -46,13 +47,42 @@ const HomeTab = () => {
   const fadeAnim = new Animated.Value(0);
 
   useEffect(() => {
-    fetchData();
+    let subscription: any;
 
-    Animated.timing(fadeAnim, {
-      toValue: 1,
-      duration: 300,
-      useNativeDriver: true,
-    }).start();
+    const setupSubscription = async () => {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+
+      if (!session) return;
+
+      fetchData();
+
+      subscription = supabase
+        .channel("alert-reports-channel")
+        .on(
+          "postgres_changes",
+          {
+            event: "*",
+            schema: "public",
+            table: "alert_reports",
+          },
+          async (payload) => {
+            console.log("Realtime change in alert_reports:", payload);
+
+            fetchData();
+          }
+        )
+        .subscribe();
+    };
+
+    setupSubscription();
+
+    return () => {
+      if (subscription) {
+        supabase.removeChannel(subscription);
+      }
+    };
   }, []);
 
   useFocusEffect(

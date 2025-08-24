@@ -119,5 +119,6 @@
   "delete_alerts": "Delete alerts",
   "delete_alert": "Delete alert",
   "are_you_sure_count_plural": "Are you sure you want to delete {count} alerts?",
-  "are_you_sure_count_singular": "Are you sure you want to delete {count} alert?"
+  "are_you_sure_count_singular": "Are you sure you want to delete {count} alert?",
+  "my_alerts": "My Alerts"
 }

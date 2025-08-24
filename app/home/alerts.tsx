@@ -317,7 +317,7 @@ const AlertsTab = () => {
             </View>
           ) : (
             <Text style={[styles.title, { color: textColor }]}>
-              <FormattedMessage id="alerts" />
+              <FormattedMessage id="my_alerts" />
             </Text>
           )}
         </View>

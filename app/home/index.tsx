@@ -10,8 +10,8 @@ import {
 } from "@/utils/apiUtils";
 import { horizontalScale, moderateScale, verticalScale } from "@/utils/metrics";
 import { getGreetingMessage } from "@/utils/uiUtils";
-import { router } from "expo-router";
-import { useEffect, useState } from "react";
+import { router, useFocusEffect } from "expo-router";
+import { useCallback, useEffect, useState } from "react";
 import { FormattedMessage } from "react-intl";
 import {
   Animated,
@@ -54,6 +54,12 @@ const HomeTab = () => {
       useNativeDriver: true,
     }).start();
   }, []);
+
+  useFocusEffect(
+    useCallback(() => {
+      fetchData();
+    }, [])
+  );
 
   const fetchData = async () => {
     try {

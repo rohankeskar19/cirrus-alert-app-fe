@@ -199,7 +199,7 @@ const AlertCard = ({
 
 const styles = StyleSheet.create({
   alertCard: {
-    marginHorizontal: horizontalScale(20),
+    marginHorizontal: horizontalScale(16),
     marginBottom: verticalScale(16),
     borderRadius: moderateScale(5),
     padding: moderateScale(14),

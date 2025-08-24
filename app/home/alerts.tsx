@@ -33,11 +33,14 @@ import AlertCard from "@/components/AlertCard";
 import FilterModal from "@/components/AlertFilterModal";
 import CreateAlertModal from "@/components/CreateAlertModal";
 import ShimmerAlertCard from "@/components/ShimmerAlertCard";
+import { useFocusEffect } from "expo-router";
 import _ from "lodash";
 import { FormattedMessage, useIntl } from "react-intl";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 dayjs.extend(relativeTime);
+
+type Row = { _type: "sticky" } | Alert;
 
 type FilterStatus = "all" | "active" | "inactive";
 
@@ -73,17 +76,24 @@ const AlertsTab = () => {
   const [appliedFilters, setAppliedFilters] =
     useState<FilterData>(initialFilter);
 
-  // Selection mode state
   const [isSelectionMode, setIsSelectionMode] = useState(false);
   const [selectedAlerts, setSelectedAlerts] = useState<Set<string>>(new Set());
 
   const [modalLoading, setModalLoading] = useState(false);
 
+  const dataWithSticky: Row[] = [{ _type: "sticky" }, ...alerts];
+
   const intl = useIntl();
 
   useEffect(() => {
     loadAlerts();
-  }, []);
+  }, [appliedFilters]);
+
+  useFocusEffect(
+    useCallback(() => {
+      loadAlerts();
+    }, [])
+  );
 
   const loadAlerts = async () => {
     try {
@@ -107,27 +117,6 @@ const AlertsTab = () => {
     await loadAlerts();
     setRefreshing(false);
   }, []);
-
-  const filteredAlerts = alerts.filter((alert) => {
-    const matchesSearch = alert.alert_text
-      .toLowerCase()
-      .includes(searchQuery.toLowerCase());
-
-    const matchesStatus =
-      appliedFilters.status === "all" ||
-      (appliedFilters.status === "active" && alert.is_active) ||
-      (appliedFilters.status === "inactive" && !alert.is_active);
-
-    const matchesFrequency = appliedFilters.alertFrequency.includes(
-      alert.alert_type
-    );
-
-    const matchesSources = alert.alert_sources.some((source) =>
-      appliedFilters.sources.includes(source)
-    );
-
-    return matchesSearch && matchesStatus && matchesFrequency && matchesSources;
-  });
 
   const handleToggleStatus = async (
     alertId: string,
@@ -314,7 +303,7 @@ const AlertsTab = () => {
     />
   );
 
-  const renderHeader = () => (
+  const renderTitleHeader = () => (
     <View style={styles.headerContainer}>
       <View style={styles.titleSection}>
         <View style={styles.titleLeft}>
@@ -341,14 +330,20 @@ const AlertsTab = () => {
           </Pressable>
         )}
       </View>
+    </View>
+  );
 
+  const renderSearchBar = () => (
+    <View
+      style={{
+        paddingHorizontal: horizontalScale(16),
+        paddingTop: verticalScale(16),
+      }}
+    >
       <View
         style={[
           styles.searchContainer,
-          {
-            backgroundColor: inputBg,
-            borderColor,
-          },
+          { backgroundColor: inputBg, borderColor },
         ]}
       >
         <TextInput
@@ -359,10 +354,7 @@ const AlertsTab = () => {
           onChangeText={setSearchQuery}
           selectionColor={accentColor}
         />
-        <Pressable
-          style={({ pressed }) => [{ opacity: pressed ? 0.6 : 1 }]}
-          onPress={() => setFilterModalVisible(true)}
-        >
+        <Pressable onPress={() => setFilterModalVisible(true)}>
           <FilterIcon width={24} height={24} color={placeholderGray} />
           {!_.isEqual(appliedFilters, initialFilter) && (
             <View
@@ -373,6 +365,23 @@ const AlertsTab = () => {
       </View>
     </View>
   );
+
+  const renderRow: ListRenderItem<Row> = ({ item }) => {
+    if ("_type" in item && item._type === "sticky") {
+      return (
+        <View
+          style={[styles.stickyWrapper, { backgroundColor: backgroundColor }]}
+        >
+          {renderSearchBar()}
+        </View>
+      );
+    }
+    return renderAlertItem({
+      item: item as Alert,
+      index: 0,
+      separators: {} as any,
+    });
+  };
 
   const renderShimmerContent = () => (
     <View style={styles.shimmerContainer}>
@@ -401,37 +410,34 @@ const AlertsTab = () => {
   return (
     <View style={[styles.container, { backgroundColor }]}>
       <SafeAreaView style={styles.safeArea}>
-        {loading ? (
-          <>
-            {renderHeader()}
-            {renderShimmerContent()}
-          </>
-        ) : (
-          <>
-            {renderHeader()}
-            <FlatList
-              data={filteredAlerts}
-              renderItem={renderAlertItem}
-              keyExtractor={(item) => item.id}
-              ListEmptyComponent={
-                filteredAlerts.length === 0 ? renderEmptyState : null
-              }
-              contentContainerStyle={[
-                styles.contentContainer,
-                filteredAlerts.length === 0 && styles.emptyContentContainer,
-              ]}
-              showsVerticalScrollIndicator={false}
-              refreshControl={
-                <RefreshControl
-                  refreshing={refreshing}
-                  onRefresh={onRefresh}
-                  colors={[accentColor]}
-                  tintColor={accentColor}
-                />
-              }
+        <FlatList
+          data={dataWithSticky}
+          renderItem={renderRow}
+          keyExtractor={(item, i) =>
+            "_type" in item ? "sticky" : (item as Alert).id
+          }
+          ListHeaderComponent={renderTitleHeader}
+          stickyHeaderIndices={[1]}
+          ListEmptyComponent={
+            alerts.length === 0
+              ? loading
+                ? renderShimmerContent
+                : renderEmptyState
+              : null
+          }
+          contentContainerStyle={[
+            styles.contentContainer,
+            alerts.length === 0 && styles.emptyContentContainer,
+          ]}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={onRefresh}
+              colors={[accentColor]}
+              tintColor={accentColor}
             />
-          </>
-        )}
+          }
+        />
       </SafeAreaView>
 
       <CreateAlertModal
@@ -484,7 +490,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   contentContainer: {
-    paddingBottom: verticalScale(120),
+    paddingBottom: verticalScale(70),
   },
   emptyContentContainer: {
     flexGrow: 1,
@@ -492,14 +498,12 @@ const styles = StyleSheet.create({
   headerContainer: {
     paddingHorizontal: horizontalScale(20),
     paddingTop: verticalScale(20),
-    paddingBottom: verticalScale(20),
   },
   titleSection: {
     height: verticalScale(60),
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: verticalScale(22),
   },
   titleLeft: {
     flexDirection: "row",
@@ -592,6 +596,10 @@ const styles = StyleSheet.create({
     position: "absolute",
     right: 0,
     top: -2,
+  },
+  stickyWrapper: {
+    zIndex: 10,
+    elevation: 0,
   },
 });
 

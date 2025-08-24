@@ -47,11 +47,6 @@ const ViewReportScreen = () => {
     router.back();
   };
 
-  console.log(
-    "Matches ",
-    matches.map((m: any) => m.published_at)
-  );
-
   return (
     <SafeAreaView style={[styles.container, { backgroundColor }]}>
       <View style={[styles.header, { borderBottomColor: borderColor }]}>
@@ -70,11 +65,15 @@ const ViewReportScreen = () => {
         <View style={styles.imageContainer}>
           <Image source={{ uri: featuredImage }} style={styles.featuredImage} />
           {featuredSource && (
-            <View
+            <TouchableOpacity
               style={[
                 styles.sourceCredit,
                 { backgroundColor: "rgba(0,0,0,0.6)" },
               ]}
+              onPress={() =>
+                featuredSource.url && Linking.openURL(featuredSource.url)
+              }
+              activeOpacity={1}
             >
               <Image
                 source={{
@@ -88,7 +87,7 @@ const ViewReportScreen = () => {
                 {featuredSource.domain}
               </Text>
               <ArrowTopRight />
-            </View>
+            </TouchableOpacity>
           )}
         </View>
 

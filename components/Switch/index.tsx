@@ -83,7 +83,7 @@ const CirrusSwitch = ({
           style={{
             width: config.thumbSize,
             height: config.thumbSize,
-            borderRadius: moderateScale(5),
+            borderRadius: moderateScale(3),
             backgroundColor: thumbColor,
             transform: [{ translateX: thumbTranslateX }],
           }}

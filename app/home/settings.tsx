@@ -534,7 +534,7 @@ const styles = StyleSheet.create({
   },
   settingsItemTitle: {
     fontSize: moderateScale(16),
-    fontFamily: "Inter-SemiBold",
+    fontFamily: "Inter-Medium",
     lineHeight: moderateScale(20),
   },
   settingsItemSubtitle: {

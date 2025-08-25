@@ -98,8 +98,6 @@ const ViewAllReportsScreen = () => {
       await loadReports(true);
     } catch (error) {
       console.error("Error loading initial data:", error);
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -131,6 +129,7 @@ const ViewAllReportsScreen = () => {
         setHasMore(
           data.length === ITEMS_PER_PAGE && offset + data.length < count
         );
+        setLoading(false);
       } catch (e) {
         console.error("Error loading reports:", e);
       } finally {
@@ -289,28 +288,25 @@ const ViewAllReportsScreen = () => {
     <View style={[styles.container, { backgroundColor }]}>
       <SafeAreaView style={styles.safeArea}>
         {renderHeader()}
-        {loading ? (
-          renderShimmerContent()
-        ) : (
-          <FlatList
-            data={reports}
-            renderItem={renderReportItem}
-            keyExtractor={(item) => item.id}
-            ListFooterComponent={renderFooter}
-            contentContainerStyle={styles.contentContainer}
-            showsVerticalScrollIndicator={false}
-            refreshControl={
-              <RefreshControl
-                refreshing={refreshing}
-                onRefresh={onRefresh}
-                colors={[accentColor]}
-                tintColor={accentColor}
-              />
-            }
-            onEndReached={loadMore}
-            onEndReachedThreshold={0.5}
-          />
-        )}
+        <FlatList
+          data={reports}
+          renderItem={renderReportItem}
+          keyExtractor={(item) => item.id}
+          ListFooterComponent={renderFooter}
+          contentContainerStyle={styles.contentContainer}
+          showsVerticalScrollIndicator={false}
+          ListEmptyComponent={loading ? renderShimmerContent() : null}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={onRefresh}
+              colors={[accentColor]}
+              tintColor={accentColor}
+            />
+          }
+          onEndReached={loadMore}
+          onEndReachedThreshold={0.5}
+        />
       </SafeAreaView>
 
       <AlertReportFilterModal

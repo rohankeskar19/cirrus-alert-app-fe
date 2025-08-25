@@ -98,6 +98,7 @@ const AlertsTab = () => {
   const loadAlerts = async () => {
     try {
       setLoading(true);
+
       const alertsData = await fetchAllUserAlerts({
         status: appliedFilters.status,
         alertFrequency: appliedFilters.alertFrequency,
@@ -105,10 +106,9 @@ const AlertsTab = () => {
         searchQuery,
       });
       setAlerts(alertsData);
+      setLoading(false);
     } catch (error) {
       console.error("Error loading alerts:", error);
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -419,11 +419,7 @@ const AlertsTab = () => {
           ListHeaderComponent={renderTitleHeader}
           stickyHeaderIndices={[1]}
           ListEmptyComponent={
-            alerts.length === 0
-              ? loading
-                ? renderShimmerContent
-                : renderEmptyState
-              : null
+            loading ? renderShimmerContent() : renderEmptyState()
           }
           contentContainerStyle={[
             styles.contentContainer,

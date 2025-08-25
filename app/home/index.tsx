@@ -127,13 +127,22 @@ const HomeTab = () => {
   );
 
   const renderShimmerContent = () => (
-    <View style={styles.shimmerContainer}>
-      <ShimmerAlertReportCard />
-      <View style={[styles.reportDivider, { backgroundColor: dividerGray }]} />
-      <ShimmerAlertReportCard />
-      <View style={[styles.reportDivider, { backgroundColor: dividerGray }]} />
-      <ShimmerAlertReportCard />
-    </View>
+    <>
+      <View style={[{ backgroundColor }, styles.stickyWrapper]}>
+        {renderStickyHeader()}
+      </View>
+      <View style={styles.shimmerContainer}>
+        <ShimmerAlertReportCard />
+        <View
+          style={[styles.reportDivider, { backgroundColor: dividerGray }]}
+        />
+        <ShimmerAlertReportCard />
+        <View
+          style={[styles.reportDivider, { backgroundColor: dividerGray }]}
+        />
+        <ShimmerAlertReportCard />
+      </View>
+    </>
   );
 
   const openViewAll = () => {
@@ -141,15 +150,20 @@ const HomeTab = () => {
   };
 
   const renderEmptyState = () => (
-    <View style={styles.emptyState}>
-      <NewsIcon width={56} height={56} color={placeholderGray} />
-      <Text style={[styles.emptyStateTitle, { color: textColor }]}>
-        <FormattedMessage id="no_new_matches" />
-      </Text>
-      <Text style={[styles.emptyStateSubtitle, { color: placeholderGray }]}>
-        <FormattedMessage id="we_will_notify" />
-      </Text>
-    </View>
+    <>
+      <View style={[{ backgroundColor }, styles.stickyWrapper]}>
+        {renderStickyHeader()}
+      </View>
+      <View style={styles.emptyState}>
+        <NewsIcon width={56} height={56} color={placeholderGray} />
+        <Text style={[styles.emptyStateTitle, { color: textColor }]}>
+          <FormattedMessage id="no_new_matches" />
+        </Text>
+        <Text style={[styles.emptyStateSubtitle, { color: placeholderGray }]}>
+          <FormattedMessage id="we_will_notify" />
+        </Text>
+      </View>
+    </>
   );
 
   const renderStickyHeader = () => (
@@ -221,7 +235,9 @@ const HomeTab = () => {
     </View>
   );
 
-  const dataWithSticky: Row[] = [{ _type: "sticky" }, ...alertReports];
+  const dataWithSticky: Row[] = alertReports.length
+    ? [{ _type: "sticky" }, ...alertReports]
+    : alertReports;
 
   const renderRow: ListRenderItem<Row> = ({ item }) => {
     if ("_type" in item && item._type === "sticky") {
@@ -259,7 +275,7 @@ const HomeTab = () => {
           }
           stickyHeaderIndices={[1]}
           ListEmptyComponent={
-            alertReports.length === 0 ? renderEmptyState : null
+            loading ? renderShimmerContent() : renderEmptyState()
           }
           contentContainerStyle={[
             styles.contentContainer,

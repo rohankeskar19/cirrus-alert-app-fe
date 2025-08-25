@@ -1,4 +1,3 @@
-// app/(tabs)/settings.tsx - Main Settings Tab
 import { ThemeContext } from "@/app/_layout";
 import {
   deleteUserAccount,
@@ -28,9 +27,11 @@ import MoonIcon from "@/assets/icons/moon.svg";
 import SignoutIcon from "@/assets/icons/signout.svg";
 import SliderIcon from "@/assets/icons/slider.svg";
 import SunIcon from "@/assets/icons/sun.svg";
+import Tick from "@/assets/icons/tick.svg";
 import { useThemeColor } from "@/hooks/useThemeColor";
 import { horizontalScale, moderateScale, verticalScale } from "@/utils/metrics";
 import { useRouter } from "expo-router";
+import { FormattedMessage, useIntl } from "react-intl";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 const SettingsTab = () => {
@@ -43,6 +44,8 @@ const SettingsTab = () => {
   const placeholderGray = useThemeColor("placeholderGray");
   const secondaryGray = useThemeColor("secondaryGray");
   const redColor = useThemeColor("redColor");
+
+  const intl = useIntl();
 
   const [user, setUser] = useState<any>(null);
   const [subscription, setSubscription] = useState<any>(null);
@@ -73,19 +76,23 @@ const SettingsTab = () => {
   };
 
   const handleLogout = () => {
-    Alert.alert("Sign Out", "Are you sure you want to sign out?", [
-      { text: "Cancel", style: "cancel" },
-      {
-        text: "Sign Out",
-        style: "destructive",
-        onPress: async () => {
-          const success = await signOutUser();
-          if (success) {
-            router.replace("/welcome");
-          }
+    Alert.alert(
+      intl.formatMessage({ id: "sign_out" }),
+      intl.formatMessage({ id: "logout_confirmation" }),
+      [
+        { text: intl.formatMessage({ id: "cancel" }), style: "cancel" },
+        {
+          text: intl.formatMessage({ id: "sign_out" }),
+          style: "destructive",
+          onPress: async () => {
+            const success = await signOutUser();
+            if (success) {
+              router.replace("/welcome");
+            }
+          },
         },
-      },
-    ]);
+      ]
+    );
   };
 
   const handleDeleteAccount = () => {
@@ -199,11 +206,11 @@ const SettingsTab = () => {
       <SafeAreaView style={[styles.modalContainer, { backgroundColor }]}>
         <View style={[styles.modalHeader]}>
           <Text style={[styles.modalTitle, { color: textColor }]}>
-            Choose Theme
+            <FormattedMessage id="choose_theme" />
           </Text>
           <TouchableOpacity onPress={() => setShowThemeModal(false)}>
             <Text style={[styles.modalCloseText, { color: accentColor }]}>
-              Done
+              <FormattedMessage id="done" />
             </Text>
           </TouchableOpacity>
         </View>
@@ -212,17 +219,17 @@ const SettingsTab = () => {
           {[
             {
               key: THEMES.LIGHT,
-              label: "Light",
+              label: intl.formatMessage({ id: "light" }),
               icon: <SunIcon width={24} height={24} color={accentColor} />,
             },
             {
               key: THEMES.DARK,
-              label: "Dark",
+              label: intl.formatMessage({ id: "dark" }),
               icon: <MoonIcon width={24} height={24} color={accentColor} />,
             },
             {
               key: THEMES.AUTO,
-              label: "Auto",
+              label: intl.formatMessage({ id: "auto" }),
               icon: <AutoIcon width={24} height={24} color={accentColor} />,
             },
           ].map((option) => (
@@ -252,9 +259,7 @@ const SettingsTab = () => {
                 <View
                   style={[styles.checkmark, { backgroundColor: accentColor }]}
                 >
-                  <Text style={[styles.checkmarkText, { color: "#ffffff" }]}>
-                    ✓
-                  </Text>
+                  <Tick width={16} height={16} color={"#ffffff"} />
                 </View>
               )}
             </TouchableOpacity>
@@ -278,13 +283,11 @@ const SettingsTab = () => {
           </View>
 
           <Text style={[styles.deleteModalTitle, { color: textColor }]}>
-            Delete Account
+            <FormattedMessage id="delete_account" />
           </Text>
 
           <Text style={[styles.deleteModalMessage, { color: placeholderGray }]}>
-            This will permanently delete your account and all associated data
-            including alerts, reports, and preferences. This action cannot be
-            undone.
+            <FormattedMessage id="delete_account_warning" />
           </Text>
 
           <View style={styles.deleteModalButtons}>
@@ -299,7 +302,7 @@ const SettingsTab = () => {
               activeOpacity={1}
             >
               <Text style={[styles.cancelButtonText, { color: textColor }]}>
-                Cancel
+                <FormattedMessage id="cancel" />
               </Text>
             </TouchableOpacity>
 
@@ -317,7 +320,7 @@ const SettingsTab = () => {
                 <ActivityIndicator size="small" color="#ffffff" />
               ) : (
                 <Text style={[styles.deleteButtonText, { color: "#ffffff" }]}>
-                  Delete Account
+                  <FormattedMessage id="delete_account" />
                 </Text>
               )}
             </TouchableOpacity>
@@ -327,17 +330,6 @@ const SettingsTab = () => {
     </Modal>
   );
 
-  if (loading) {
-    return (
-      <View style={[styles.loadingContainer, { backgroundColor }]}>
-        <ActivityIndicator size="large" color={accentColor} />
-        <Text style={[styles.loadingText, { color: placeholderGray }]}>
-          Loading settings...
-        </Text>
-      </View>
-    );
-  }
-
   return (
     <View style={[styles.container, { backgroundColor }]}>
       <SafeAreaView style={styles.safeArea}>
@@ -345,10 +337,10 @@ const SettingsTab = () => {
           <View style={styles.headerLeft}>
             <View>
               <Text style={[styles.headerTitle, { color: textColor }]}>
-                Settings
+                <FormattedMessage id="settings" />
               </Text>
               <Text style={[styles.headerSubtitle, { color: placeholderGray }]}>
-                Manage your account and preferences
+                <FormattedMessage id="manage_your_account" />
               </Text>
             </View>
           </View>
@@ -359,19 +351,19 @@ const SettingsTab = () => {
           showsVerticalScrollIndicator={false}
         >
           {renderSettingsSection(
-            "Account",
+            intl.formatMessage({ id: "account" }),
             <>
               {renderSettingsItem(
                 <LockIcon width={20} height={20} color={secondaryGray} />,
-                "Change Password",
-                "Update your account password",
+                intl.formatMessage({ id: "change_password" }),
+                intl.formatMessage({ id: "change_password_subtitle" }),
                 () => router.push("/forgot-password")
               )}
             </>
           )}
 
           {renderSettingsSection(
-            "Subscription",
+            intl.formatMessage({ id: "subscription" }),
             renderSettingsItem(
               <CreditCardIcon width={20} height={20} color={secondaryGray} />,
               subscription?.plan === "free"
@@ -408,10 +400,10 @@ const SettingsTab = () => {
           )}
 
           {renderSettingsSection(
-            "Preferences",
+            intl.formatMessage({ id: "preferences" }),
             renderSettingsItem(
               <SliderIcon width={20} height={20} color={secondaryGray} />,
-              "Theme",
+              intl.formatMessage({ id: "theme" }),
               `Change app theme`,
               () => setShowThemeModal(true),
               getThemeIcon(theme)
@@ -419,12 +411,12 @@ const SettingsTab = () => {
           )}
 
           {renderSettingsSection(
-            "Danger Zone",
+            intl.formatMessage({ id: "danger_zone" }),
             <>
               {renderSettingsItem(
                 <SignoutIcon width={20} height={20} color={redColor} />,
-                "Sign Out",
-                "Sign out of your account",
+                intl.formatMessage({ id: "sign_out" }),
+                intl.formatMessage({ id: "sign_out_account" }),
                 handleLogout,
                 undefined,
                 true
@@ -432,8 +424,8 @@ const SettingsTab = () => {
 
               {renderSettingsItem(
                 <DeleteAccountIcon width={20} height={20} color={redColor} />,
-                "Delete Account",
-                "Permanently delete your account and data",
+                intl.formatMessage({ id: "delete_account" }),
+                intl.formatMessage({ id: "delete_account_subtitle" }),
                 handleDeleteAccount,
                 undefined,
                 true
@@ -443,10 +435,10 @@ const SettingsTab = () => {
 
           <View style={styles.appInfo}>
             <Text style={[styles.appInfoText, { color: placeholderGray }]}>
-              Cirrus v1.0.0
+              <FormattedMessage id="app_version" />
             </Text>
             <Text style={[styles.appInfoText, { color: placeholderGray }]}>
-              Built with ❤️ for staying informed
+              <FormattedMessage id="built_with_love" />
             </Text>
           </View>
         </ScrollView>
@@ -603,7 +595,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
     paddingHorizontal: horizontalScale(16),
-    paddingVertical: verticalScale(16),
+    paddingVertical: verticalScale(12),
     borderRadius: moderateScale(5),
     borderWidth: 1,
   },

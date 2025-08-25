@@ -281,7 +281,7 @@ export const fetchAllAlertReports = async (): Promise<AlertReport[]> => {
 
   const { data, error } = await supabase
     .from("alert_reports")
-    .select("*, alerts(*)")
+    .select("*, alerts!inner(*)")
     .eq("alerts.user_id", session.user.id)
     .order("generated_at", { ascending: false });
 
@@ -302,7 +302,7 @@ export const fetchUnreadAlertReports = async (): Promise<AlertReport[]> => {
 
   const { data, error } = await supabase
     .from("alert_reports")
-    .select("*, alerts(*)")
+    .select("*, alerts!inner(*)")
     .eq("is_read", false)
     .eq("alerts.user_id", session.user.id)
     .order("generated_at", { ascending: false });
@@ -341,8 +341,8 @@ export const fetchActiveAlerts = async (): Promise<Alert[]> => {
   const { data, error } = await supabase
     .from("alerts")
     .select("*")
-    .eq("user_id", session.user.id)
     .eq("is_active", true)
+    .eq("user_id", session.user.id)
     .order("created_at", { ascending: false });
 
   if (error) {
@@ -377,7 +377,7 @@ export const fetchFilteredAlertReports = async (
 
   let query = supabase
     .from("alert_reports")
-    .select("*, alerts(*)", { count: "exact" })
+    .select("*, alerts!inner(*)")
     .eq("alerts.user_id", session.user.id)
     .order("generated_at", { ascending: false })
     .range(offset, offset + limit - 1);

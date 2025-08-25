@@ -235,9 +235,7 @@ const HomeTab = () => {
     </View>
   );
 
-  const dataWithSticky: Row[] = alertReports.length
-    ? [{ _type: "sticky" }, ...alertReports]
-    : alertReports;
+  const dataWithSticky: Row[] = [{ _type: "sticky" }, ...alertReports];
 
   const renderRow: ListRenderItem<Row> = ({ item }) => {
     if ("_type" in item && item._type === "sticky") {

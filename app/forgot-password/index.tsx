@@ -29,6 +29,7 @@ const ForgotPasswordScreen = () => {
 
   const backgroundColor = useThemeColor("background");
   const textColor = useThemeColor("textColor");
+  const secondaryGray = useThemeColor("secondaryGray");
 
   const intl = useIntl();
 
@@ -75,7 +76,7 @@ const ForgotPasswordScreen = () => {
             onPress={() => router.back()}
             activeOpacity={1}
           >
-            <ChevronLeft />
+            <ChevronLeft color={secondaryGray} />
           </TouchableOpacity>
           <View style={styles.contentContainer}>
             <Text style={[{ color: textColor }, styles.headerText]}>

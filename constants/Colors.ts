@@ -76,6 +76,6 @@ export const Colors = {
     tabBackground: "#575656",
     dividerGray: "#545252",
     timeSinceGray: "#9B9999",
-    markAsReadGray: "#636363",
+    markAsReadGray: "#8c8c8c",
   },
 };

@@ -207,7 +207,7 @@ const ViewAllReportsScreen = () => {
           ]}
           onPress={() => router.back()}
         >
-          <BackIcon width={18} height={18} color={textColor} />
+          <BackIcon width={18} height={18} color={secondaryGray} />
         </Pressable>
 
         <Text style={[styles.headerTitle, { color: textColor }]}>

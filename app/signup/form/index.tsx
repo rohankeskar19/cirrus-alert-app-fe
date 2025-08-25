@@ -12,14 +12,12 @@ import {
 import { router } from "expo-router";
 import { get } from "lodash";
 import { FormattedMessage, useIntl } from "react-intl";
-import { useSelector } from "react-redux";
 import validator from "validator";
 
 import ChevronLeft from "@/assets/icons/chevron-left.svg";
 import Button from "@/components/Button";
 import Input from "@/components/Input";
 import { useThemeColor } from "@/hooks/useThemeColor";
-import { selectUserProfile } from "@/slices/onboarding";
 import { signupUser } from "@/utils/apiUtils";
 import { horizontalScale, moderateScale, verticalScale } from "@/utils/metrics";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -34,9 +32,8 @@ const SignupFormScreen = () => {
   const [confirmPasswordError, setConfirmPasswordError] = useState("");
 
   const backgroundColor = useThemeColor("background");
-  const onBackground = useThemeColor("onBackground");
 
-  const userProfile = useSelector(selectUserProfile);
+  const secondaryGray = useThemeColor("secondaryGray");
 
   const intl = useIntl();
 
@@ -70,7 +67,7 @@ const SignupFormScreen = () => {
       if (validateSignupData()) {
         setLoading(true);
         // Sign up logic here
-        await signupUser(email, password, userProfile);
+        await signupUser(email, password);
 
         router.push("/login");
 
@@ -97,7 +94,7 @@ const SignupFormScreen = () => {
             onPress={() => router.back()}
             activeOpacity={1}
           >
-            <ChevronLeft />
+            <ChevronLeft color={secondaryGray} />
           </TouchableOpacity>
           <View style={styles.formContainer}>
             <Input

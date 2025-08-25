@@ -21,14 +21,13 @@ import {
 
 import AutoIcon from "@/assets/icons/auto.svg";
 import ChevronRightIcon from "@/assets/icons/chevron-right.svg";
-import CrownIcon from "@/assets/icons/crown.svg";
-import DeleteIcon from "@/assets/icons/delete.svg";
+import CreditCardIcon from "@/assets/icons/credit-card.svg";
+import DeleteAccountIcon from "@/assets/icons/delete-account-icon.svg";
 import LockIcon from "@/assets/icons/lock.svg";
-import LogoutIcon from "@/assets/icons/logout.svg";
 import MoonIcon from "@/assets/icons/moon.svg";
+import SignoutIcon from "@/assets/icons/signout.svg";
+import SliderIcon from "@/assets/icons/slider.svg";
 import SunIcon from "@/assets/icons/sun.svg";
-import ThemeIcon from "@/assets/icons/theme.svg";
-import UserIcon from "@/assets/icons/user.svg";
 import { useThemeColor } from "@/hooks/useThemeColor";
 import { horizontalScale, moderateScale, verticalScale } from "@/utils/metrics";
 import { useRouter } from "expo-router";
@@ -42,6 +41,8 @@ const SettingsTab = () => {
   const accentColor = useThemeColor("accentColor");
   const borderColor = useThemeColor("inputBorder");
   const placeholderGray = useThemeColor("placeholderGray");
+  const secondaryGray = useThemeColor("secondaryGray");
+  const redColor = useThemeColor("redColor");
 
   const [user, setUser] = useState<any>(null);
   const [subscription, setSubscription] = useState<any>(null);
@@ -122,19 +123,6 @@ const SettingsTab = () => {
     }
   };
 
-  const getThemeLabel = (themeType: string) => {
-    switch (themeType) {
-      case THEMES.LIGHT:
-        return "Light";
-      case THEMES.DARK:
-        return "Dark";
-      case THEMES.AUTO:
-        return "Auto";
-      default:
-        return "Light";
-    }
-  };
-
   const getSubscriptionBadgeColor = (status: string) => {
     switch (status) {
       case "active":
@@ -160,7 +148,7 @@ const SettingsTab = () => {
   );
 
   const renderSettingsItem = (
-    icon: React.ReactNode,
+    icon: any,
     title: string,
     subtitle?: string,
     onPress?: () => void,
@@ -168,28 +156,17 @@ const SettingsTab = () => {
     danger?: boolean
   ) => (
     <TouchableOpacity
-      style={[styles.settingsItem, { borderBottomColor: borderColor }]}
+      style={styles.settingsItem}
       onPress={onPress}
-      activeOpacity={onPress ? 0.7 : 1}
+      activeOpacity={1}
     >
       <View style={styles.settingsItemLeft}>
-        <View
-          style={[
-            styles.settingsItemIcon,
-            {
-              backgroundColor: danger
-                ? "rgba(239, 68, 68, 0.1)"
-                : `${accentColor}20`,
-            },
-          ]}
-        >
-          {icon}
-        </View>
+        {icon && <View style={[styles.settingsItemIcon]}>{icon}</View>}
         <View style={styles.settingsItemText}>
           <Text
             style={[
               styles.settingsItemTitle,
-              { color: danger ? "#EF4444" : textColor },
+              { color: danger ? redColor : textColor },
             ]}
           >
             {title}
@@ -206,7 +183,7 @@ const SettingsTab = () => {
 
       <View style={styles.settingsItemRight}>
         {rightComponent}
-        {onPress && (
+        {onPress && !danger && (
           <ChevronRightIcon width={16} height={16} color={placeholderGray} />
         )}
       </View>
@@ -265,14 +242,7 @@ const SettingsTab = () => {
               }}
             >
               <View style={styles.themeOptionLeft}>
-                <View
-                  style={[
-                    styles.themeOptionIcon,
-                    { backgroundColor: `${accentColor}20` },
-                  ]}
-                >
-                  {option.icon}
-                </View>
+                <View style={[styles.themeOptionIcon]}>{option.icon}</View>
                 <Text style={[styles.themeOptionText, { color: textColor }]}>
                   {option.label}
                 </Text>
@@ -304,7 +274,7 @@ const SettingsTab = () => {
               { backgroundColor: "rgba(239, 68, 68, 0.1)" },
             ]}
           >
-            <DeleteIcon width={32} height={32} color="#EF4444" />
+            <DeleteAccountIcon width={32} height={32} color={redColor} />
           </View>
 
           <Text style={[styles.deleteModalTitle, { color: textColor }]}>
@@ -326,6 +296,7 @@ const SettingsTab = () => {
               ]}
               onPress={() => setShowDeleteModal(false)}
               disabled={deleteLoading}
+              activeOpacity={1}
             >
               <Text style={[styles.cancelButtonText, { color: textColor }]}>
                 Cancel
@@ -333,9 +304,14 @@ const SettingsTab = () => {
             </TouchableOpacity>
 
             <TouchableOpacity
-              style={[styles.deleteModalButton, styles.deleteButton]}
+              style={[
+                styles.deleteModalButton,
+                styles.deleteButton,
+                { backgroundColor: redColor },
+              ]}
               onPress={confirmDeleteAccount}
               disabled={deleteLoading}
+              activeOpacity={1}
             >
               {deleteLoading ? (
                 <ActivityIndicator size="small" color="#ffffff" />
@@ -365,7 +341,6 @@ const SettingsTab = () => {
   return (
     <View style={[styles.container, { backgroundColor }]}>
       <SafeAreaView style={styles.safeArea}>
-        {/* Header */}
         <View style={styles.header}>
           <View style={styles.headerLeft}>
             <View>
@@ -383,18 +358,11 @@ const SettingsTab = () => {
           style={styles.scrollContainer}
           showsVerticalScrollIndicator={false}
         >
-          {/* Account Section */}
           {renderSettingsSection(
             "Account",
             <>
               {renderSettingsItem(
-                <UserIcon width={20} height={20} color={accentColor} />,
-                user?.email || "Account",
-                "Manage your profile and account details"
-              )}
-
-              {renderSettingsItem(
-                <LockIcon width={20} height={20} color={accentColor} />,
+                <LockIcon width={20} height={20} color={secondaryGray} />,
                 "Change Password",
                 "Update your account password",
                 () => router.push("/forgot-password")
@@ -402,11 +370,10 @@ const SettingsTab = () => {
             </>
           )}
 
-          {/* Subscription Section */}
           {renderSettingsSection(
             "Subscription",
             renderSettingsItem(
-              <CrownIcon width={20} height={20} color={accentColor} />,
+              <CreditCardIcon width={20} height={20} color={secondaryGray} />,
               subscription?.plan === "free"
                 ? "Upgrade to Pro"
                 : "Manage Subscription",
@@ -414,7 +381,6 @@ const SettingsTab = () => {
                 ? "Unlock unlimited alerts and premium features"
                 : `${subscription?.plan} plan • ${subscription?.status}`,
               () => {
-                // Navigate to subscription management
                 Alert.alert(
                   "Subscription",
                   "Subscription management coming soon!"
@@ -441,24 +407,22 @@ const SettingsTab = () => {
             )
           )}
 
-          {/* Preferences Section */}
           {renderSettingsSection(
             "Preferences",
             renderSettingsItem(
-              <ThemeIcon width={20} height={20} color={accentColor} />,
+              <SliderIcon width={20} height={20} color={secondaryGray} />,
               "Theme",
-              `Currently using ${getThemeLabel(theme)} theme`,
+              `Change app theme`,
               () => setShowThemeModal(true),
               getThemeIcon(theme)
             )
           )}
 
-          {/* Danger Zone */}
           {renderSettingsSection(
             "Danger Zone",
             <>
               {renderSettingsItem(
-                <LogoutIcon width={20} height={20} color="#EF4444" />,
+                <SignoutIcon width={20} height={20} color={redColor} />,
                 "Sign Out",
                 "Sign out of your account",
                 handleLogout,
@@ -467,7 +431,7 @@ const SettingsTab = () => {
               )}
 
               {renderSettingsItem(
-                <DeleteIcon width={20} height={20} color="#EF4444" />,
+                <DeleteAccountIcon width={20} height={20} color={redColor} />,
                 "Delete Account",
                 "Permanently delete your account and data",
                 handleDeleteAccount,
@@ -477,7 +441,6 @@ const SettingsTab = () => {
             </>
           )}
 
-          {/* App Info */}
           <View style={styles.appInfo}>
             <Text style={[styles.appInfoText, { color: placeholderGray }]}>
               Cirrus v1.0.0
@@ -497,11 +460,10 @@ const SettingsTab = () => {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    paddingBottom: verticalScale(50),
+    flexGrow: 1,
   },
   safeArea: {
-    flex: 1,
+    flexGrow: 1,
   },
   header: {
     flexDirection: "row",
@@ -519,51 +481,48 @@ const styles = StyleSheet.create({
   headerIcon: {
     width: moderateScale(48),
     height: moderateScale(48),
-    borderRadius: moderateScale(24),
+    borderRadius: moderateScale(5),
     alignItems: "center",
     justifyContent: "center",
     marginRight: horizontalScale(12),
   },
   headerTitle: {
-    fontSize: moderateScale(32),
+    fontSize: moderateScale(38),
     fontFamily: "Inter-Bold",
-    lineHeight: moderateScale(38),
     letterSpacing: -0.5,
   },
   headerSubtitle: {
     fontSize: moderateScale(16),
     fontFamily: "Inter-Medium",
     lineHeight: moderateScale(20),
-    marginTop: verticalScale(4),
+    marginTop: verticalScale(12),
     opacity: 0.8,
   },
   scrollContainer: {
-    flex: 1,
-    paddingHorizontal: horizontalScale(16),
+    flexGrow: 1,
+    display: "flex",
+    flexDirection: "column",
   },
   section: {
-    marginBottom: verticalScale(24),
+    marginBottom: verticalScale(16),
   },
   sectionTitle: {
-    fontSize: moderateScale(13),
+    fontSize: moderateScale(16),
     fontFamily: "Inter-SemiBold",
-    textTransform: "uppercase",
-    letterSpacing: 0.5,
     marginBottom: verticalScale(8),
-    paddingHorizontal: horizontalScale(4),
+    paddingHorizontal: horizontalScale(16),
+    paddingVertical: verticalScale(8),
   },
   sectionContent: {
-    borderRadius: moderateScale(16),
-    borderWidth: 1,
+    borderRadius: moderateScale(5),
     overflow: "hidden",
+    gap: verticalScale(24),
   },
   settingsItem: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
     paddingHorizontal: horizontalScale(16),
-    paddingVertical: verticalScale(16),
-    borderBottomWidth: 1,
   },
   settingsItemLeft: {
     flexDirection: "row",
@@ -627,8 +586,9 @@ const styles = StyleSheet.create({
     paddingVertical: verticalScale(16),
   },
   modalTitle: {
-    fontSize: moderateScale(18),
+    fontSize: moderateScale(28),
     fontFamily: "Inter-SemiBold",
+    letterSpacing: -0.3,
   },
   modalCloseText: {
     fontSize: moderateScale(16),
@@ -644,7 +604,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     paddingHorizontal: horizontalScale(16),
     paddingVertical: verticalScale(16),
-    borderRadius: moderateScale(12),
+    borderRadius: moderateScale(5),
     borderWidth: 1,
   },
   themeOptionLeft: {
@@ -682,7 +642,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: horizontalScale(32),
   },
   deleteModalContent: {
-    borderRadius: moderateScale(16),
+    borderRadius: moderateScale(5),
     padding: horizontalScale(24),
     alignItems: "center",
     width: "100%",
@@ -717,7 +677,7 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingVertical: verticalScale(12),
     paddingHorizontal: horizontalScale(12),
-    borderRadius: moderateScale(100),
+    borderRadius: moderateScale(5),
     alignItems: "center",
     justifyContent: "center",
   },
@@ -738,6 +698,7 @@ const styles = StyleSheet.create({
   appInfo: {
     alignItems: "center",
     paddingVertical: verticalScale(24),
+    marginTop: "auto",
     marginBottom: verticalScale(20),
   },
   appInfoText: {
@@ -745,7 +706,6 @@ const styles = StyleSheet.create({
     fontFamily: "Inter-Regular",
     lineHeight: moderateScale(16),
   },
-  // Change Password Screen Styles
   content: {
     flex: 1,
     paddingHorizontal: horizontalScale(16),
@@ -802,12 +762,6 @@ const styles = StyleSheet.create({
     fontSize: moderateScale(16),
     fontFamily: "Inter-SemiBold",
   },
-
-  backButton: {
-    padding: moderateScale(8),
-    marginLeft: -moderateScale(8),
-  },
-
   headerSpacer: {
     width: moderateScale(40),
   },

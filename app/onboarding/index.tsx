@@ -62,6 +62,7 @@ const OnboardingScreen = () => {
   const [selectedType, setSelectedType] = useState<AlertType>("immediate");
 
   const backgroundColor = useThemeColor("background");
+  const secondaryGray = useThemeColor("secondaryGray");
 
   useEffect(() => {
     handleStepNavigation();
@@ -265,7 +266,7 @@ const OnboardingScreen = () => {
               onPress={handleBack}
               activeOpacity={1}
             >
-              <ChevronLeft />
+              <ChevronLeft color={secondaryGray} />
             </TouchableOpacity>
           )}
         </View>

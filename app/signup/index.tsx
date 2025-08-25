@@ -21,6 +21,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 const SignupScreen = () => {
   const backgroundColor = useThemeColor("background");
   const onBackground = useThemeColor("onBackground");
+  const secondaryGray = useThemeColor("secondaryGray");
 
   const handleGoogleSignIn = () => {};
 
@@ -41,7 +42,7 @@ const SignupScreen = () => {
             onPress={() => router.back()}
             activeOpacity={1}
           >
-            <ChevronLeft />
+            <ChevronLeft color={secondaryGray} />
           </TouchableOpacity>
           <View style={styles.contentContainer}>
             <Text style={[{ color: onBackground }, styles.headerText]}>

@@ -34,6 +34,7 @@ const ViewReportScreen = () => {
   const accentColor = useThemeColor("accentColor");
   const borderColor = useThemeColor("inputBorder");
   const placeholderGray = useThemeColor("placeholderGray");
+  const secondaryGray = useThemeColor("secondaryGray");
 
   const matches = alertReport.matches_data ?? ([] as any);
   const featuredMatch = matches.find((m: any) => m.images?.featured) || null;
@@ -55,7 +56,7 @@ const ViewReportScreen = () => {
           style={styles.backButton}
           activeOpacity={1}
         >
-          <BackIcon width={18} height={18} color={textColor} />
+          <BackIcon width={18} height={18} color={secondaryGray} />
         </TouchableOpacity>
       </View>
       <ScrollView

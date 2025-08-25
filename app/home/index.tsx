@@ -55,6 +55,7 @@ const HomeTab = () => {
       } = await supabase.auth.getSession();
 
       if (!session) return;
+      const userId = session.user.id;
 
       fetchData();
 
@@ -66,6 +67,7 @@ const HomeTab = () => {
             event: "*",
             schema: "public",
             table: "alert_reports",
+            filter: `alert_reports.user_id=eq.${userId}`,
           },
           async (payload) => {
             console.log("Realtime change in alert_reports:", payload);

@@ -377,7 +377,7 @@ export const fetchFilteredAlertReports = async (
 
   let query = supabase
     .from("alert_reports")
-    .select("*, alerts!inner(*)")
+    .select("*, alerts!inner(*)", { count: "exact" })
     .eq("alerts.user_id", session.user.id)
     .order("generated_at", { ascending: false })
     .range(offset, offset + limit - 1);
@@ -450,21 +450,18 @@ export const getReportsStats = async (): Promise<{
   const [totalResult, unreadResult, readResult] = await Promise.all([
     supabase
       .from("alert_reports")
-      .select("id", { count: "exact", head: true })
-      .eq("alerts.user_id", userId)
-      .select("id, alerts!inner(id)"), // 👈 inner join alerts
+      .select("id, alerts!inner(id)", { count: "exact", head: true })
+      .eq("alerts.user_id", userId),
     supabase
       .from("alert_reports")
-      .select("id", { count: "exact", head: true })
+      .select("id, alerts!inner(id)", { count: "exact", head: true })
       .eq("is_read", false)
-      .eq("alerts.user_id", userId)
-      .select("id, alerts!inner(id)"),
+      .eq("alerts.user_id", userId),
     supabase
       .from("alert_reports")
-      .select("id", { count: "exact", head: true })
+      .select("id, alerts!inner(id)", { count: "exact", head: true })
       .eq("is_read", true)
-      .eq("alerts.user_id", userId)
-      .select("id, alerts!inner(id)"),
+      .eq("alerts.user_id", userId),
   ]);
 
   return {

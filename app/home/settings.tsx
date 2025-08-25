@@ -691,7 +691,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingVertical: verticalScale(24),
     marginTop: "auto",
-    marginBottom: verticalScale(20),
   },
   appInfoText: {
     fontSize: moderateScale(12),

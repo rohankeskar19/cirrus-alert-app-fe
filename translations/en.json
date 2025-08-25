@@ -138,5 +138,9 @@
   "change_password_subtitle": "Update your account password",
   "theme": "Theme",
   "sign_out_account": "Sign out of your account",
-  "delete_account_subtitle": "Permanently delete your account and data"
+  "delete_account_subtitle": "Permanently delete your account and data",
+  "account": "Account",
+  "preferences": "Preferences",
+  "subscription": "Subscription",
+  "danger_zone": "Danger Zone"
 }

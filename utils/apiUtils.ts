@@ -836,7 +836,7 @@ export const registerDevice = async (
         updated_at: new Date().toISOString(),
       },
       {
-        onConflict: "user_id,push_token",
+        onConflict: "push_token",
       }
     );
 

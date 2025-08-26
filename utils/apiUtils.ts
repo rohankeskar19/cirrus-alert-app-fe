@@ -818,61 +818,6 @@ export const requestDeviceRegistration = async (
 };
 
 /**
- * Get all registered devices for a user
- * @param userId - User ID
- * @returns Array of registered devices
- */
-export const getUserDevices = async (userId: string): Promise<any[]> => {
-  try {
-    const { data, error } = await supabase
-      .from("user_devices")
-      .select("*")
-      .eq("user_id", userId)
-      .eq("is_active", true)
-      .order("updated_at", { ascending: false });
-
-    if (error) {
-      console.error("Error fetching user devices:", error.message);
-      return [];
-    }
-
-    return data || [];
-  } catch (error: any) {
-    console.error("Unexpected error fetching devices:", error.message);
-    return [];
-  }
-};
-
-/**
- * Remove a device registration
- * @param userId - User ID
- * @param deviceId - Device ID to remove
- * @returns Boolean indicating success
- */
-export const removeDeviceRegistration = async (
-  userId: string,
-  deviceId: string
-): Promise<boolean> => {
-  try {
-    const { error } = await supabase
-      .from("user_devices")
-      .update({ is_active: false })
-      .eq("user_id", userId)
-      .eq("id", deviceId);
-
-    if (error) {
-      console.error("Error removing device:", error.message);
-      return false;
-    }
-
-    return true;
-  } catch (error: any) {
-    console.error("Unexpected error removing device:", error.message);
-    return false;
-  }
-};
-
-/**
  * Update the existing registerDevice function to use proper error handling
  */
 export const registerDevice = async (

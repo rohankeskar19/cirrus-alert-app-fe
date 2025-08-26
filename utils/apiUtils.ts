@@ -834,11 +834,9 @@ export const registerDevice = async (
         device_platform: devicePlatform,
         push_token: token,
         updated_at: new Date().toISOString(),
-        created_at: new Date().toISOString(),
       },
       {
         onConflict: "user_id,push_token",
-        ignoreDuplicates: false,
       }
     );
 

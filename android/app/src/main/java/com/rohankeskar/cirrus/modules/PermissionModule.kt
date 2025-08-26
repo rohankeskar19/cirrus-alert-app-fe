@@ -1,4 +1,4 @@
-package com.anonymous.cirrus.modules
+package com.rohankeskar.cirrus.modules
 
 import android.app.AppOpsManager
 import android.content.Context

@@ -1,4 +1,4 @@
-package com.anonymous.cirrus
+package com.rohankeskar.cirrus
 import expo.modules.splashscreen.SplashScreenManager
 
 import android.os.Build

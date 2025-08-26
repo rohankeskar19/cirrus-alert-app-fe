@@ -86,7 +86,7 @@ export const getCurrentUser = async () => {
 };
 
 /**
- * Sign up a new user with email and password
+ * Sign up a new user with email, password, and device timezone
  * @param email - User's email
  * @param password - User's password
  * @returns The new user object or null if signup failed
@@ -94,8 +94,14 @@ export const getCurrentUser = async () => {
 export const signupUser = async (
   email: string,
   password: string
-  // userData: UserProfile,
-) => {
+): Promise<any> => {
+  let timezone = "UTC";
+  try {
+    timezone = Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC";
+  } catch (e) {
+    console.warn("Failed to detect timezone, defaulting to UTC:", e);
+  }
+
   const {
     data: { user },
     error: signUpError,
@@ -117,7 +123,9 @@ export const signupUser = async (
       id: user.id,
       email: user.email,
       onboarding_done: false,
+      timezone,
       created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
     },
   ]);
 
@@ -125,7 +133,6 @@ export const signupUser = async (
     throw new Error(profileError.message);
   }
 
-  // Return the user data
   return user;
 };
 

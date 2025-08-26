@@ -48,7 +48,8 @@
   "step2_title": "Let’s create your first alert",
   "step3_title": "What type of content do you want to monitor?",
   "step4_title": "How soon should we alert you?",
-  "step5_title": "Do you want summaries?",
+  "step5_title": "Allow notifications",
+  "step5_subtitle": "Get notified when you have new matches",
   "invalid_alert_error": "Alert text must be between 5-150 characters",
   "alert_text_placeholder": "Startups building in edtech",
   "news_article": "News articles",
@@ -142,5 +143,6 @@
   "account": "Account",
   "preferences": "Preferences",
   "subscription": "Subscription",
-  "danger_zone": "Danger Zone"
+  "danger_zone": "Danger Zone",
+  "allow_permission": "Allow permission"
 }

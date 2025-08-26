@@ -51,7 +51,8 @@ export default function RootLayout() {
   const handleAuthNavigation = async () => {
     try {
       const currentUser = await getCurrentUser();
-      if (currentUser) {
+
+      if (currentUser?.profile) {
         if (currentUser.profile.onboarding_done) {
           setRedirectRoute("/home");
         } else {

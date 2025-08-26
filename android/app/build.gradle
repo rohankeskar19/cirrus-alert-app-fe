@@ -87,9 +87,9 @@ android {
     buildToolsVersion rootProject.ext.buildToolsVersion
     compileSdk rootProject.ext.compileSdkVersion
 
-    namespace 'com.anonymous.cirrus'
+    namespace 'com.rohankeskar.cirrus'
     defaultConfig {
-        applicationId 'com.anonymous.cirrus'
+        applicationId 'com.rohankeskar.cirrus'
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1

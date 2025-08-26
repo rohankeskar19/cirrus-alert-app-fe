@@ -10,8 +10,9 @@ import {
   View,
 } from "react-native";
 
+import * as Notifications from "expo-notifications";
 import { router, useNavigation } from "expo-router";
-import { useIntl } from "react-intl";
+import { FormattedMessage, useIntl } from "react-intl";
 
 import ChevronLeft from "@/assets/icons/chevron-left.svg";
 import Button from "@/components/Button";
@@ -25,6 +26,7 @@ import {
   getCurrentUser,
   loginUser,
   signupUser,
+  supabase,
   updateUserProfile,
 } from "@/utils/apiUtils";
 import { get } from "lodash";
@@ -34,6 +36,7 @@ import Step1 from "./components/Step1";
 import Step2 from "./components/Step2";
 import Step3 from "./components/Step3";
 import Step4 from "./components/Step4";
+import Step5 from "./components/Step5";
 
 const { width } = Dimensions.get("window");
 
@@ -60,9 +63,12 @@ const OnboardingScreen = () => {
   const [alertTextError, setAlertTextError] = useState<string>("");
   const [selectedSources, setSelectedSources] = useState<string[]>(["news"]);
   const [selectedType, setSelectedType] = useState<AlertType>("immediate");
+  const [notificationPermissionGranted, setNotificationPermissionGranted] =
+    useState(false);
 
   const backgroundColor = useThemeColor("background");
   const secondaryGray = useThemeColor("secondaryGray");
+  const textColor = useThemeColor("textColor");
 
   useEffect(() => {
     handleStepNavigation();
@@ -73,7 +79,7 @@ const OnboardingScreen = () => {
 
     setCurrentUser(currentUser as any);
 
-    if (currentUser) {
+    if (currentUser?.profile) {
       setCurrentStep(1);
     } else {
       setCurrentStep(0);
@@ -119,6 +125,9 @@ const OnboardingScreen = () => {
       content: (
         <Step4 selectedType={selectedType} setSelectedType={setSelectedType} />
       ),
+    },
+    {
+      content: <Step5 />,
     },
   ];
 
@@ -172,21 +181,21 @@ const OnboardingScreen = () => {
           animateSlide("right");
           setCurrentStep(currentStep + 1);
         }
-      } else if (currentStep == 3) {
-        setCreatingAlert(true);
-        await createAlert(alertText, selectedSources, selectedType);
+      } else if (currentStep == 4) {
+        if (!notificationPermissionGranted) {
+          if (currentUser) {
+            const token = await requestNotificationPermission(
+              get(currentUser, "id", "")
+            );
 
-        await updateUserProfile(get(currentUser, "id", ""), {
-          onboarding_done: true,
-        });
-
-        setTimeout(() => {
-          setCreatingAlert(false);
-          navigation.reset({
-            index: 0,
-            routes: [{ name: "home" } as any],
-          });
-        }, 1200);
+            console.log("Token ", token);
+            if (token) {
+              setNotificationPermissionGranted(true);
+            }
+          }
+        } else {
+          handleOnboardingCompletion();
+        }
       } else {
         animateSlide("right");
         setCurrentStep(currentStep + 1);
@@ -236,7 +245,13 @@ const OnboardingScreen = () => {
     } else if (currentStep < 1) {
       return intl.formatMessage({ id: "continue" });
     } else if (currentStep === 3) {
-      return intl.formatMessage({ id: "finish" });
+      return intl.formatMessage({ id: "next" });
+    } else if (currentStep === 4) {
+      if (!notificationPermissionGranted) {
+        return intl.formatMessage({ id: "allow_permission" });
+      } else {
+        return intl.formatMessage({ id: "finish" });
+      }
     } else {
       return intl.formatMessage({ id: "next" });
     }
@@ -251,6 +266,70 @@ const OnboardingScreen = () => {
       }
     } else {
       return true;
+    }
+  };
+
+  const handleOnboardingCompletion = async () => {
+    setCreatingAlert(true);
+    await createAlert(alertText, selectedSources, selectedType);
+
+    await updateUserProfile(get(currentUser, "id", ""), {
+      onboarding_done: true,
+    });
+
+    setTimeout(() => {
+      setCreatingAlert(false);
+      navigation.reset({
+        index: 0,
+        routes: [{ name: "home" } as any],
+      });
+    }, 1200);
+  };
+
+  const requestNotificationPermission = async (userId: string) => {
+    try {
+      // Request permissions
+      const { status } = await Notifications.requestPermissionsAsync();
+
+      if (status !== "granted") {
+        console.log("Notification permission not granted");
+        return null;
+      }
+
+      const tokenPromise = Notifications.getDevicePushTokenAsync();
+
+      const timeoutPromise = new Promise((_, reject) =>
+        setTimeout(() => reject(new Error("Token request timeout")), 30000)
+      );
+
+      const tokenData = (await Promise.race([
+        tokenPromise,
+        timeoutPromise,
+      ])) as any;
+      console.log("Obtained Expo Push Token:", tokenData);
+
+      const token = tokenData?.data;
+      if (!token) {
+        console.error("No token received from Expo");
+        return null;
+      }
+
+      console.log("Expo Push Token:", token);
+
+      const { error } = await supabase
+        .from("profiles")
+        .update({ push_token: token })
+        .eq("id", userId);
+
+      if (error) {
+        console.error("Failed to save push token:", error.message);
+        return null;
+      }
+
+      return token;
+    } catch (error: any) {
+      console.error("Full error:", error);
+      return null;
     }
   };
 
@@ -294,6 +373,26 @@ const OnboardingScreen = () => {
           >
             <Text>{getButtonText()}</Text>
           </Button>
+          {currentStep === 4 && !notificationPermissionGranted && (
+            <TouchableOpacity
+              style={{
+                marginTop: verticalScale(5),
+                marginBottom: verticalScale(15),
+              }}
+              activeOpacity={1}
+              onPress={handleOnboardingCompletion}
+            >
+              <Text
+                style={{
+                  color: textColor,
+                  fontFamily: "Inter-Medium",
+                  fontSize: moderateScale(14),
+                }}
+              >
+                <FormattedMessage id={"no_thanks"} />
+              </Text>
+            </TouchableOpacity>
+          )}
         </View>
         {creatingAlert && <OnboardingOverlay />}
       </SafeAreaView>

@@ -1,4 +1,4 @@
-package com.anonymous.cirrus.models
+package com.rohankeskar.cirrus.models
 
 data class AppUsageData(
     val packageName: String,

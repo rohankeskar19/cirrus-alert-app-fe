@@ -1,4 +1,4 @@
-package com.anonymous.cirrus.modules
+package com.rohankeskar.cirrus.modules
 
 
 import android.app.usage.UsageStats
@@ -11,8 +11,8 @@ import android.graphics.Canvas
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import android.util.Base64
-import com.anonymous.cirrus.models.AppUsageData
-import com.anonymous.cirrus.models.DailyUsageData
+import com.rohankeskar.cirrus.models.AppUsageData
+import com.rohankeskar.cirrus.models.DailyUsageData
 import com.facebook.react.bridge.*
 import java.io.ByteArrayOutputStream
 import java.util.*

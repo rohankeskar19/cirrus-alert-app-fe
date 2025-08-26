@@ -1,4 +1,4 @@
-package com.anonymous.cirrus
+package com.rohankeskar.cirrus
 
 import android.app.Application
 import android.content.res.Configuration

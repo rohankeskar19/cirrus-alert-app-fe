@@ -28,7 +28,7 @@
         <key>CFBundleURLSchemes</key>
         <array>
           <string>daisy</string>
-          <string>com.anonymous.Daisy</string>
+          <string>com.rohankeskar.Daisy</string>
         </array>
       </dict>
     </array>

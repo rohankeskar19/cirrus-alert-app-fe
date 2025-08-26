@@ -1,5 +1,7 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { createClient } from "@supabase/supabase-js";
+import * as Notifications from "expo-notifications";
+import { Platform } from "react-native";
 
 import { Alert as UiAlert } from "react-native";
 
@@ -673,5 +675,237 @@ export const getUserSubscription = async (): Promise<{
   } catch (error) {
     console.error("Error getting subscription:", error);
     return null;
+  }
+};
+
+export const updateUserTimezone = async (
+  userId: string,
+  timezone: string
+): Promise<boolean> => {
+  try {
+    const { error } = await supabase
+      .from("profiles")
+      .update({
+        timezone,
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", userId);
+
+    if (error) {
+      console.error("Error updating timezone:", error.message);
+      return false;
+    }
+
+    return true;
+  } catch (error: any) {
+    console.error("Unexpected error updating timezone:", error.message);
+    return false;
+  }
+};
+
+/**
+ * Check current notification permission and registration status
+ * @returns Object with permission and registration status
+ */
+export const checkNotificationPermission = async (): Promise<{
+  hasPermission: boolean;
+  isRegistered: boolean;
+  loading: boolean;
+}> => {
+  try {
+    // Check if we have notification permission
+    const { status } = await Notifications.getPermissionsAsync();
+    const hasPermission = status === "granted";
+
+    if (!hasPermission) {
+      return { hasPermission: false, isRegistered: false, loading: false };
+    }
+
+    // Check if device is registered in our database
+    const {
+      data: { session },
+      error: sessionError,
+    } = await supabase.auth.getSession();
+
+    if (sessionError || !session) {
+      return { hasPermission, isRegistered: false, loading: false };
+    }
+
+    // Get device token to check registration
+    let deviceToken = null;
+    try {
+      const tokenData = await Notifications.getDevicePushTokenAsync();
+      deviceToken = tokenData?.data;
+    } catch (error) {
+      console.error("Error getting device token:", error);
+      return { hasPermission, isRegistered: false, loading: false };
+    }
+
+    if (!deviceToken) {
+      return { hasPermission, isRegistered: false, loading: false };
+    }
+
+    // Check if this device token is registered in our database
+    const { data, error } = await supabase
+      .from("user_devices")
+      .select("id")
+      .eq("user_id", session.user.id)
+      .eq("push_token", deviceToken)
+      .maybeSingle();
+
+    if (error) {
+      console.error("Error checking device registration:", error.message);
+      return { hasPermission, isRegistered: false, loading: false };
+    }
+
+    return {
+      hasPermission,
+      isRegistered: !!data,
+      loading: false,
+    };
+  } catch (error: any) {
+    console.error("Error checking notification status:", error.message);
+    return { hasPermission: false, isRegistered: false, loading: false };
+  }
+};
+
+/**
+ * Request notification permissions and register device
+ * @param userId - User ID
+ * @returns Boolean indicating success
+ */
+export const requestDeviceRegistration = async (
+  userId: string
+): Promise<boolean> => {
+  try {
+    console.log("Starting device registration...");
+
+    // Request notification permissions
+    const { status } = await Notifications.requestPermissionsAsync();
+    console.log("Notification permission status:", status);
+
+    if (status !== "granted") {
+      console.log("Notification permission not granted");
+      return false;
+    }
+
+    // Get device token
+    const deviceToken = await Notifications.getDevicePushTokenAsync();
+
+    if (!deviceToken?.data) {
+      console.error("No device token received");
+      return false;
+    }
+
+    const platform = Platform.OS === "ios" ? "ios" : "android";
+
+    console.log("Got device token:", deviceToken.data, "Platform:", platform);
+
+    // Register device in database
+    const success = await registerDevice(userId, deviceToken.data, platform);
+
+    if (success) {
+      console.log("Device registered successfully");
+      return true;
+    } else {
+      console.log("Failed to register device");
+      return false;
+    }
+  } catch (error: any) {
+    console.error("Error in device registration:", error.message);
+    return false;
+  }
+};
+
+/**
+ * Get all registered devices for a user
+ * @param userId - User ID
+ * @returns Array of registered devices
+ */
+export const getUserDevices = async (userId: string): Promise<any[]> => {
+  try {
+    const { data, error } = await supabase
+      .from("user_devices")
+      .select("*")
+      .eq("user_id", userId)
+      .eq("is_active", true)
+      .order("updated_at", { ascending: false });
+
+    if (error) {
+      console.error("Error fetching user devices:", error.message);
+      return [];
+    }
+
+    return data || [];
+  } catch (error: any) {
+    console.error("Unexpected error fetching devices:", error.message);
+    return [];
+  }
+};
+
+/**
+ * Remove a device registration
+ * @param userId - User ID
+ * @param deviceId - Device ID to remove
+ * @returns Boolean indicating success
+ */
+export const removeDeviceRegistration = async (
+  userId: string,
+  deviceId: string
+): Promise<boolean> => {
+  try {
+    const { error } = await supabase
+      .from("user_devices")
+      .update({ is_active: false })
+      .eq("user_id", userId)
+      .eq("id", deviceId);
+
+    if (error) {
+      console.error("Error removing device:", error.message);
+      return false;
+    }
+
+    return true;
+  } catch (error: any) {
+    console.error("Unexpected error removing device:", error.message);
+    return false;
+  }
+};
+
+/**
+ * Update the existing registerDevice function to use proper error handling
+ */
+export const registerDevice = async (
+  userId: string,
+  token: string,
+  type: string
+): Promise<boolean> => {
+  try {
+    const devicePlatform = type === "ios" ? "ios" : "android";
+
+    const { error } = await supabase.from("user_devices").upsert(
+      {
+        user_id: userId,
+        device_platform: devicePlatform,
+        push_token: token,
+        updated_at: new Date().toISOString(),
+        created_at: new Date().toISOString(),
+      },
+      {
+        onConflict: "user_id,push_token",
+        ignoreDuplicates: false,
+      }
+    );
+
+    if (error) {
+      console.error("Error saving user device:", error.message);
+      return false;
+    }
+
+    console.log("Device registered successfully");
+    return true;
+  } catch (err: any) {
+    console.error("Failed to register device:", err.message);
+    return false;
   }
 };

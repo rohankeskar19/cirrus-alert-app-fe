@@ -25,8 +25,8 @@ import {
   createAlert,
   getCurrentUser,
   loginUser,
+  registerDevice,
   signupUser,
-  supabase,
   updateUserProfile,
 } from "@/utils/apiUtils";
 import { get } from "lodash";
@@ -188,7 +188,6 @@ const OnboardingScreen = () => {
               get(currentUser, "id", "")
             );
 
-            console.log("Token ", token);
             if (token) {
               setNotificationPermissionGranted(true);
             }
@@ -288,7 +287,6 @@ const OnboardingScreen = () => {
 
   const requestNotificationPermission = async (userId: string) => {
     try {
-      // Request permissions
       const { status } = await Notifications.requestPermissionsAsync();
 
       if (status !== "granted") {
@@ -306,7 +304,6 @@ const OnboardingScreen = () => {
         tokenPromise,
         timeoutPromise,
       ])) as any;
-      console.log("Obtained Expo Push Token:", tokenData);
 
       const token = tokenData?.data;
       if (!token) {
@@ -314,17 +311,7 @@ const OnboardingScreen = () => {
         return null;
       }
 
-      console.log("Expo Push Token:", token);
-
-      const { error } = await supabase
-        .from("profiles")
-        .update({ push_token: token })
-        .eq("id", userId);
-
-      if (error) {
-        console.error("Failed to save push token:", error.message);
-        return null;
-      }
+      await registerDevice(userId, token, tokenData.type);
 
       return token;
     } catch (error: any) {

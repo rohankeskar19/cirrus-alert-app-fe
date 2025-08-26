@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "814402339885",
+    "project_id": "cirrus-7b6e7",
+    "storage_bucket": "cirrus-7b6e7.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:814402339885:android:75712a8b7566c0a969a4a4",
+        "android_client_info": {
+          "package_name": "com.rohankeskar.cirrus"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAcMMLY-HFQCGuVQ_2auv5I8typAMcp3Dk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

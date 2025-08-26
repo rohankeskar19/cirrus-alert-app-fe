@@ -1,9 +1,12 @@
 import { ThemeContext } from "@/app/_layout";
 import {
+  checkNotificationPermission,
   deleteUserAccount,
   getCurrentUser,
   getUserSubscription,
+  requestDeviceRegistration,
   signOutUser,
+  updateUserTimezone,
 } from "@/utils/apiUtils";
 import { THEMES } from "@/utils/constants";
 import React, { useContext, useEffect, useState } from "react";
@@ -19,7 +22,9 @@ import {
 } from "react-native";
 
 import AutoIcon from "@/assets/icons/auto.svg";
+import BellIcon from "@/assets/icons/bell.svg";
 import ChevronRightIcon from "@/assets/icons/chevron-right.svg";
+import ClockIcon from "@/assets/icons/clock.svg";
 import CreditCardIcon from "@/assets/icons/credit-card.svg";
 import DeleteAccountIcon from "@/assets/icons/delete-account-icon.svg";
 import LockIcon from "@/assets/icons/lock.svg";
@@ -28,11 +33,26 @@ import SignoutIcon from "@/assets/icons/signout.svg";
 import SliderIcon from "@/assets/icons/slider.svg";
 import SunIcon from "@/assets/icons/sun.svg";
 import Tick from "@/assets/icons/tick.svg";
+
 import { useThemeColor } from "@/hooks/useThemeColor";
 import { horizontalScale, moderateScale, verticalScale } from "@/utils/metrics";
 import { useRouter } from "expo-router";
 import { FormattedMessage, useIntl } from "react-intl";
 import { SafeAreaView } from "react-native-safe-area-context";
+
+// Common timezones for easy selection
+const COMMON_TIMEZONES = [
+  { label: "Pacific Time (PT)", value: "America/Los_Angeles" },
+  { label: "Mountain Time (MT)", value: "America/Denver" },
+  { label: "Central Time (CT)", value: "America/Chicago" },
+  { label: "Eastern Time (ET)", value: "America/New_York" },
+  { label: "UTC", value: "UTC" },
+  { label: "London", value: "Europe/London" },
+  { label: "Paris/Berlin", value: "Europe/Paris" },
+  { label: "Tokyo", value: "Asia/Tokyo" },
+  { label: "Sydney", value: "Australia/Sydney" },
+  { label: "Mumbai", value: "Asia/Kolkata" },
+];
 
 const SettingsTab = () => {
   const router = useRouter();
@@ -44,6 +64,7 @@ const SettingsTab = () => {
   const placeholderGray = useThemeColor("placeholderGray");
   const secondaryGray = useThemeColor("secondaryGray");
   const redColor = useThemeColor("redColor");
+  const greenColor = useThemeColor("greenColor");
 
   const intl = useIntl();
 
@@ -51,11 +72,18 @@ const SettingsTab = () => {
   const [subscription, setSubscription] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [showThemeModal, setShowThemeModal] = useState(false);
+  const [showTimezoneModal, setShowTimezoneModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState(false);
+  const [notificationStatus, setNotificationStatus] = useState<{
+    hasPermission: boolean;
+    isRegistered: boolean;
+    loading: boolean;
+  }>({ hasPermission: false, isRegistered: false, loading: false });
 
   useEffect(() => {
     loadUserData();
+    checkNotificationStatus();
   }, []);
 
   const loadUserData = async () => {
@@ -72,6 +100,54 @@ const SettingsTab = () => {
       console.error("Error loading user data:", error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const checkNotificationStatus = async () => {
+    try {
+      const status = await checkNotificationPermission();
+      setNotificationStatus(status);
+    } catch (error) {
+      console.error("Error checking notification status:", error);
+    }
+  };
+
+  const handleTimezoneUpdate = async (timezone: string) => {
+    try {
+      const success = await updateUserTimezone(user?.id, timezone);
+      if (success) {
+        setUser({ ...user, profile: { ...user.profile, timezone } });
+        setShowTimezoneModal(false);
+        Alert.alert("Success", "Timezone updated successfully");
+      } else {
+        Alert.alert("Error", "Failed to update timezone");
+      }
+    } catch (error) {
+      Alert.alert("Error", "Failed to update timezone");
+    }
+  };
+
+  const handleNotificationSetup = async () => {
+    if (!notificationStatus.hasPermission || !notificationStatus.isRegistered) {
+      setNotificationStatus((prev) => ({ ...prev, loading: true }));
+
+      try {
+        const result = await requestDeviceRegistration(user?.id);
+        if (result) {
+          setNotificationStatus({
+            hasPermission: true,
+            isRegistered: true,
+            loading: false,
+          });
+          Alert.alert("Success", "Notifications enabled successfully!");
+        } else {
+          setNotificationStatus((prev) => ({ ...prev, loading: false }));
+          Alert.alert("Error", "Failed to enable notifications");
+        }
+      } catch (error) {
+        setNotificationStatus((prev) => ({ ...prev, loading: false }));
+        Alert.alert("Error", "Failed to enable notifications");
+      }
     }
   };
 
@@ -114,6 +190,35 @@ const SettingsTab = () => {
       Alert.alert("Error", "An unexpected error occurred.");
     } finally {
       setDeleteLoading(false);
+    }
+  };
+
+  const getCurrentTimezoneLabel = () => {
+    const userTimezone = user?.profile?.timezone;
+    if (!userTimezone) return "Not set";
+
+    const found = COMMON_TIMEZONES.find((tz) => tz.value === userTimezone);
+    return found ? found.label : userTimezone;
+  };
+
+  const getNotificationStatusText = () => {
+    if (notificationStatus.hasPermission && notificationStatus.isRegistered) {
+      return "Enabled";
+    } else if (
+      notificationStatus.hasPermission &&
+      !notificationStatus.isRegistered
+    ) {
+      return "Permission granted, needs registration";
+    } else {
+      return "Disabled";
+    }
+  };
+
+  const getNotificationStatusColor = () => {
+    if (notificationStatus.hasPermission && notificationStatus.isRegistered) {
+      return greenColor;
+    } else {
+      return redColor;
     }
   };
 
@@ -195,6 +300,60 @@ const SettingsTab = () => {
         )}
       </View>
     </TouchableOpacity>
+  );
+
+  const renderTimezoneModal = () => (
+    <Modal
+      visible={showTimezoneModal}
+      animationType="slide"
+      presentationStyle="pageSheet"
+    >
+      <SafeAreaView style={[styles.modalContainer, { backgroundColor }]}>
+        <View style={styles.modalHeader}>
+          <Text style={[styles.modalTitle, { color: textColor }]}>
+            Select Timezone
+          </Text>
+          <TouchableOpacity onPress={() => setShowTimezoneModal(false)}>
+            <Text style={[styles.modalCloseText, { color: accentColor }]}>
+              Cancel
+            </Text>
+          </TouchableOpacity>
+        </View>
+
+        <ScrollView style={styles.timezoneOptions}>
+          {COMMON_TIMEZONES.map((timezone) => (
+            <TouchableOpacity
+              key={timezone.value}
+              style={[
+                styles.timezoneOption,
+                {
+                  backgroundColor:
+                    user?.profile?.timezone === timezone.value
+                      ? `${accentColor}20`
+                      : backgroundColor,
+                  borderColor:
+                    user?.profile?.timezone === timezone.value
+                      ? accentColor
+                      : borderColor,
+                },
+              ]}
+              onPress={() => handleTimezoneUpdate(timezone.value)}
+            >
+              <Text style={[styles.timezoneOptionText, { color: textColor }]}>
+                {timezone.label}
+              </Text>
+              {user?.profile?.timezone === timezone.value && (
+                <View
+                  style={[styles.checkmark, { backgroundColor: accentColor }]}
+                >
+                  <Tick width={16} height={16} color={"#ffffff"} />
+                </View>
+              )}
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
+      </SafeAreaView>
+    </Modal>
   );
 
   const renderThemeModal = () => (
@@ -359,7 +518,36 @@ const SettingsTab = () => {
                 intl.formatMessage({ id: "change_password_subtitle" }),
                 () => router.push("/forgot-password")
               )}
+              {renderSettingsItem(
+                <ClockIcon width={20} height={20} color={secondaryGray} />,
+                intl.formatMessage({ id: "timezone" }),
+                getCurrentTimezoneLabel(),
+                () => setShowTimezoneModal(true)
+              )}
             </>
+          )}
+
+          {renderSettingsSection(
+            intl.formatMessage({ id: "notifications" }),
+            renderSettingsItem(
+              <BellIcon width={20} height={20} color={secondaryGray} />,
+              intl.formatMessage({ id: "push_notifications" }),
+              getNotificationStatusText(),
+              notificationStatus.hasPermission &&
+                notificationStatus.isRegistered
+                ? undefined
+                : handleNotificationSetup,
+              notificationStatus.loading ? (
+                <ActivityIndicator size="small" color={accentColor} />
+              ) : (
+                <View
+                  style={[
+                    styles.statusDot,
+                    { backgroundColor: getNotificationStatusColor() },
+                  ]}
+                />
+              )
+            )
           )}
 
           {renderSettingsSection(
@@ -446,6 +634,7 @@ const SettingsTab = () => {
 
       {renderThemeModal()}
       {renderDeleteModal()}
+      {renderTimezoneModal()}
     </View>
   );
 };
@@ -491,7 +680,7 @@ const styles = StyleSheet.create({
     opacity: 0.8,
   },
   scrollContainer: {
-    flexGrow: 1,
+    flex: 1,
     display: "flex",
     flexDirection: "column",
   },
@@ -688,6 +877,7 @@ const styles = StyleSheet.create({
     fontFamily: "Inter-SemiBold",
   },
   appInfo: {
+    height: verticalScale(130),
     alignItems: "center",
     paddingVertical: verticalScale(24),
     marginTop: "auto",
@@ -755,6 +945,28 @@ const styles = StyleSheet.create({
   },
   headerSpacer: {
     width: moderateScale(40),
+  },
+  timezoneOptions: {
+    padding: horizontalScale(16),
+  },
+  timezoneOption: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: horizontalScale(16),
+    paddingVertical: verticalScale(12),
+    borderRadius: moderateScale(5),
+    borderWidth: 1,
+    marginBottom: verticalScale(8),
+  },
+  timezoneOptionText: {
+    fontSize: moderateScale(16),
+    fontFamily: "Inter-Medium",
+  },
+  statusDot: {
+    width: moderateScale(8),
+    height: moderateScale(8),
+    borderRadius: moderateScale(4),
   },
 });
 

@@ -144,5 +144,8 @@
   "preferences": "Preferences",
   "subscription": "Subscription",
   "danger_zone": "Danger Zone",
-  "allow_permission": "Allow permission"
+  "allow_permission": "Allow permission",
+  "timezone": "Timezone",
+  "notifications": "Notifications",
+  "push_notifications": "Push Notifications"
 }

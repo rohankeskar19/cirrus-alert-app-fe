@@ -240,7 +240,7 @@ const styles = StyleSheet.create({
   alertItem: {
     display: "flex",
     flexDirection: "row",
-    alignItems: "center",
+    alignItems: "flex-start",
     paddingVertical: verticalScale(4),
     paddingHorizontal: horizontalScale(4),
     borderRadius: moderateScale(4),
@@ -249,7 +249,6 @@ const styles = StyleSheet.create({
     width: "90%",
     fontSize: moderateScale(15),
     fontFamily: "Inter-Medium",
-    lineHeight: moderateScale(20),
     marginLeft: horizontalScale(13),
   },
   seeMoreButton: {

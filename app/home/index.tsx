@@ -255,40 +255,74 @@ const HomeTab = () => {
   return (
     <View style={[styles.screenContainer, { backgroundColor }]}>
       <SafeAreaView style={styles.safeArea}>
-        <FlatList
-          data={dataWithSticky}
-          renderItem={renderRow}
-          keyExtractor={(item, i) =>
-            "_type" in item ? "sticky" : (item as AlertReport).id.toString()
-          }
-          ListHeaderComponent={
-            <View style={styles.greetingSection}>
-              <Text style={[styles.greeting, { color: textColor }]}>
-                {getGreetingMessage()}
-              </Text>
-              <Text style={[styles.subGreeting, { color: placeholderGray }]}>
-                <FormattedMessage id="stay_informed" />
-              </Text>
-            </View>
-          }
-          stickyHeaderIndices={[1]}
-          ListEmptyComponent={
-            loading ? renderShimmerContent() : renderEmptyState()
-          }
-          contentContainerStyle={[
-            styles.contentContainer,
-            alertReports.length === 0 && styles.emptyContentContainer,
-          ]}
-          showsVerticalScrollIndicator={false}
-          refreshControl={
-            <RefreshControl
-              refreshing={refreshing}
-              onRefresh={onRefresh}
-              colors={[accentColor]}
-              tintColor={accentColor}
-            />
-          }
-        />
+        {alertReports.length == 0 && !loading ? (
+          <FlatList
+            data={alertReports}
+            renderItem={renderRow}
+            ListHeaderComponent={
+              <View style={styles.greetingSection}>
+                <Text style={[styles.greeting, { color: textColor }]}>
+                  {getGreetingMessage()}
+                </Text>
+                <Text style={[styles.subGreeting, { color: placeholderGray }]}>
+                  <FormattedMessage id="stay_informed" />
+                </Text>
+              </View>
+            }
+            stickyHeaderIndices={[1]}
+            ListEmptyComponent={
+              loading ? renderShimmerContent() : renderEmptyState()
+            }
+            contentContainerStyle={[
+              styles.contentContainer,
+              alertReports.length === 0 && styles.emptyContentContainer,
+            ]}
+            showsVerticalScrollIndicator={false}
+            refreshControl={
+              <RefreshControl
+                refreshing={refreshing}
+                onRefresh={onRefresh}
+                colors={[accentColor]}
+                tintColor={accentColor}
+              />
+            }
+          />
+        ) : (
+          <FlatList
+            data={dataWithSticky}
+            renderItem={renderRow}
+            keyExtractor={(item, i) =>
+              "_type" in item ? "sticky" : (item as AlertReport).id.toString()
+            }
+            ListHeaderComponent={
+              <View style={styles.greetingSection}>
+                <Text style={[styles.greeting, { color: textColor }]}>
+                  {getGreetingMessage()}
+                </Text>
+                <Text style={[styles.subGreeting, { color: placeholderGray }]}>
+                  <FormattedMessage id="stay_informed" />
+                </Text>
+              </View>
+            }
+            stickyHeaderIndices={[1]}
+            ListEmptyComponent={
+              loading ? renderShimmerContent() : renderEmptyState()
+            }
+            contentContainerStyle={[
+              styles.contentContainer,
+              alertReports.length === 0 && styles.emptyContentContainer,
+            ]}
+            showsVerticalScrollIndicator={false}
+            refreshControl={
+              <RefreshControl
+                refreshing={refreshing}
+                onRefresh={onRefresh}
+                colors={[accentColor]}
+                tintColor={accentColor}
+              />
+            }
+          />
+        )}
       </SafeAreaView>
     </View>
   );

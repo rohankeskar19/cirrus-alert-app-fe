@@ -11,7 +11,7 @@ export function useThemeColor(
 ) {
   const { theme } = useContext(ThemeContext) as any;
   const systemScheme = useColorScheme() ?? "light";
-
+console.log("Hello");
   // Resolve which scheme to use
   const resolvedScheme =
     theme === THEMES.AUTO

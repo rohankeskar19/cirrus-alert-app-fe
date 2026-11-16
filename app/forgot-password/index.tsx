@@ -27,6 +27,8 @@ const ForgotPasswordScreen = () => {
   const [emailError, setEmailError] = useState("");
   const [loading, setLoading] = useState(false);
 
+  console.log("Hello World");
+
   const backgroundColor = useThemeColor("background");
   const textColor = useThemeColor("textColor");
   const secondaryGray = useThemeColor("secondaryGray");
